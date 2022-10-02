@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <ApplicationIcon>Assets\DS3PortingTool-logo.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="SoulsAssetPipeline">
+        <HintPath>Lib\SoulsAssetPipeline.dll</HintPath>
+      </Reference>
+      <Reference Include="SoulsFormats">
+        <HintPath>Lib\SoulsFormats.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <CopyRes Include="Res\*" />
+        <CopyHavokDowngrade Include="HavokDowngrade\**\**\*" />
+    </ItemGroup>
+
+    <Target Name="CopyRes" AfterTargets="AfterBuild">
+        <Copy SourceFiles="@(CopyRes)" DestinationFolder="bin\Release\net6.0\Res" />
+        <Copy SourceFiles="@(CopyHavokDowngrade)" DestinationFolder="bin\Release\net6.0\HavokDowngrade\%(RecursiveDir)" />
+    </Target>
+    
+</Project>

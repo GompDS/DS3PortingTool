@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<excludedAnimations>
+	<animationDenyList game="Sekiro">
+		<animation id="1000"/>
+		<animation id="1010"/>
+		<animation id="5000"/>
+		<animation id="5010"/>
+		<animation id="7000"/>
+		<animation id="7100"/>
+		<animation id="7101"/>
+		<animation id="7111"/>
+		<animation id="7200"/>
+		<animation id="7201"/>
+		<animation id="7211"/>
+		<animation id="7300"/>
+		<animation id="7310"/>
+		<animation id="7311"/>
+		<animation id="7320"/>
+		<animation id="7321"/>
+		<animation id="7400"/>
+		<animation id="7410"/>
+		<animation id="7411"/>
+		<animation id="7420"/>
+		<animation id="7421"/>
+		<animation id="7500"/>
+		<animation id="7510"/>
+		<animation id="7520"/>
+		<animation id="7521"/>
+		<animation id="7600"/>
+		<animation id="7610"/>
+		<animation id="7620"/>
+		<animation id="8900"/>
+		<animation id="9200"/>
+		<animation id="9600"/>
+		<animation id="9700"/>
+		<animation id="10010"/>
+		<animation id="10360"/>
+		<animation id="10500"/>
+		<animation id="10510"/>
+		<animation id="10600"/>
+		<animation id="10610"/>
+		<animation id="100000"/>
+		<animation id="101000"/>
+		<animation id="101040"/>
+		<animation id="105010"/>
+		<animation id="200000"/>
+		<animation id="201040"/>
+		<animation id="400600"/>
+		<animation id="400610"/>
+		<animation id="401000"/>
+		<animation id="401020"/>
+		<animation id="401040"/>
+		<animation id="600000"/>
+		<animationRange increment="1" repeat="4">
+			<animation id="605000"/>
+			<animation id="605400"/>
+		</animationRange>
+		<animationRange increment="1" repeat="8">
+			<animation id="8501"/>
+			<animation id="8511"/>
+			<animation id="8521"/>
+			<animation id="8551"/>
+		</animationRange>
+		<animationRange increment="1" repeat="10">
+			<animation id="5400"/>
+			<animation id="6800"/>
+			<animation id="8120"/>
+			<animation id="8310"/>
+			<animation id="8400"/>
+			<animation id="8600"/>
+			<animation id="8650"/>
+			<animation id="8660"/>
+			<animation id="8700"/>
+			<animation id="9500"/>
+			<animation id="9510"/>
+			<animation id="205000"/>
+			<animation id="205400"/>
+		</animationRange>
+		<animationRange increment="10" repeat="10">
+			<animation id="200"/>
+			<animation id="400"/>
+			<animation id="600"/>
+			<animation id="700"/>
+			<animation id="8200"/>
+		</animationRange>
+		<animationRange increment="1" repeat="1000">
+			<animation id="12000"/>
+			<animation id="13000"/>
+			<animation id="14000"/>
+			<animation id="17000"/>
+			<animation id="18000"/>
+			<animation id="40000"/>
+			<animation id="41000"/>
+		</animationRange>
+	</animationDenyList>
+</excludedAnimations>
