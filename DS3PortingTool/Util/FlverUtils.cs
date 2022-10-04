@@ -6,8 +6,8 @@ namespace DS3PortingTool
 {
     public static class FlverUtils
     {
-	    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat)
-        {
+	    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat) 
+	    {
 	        FLVER2.Material newMat = new()
 	        {
 				Name = oldMat.Name,
