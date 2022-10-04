@@ -6,75 +6,7 @@ namespace DS3PortingTool
 {
     public static class FlverUtils
     {
-        public static FLVER2 ToDs3Flver(this FLVER2 oldFlver)
-        {
-            FLVER2MaterialInfoBank materialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{AppDomain.CurrentDomain.BaseDirectory}Res\\BANKDS3.xml");
-            FLVER2 newFlver = new FLVER2
-            {
-                Header = new FLVER2.FLVERHeader
-                {
-                    BoundingBoxMin = oldFlver.Header.BoundingBoxMin,
-                    BoundingBoxMax = oldFlver.Header.BoundingBoxMax
-                },
-                Dummies = oldFlver.Dummies,
-                Materials = oldFlver.Materials.Select(x => ToDummyDs3Material(x)).ToList(),
-                Bones = oldFlver.Bones.Select(x =>
-                {
-                    if (x.Unk3C > 1)
-                    {
-                        x.Unk3C = 0;
-                    }
-                    return x;
-                }).ToList(),
-                Meshes = oldFlver.Meshes
-            };
-            List<FLVER2.Material> distinctMaterials = newFlver.Materials.DistinctBy(x => x.MTD).ToList();
-            foreach (var distinctMat in distinctMaterials)
-            {
-                // GXLists
-                FLVER2.GXList gxList = new FLVER2.GXList();
-                gxList.AddRange(materialInfoBank.GetDefaultGXItemsForMTD(Path.GetFileName(distinctMat.MTD).ToLower()));
-                bool isNewGxList = true;
-                foreach (var gxl in newFlver.GXLists)
-                {
-                    if (gxl.Count == gxList.Count)
-                    {
-                        for (int i = 0; i < gxl.Count; i++)
-                        {
-                            if (gxl[i].Data.Length == gxList[i].Data.Length && gxl[i].Unk04 == gxList[i].Unk04 && gxl[i].ID.Equals(gxList[i].ID))
-                            {
-                                isNewGxList = false;
-                            }
-                        }
-                    }
-                }
-                if (isNewGxList)
-                {
-                    newFlver.GXLists.Add(gxList);
-                }
-                
-                // Set material GXIndexes
-                foreach (var mat in newFlver.Materials.Where(x => x.MTD.Equals(distinctMat.MTD)))
-                {
-                    mat.GXIndex = newFlver.GXLists.Count - 1;
-                }
-            }
-            foreach (var mesh in newFlver.Meshes)
-            {
-                FLVER2MaterialInfoBank.MaterialDef matDef = materialInfoBank.MaterialDefs.Values
-                    .First(x => x.MTD.Equals($"{Path.GetFileName(newFlver.Materials[mesh.MaterialIndex].MTD).ToLower()}"));
-                
-                List<FLVER2.BufferLayout> bufferLayouts = matDef.AcceptableVertexBufferDeclarations[0].Buffers;
-                mesh.BoneIndices.Clear();
-                mesh.Vertices = mesh.Vertices.Select(x => PadVertex(x, bufferLayouts)).ToList();
-                List<int> layoutIndices = GetLayoutIndices(newFlver, bufferLayouts);
-                mesh.VertexBuffers = layoutIndices.Select(x => new FLVER2.VertexBuffer(x)).ToList();
-                
-            }
-            return newFlver;
-        }
-        
-        private static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat)
+	    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat)
         {
 	        FLVER2.Material newMat = new()
 	        {
@@ -146,7 +78,7 @@ namespace DS3PortingTool
 	        return $"N:\\FDP\\data\\Material\\mtd\\character\\{newMtd}.mtd";
         }
         
-        private static FLVER.Vertex PadVertex(this FLVER.Vertex vertex, IEnumerable<FLVER2.BufferLayout> bufferLayouts)
+        public static FLVER.Vertex Pad(this FLVER.Vertex vertex, IEnumerable<FLVER2.BufferLayout> bufferLayouts)
         {
             Dictionary<FLVER.LayoutSemantic, int> usageCounts = new();
             FLVER.LayoutSemantic[] paddedProperties =
@@ -200,7 +132,7 @@ namespace DS3PortingTool
             return vertex;
         }
         
-        private static List<int> GetLayoutIndices(FLVER2 flver, List<FLVER2.BufferLayout> bufferLayouts)
+        public static List<int> GetLayoutIndices(this FLVER2 flver, List<FLVER2.BufferLayout> bufferLayouts)
         {
             List<int> indices = new();
 

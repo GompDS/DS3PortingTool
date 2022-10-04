@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using SoulsFormats;
 using SoulsAssetPipeline.Animation;
+using SoulsAssetPipeline.FLVERImporting;
 
 namespace DS3PortingTool
 {
@@ -483,9 +484,71 @@ namespace DS3PortingTool
 					if (file != null)
 					{
 						FLVER2 oldFlver = FLVER2.Read(file.Bytes);
-						FLVER2 newFlver = oldFlver.ToDs3Flver();
-						
-						Console.WriteLine(CompareMeshes(oldFlver.Meshes, newFlver.Meshes));
+						FLVER2 newFlver = new FLVER2
+					    {
+					        Header = new FLVER2.FLVERHeader
+					        {
+					            BoundingBoxMin = oldFlver.Header.BoundingBoxMin,
+					            BoundingBoxMax = oldFlver.Header.BoundingBoxMax
+					        },
+					        Dummies = oldFlver.Dummies,
+					        Materials = oldFlver.Materials.Select(x => x.ToDummyDs3Material()).ToList(),
+					        Bones = oldFlver.Bones.Select(x =>
+					        {
+					            if (x.Unk3C > 1)
+					            {
+					                x.Unk3C = 0;
+					            }
+					            return x;
+					        }).ToList(),
+					        Meshes = oldFlver.Meshes
+					    };
+						FLVER2MaterialInfoBank materialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{AppDomain.CurrentDomain.BaseDirectory}Res\\BANKDS3.xml");
+					    List<FLVER2.Material> distinctMaterials = newFlver.Materials.DistinctBy(x => x.MTD).ToList();
+					    foreach (var distinctMat in distinctMaterials)
+					    {
+					        // GXLists
+					        FLVER2.GXList gxList = new FLVER2.GXList();
+					        gxList.AddRange(materialInfoBank.GetDefaultGXItemsForMTD(Path.GetFileName(distinctMat.MTD).ToLower()));
+					        bool isNewGxList = true;
+					        foreach (var gxl in newFlver.GXLists)
+					        {
+					            if (gxl.Count == gxList.Count)
+					            {
+					                for (int i = 0; i < gxl.Count; i++)
+					                {
+					                    if (gxl[i].Data.Length == gxList[i].Data.Length && gxl[i].Unk04 == gxList[i].Unk04 && gxl[i].ID.Equals(gxList[i].ID))
+					                    {
+					                        isNewGxList = false;
+					                    }
+					                }
+					            }
+					        }
+					        if (isNewGxList)
+					        {
+					            newFlver.GXLists.Add(gxList);
+					        }
+					        
+					        // Set material GXIndexes
+					        foreach (var mat in newFlver.Materials.Where(x => x.MTD.Equals(distinctMat.MTD)))
+					        {
+					            mat.GXIndex = newFlver.GXLists.Count - 1;
+					        }
+					    }
+					    foreach (var mesh in newFlver.Meshes)
+					    {
+					        FLVER2MaterialInfoBank.MaterialDef matDef = materialInfoBank.MaterialDefs.Values
+					            .First(x => x.MTD.Equals($"{Path.GetFileName(newFlver.Materials[mesh.MaterialIndex].MTD).ToLower()}"));
+					        
+					        List<FLVER2.BufferLayout> bufferLayouts = matDef.AcceptableVertexBufferDeclarations[0].Buffers;
+					        mesh.BoneIndices.Clear();
+					        mesh.Vertices = mesh.Vertices.Select(x => x.Pad(bufferLayouts)).ToList();
+					        List<int> layoutIndices = newFlver.GetLayoutIndices(bufferLayouts);
+					        mesh.VertexBuffers = layoutIndices.Select(x => new FLVER2.VertexBuffer(x)).ToList();
+					        
+					    }
+
+					    Console.WriteLine(CompareMeshes(oldFlver.Meshes, newFlver.Meshes));
 						
 						// convert flver to binderFile and add it to the new bnd
 						BinderFile flverFile = new BinderFile(Binder.FileFlags.Flag1, 200,
