@@ -465,33 +465,35 @@ namespace DS3PortingTool
 				{
 					// Downgrade HKX files
 					newBnd.Files = oldBnd.Files.Where(x =>
-							x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", StringComparison.OrdinalIgnoreCase) >=
-							0)
-						.Where(
-							x =>
-								x.Downgrade($"{cwd}HavokDowngrade\\")).Select(x =>
+						x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", 
+							StringComparison.OrdinalIgnoreCase) >= 0)
+						.Where(x => x.Downgrade($"{cwd}HavokDowngrade\\")).Select(x =>
 						{
 							x.Name =
-								$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{portedChrId}\\{Path.GetFileName(x.Name).Replace(oldChrId, portedChrId)}";
+								@"N:\FDP\data\INTERROOT_win64\chr\" + 
+								$"c{portedChrId}\\{Path.GetFileName(x.Name).Replace(oldChrId, portedChrId)}";
 							return x;
 						}).ToList();
 
 					// Add hkxpwv amd clm2
 					newBnd.Files.AddRange(oldBnd.Files
 						.Where(x =>
-							x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", StringComparison.OrdinalIgnoreCase) < 0)
+							x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", 
+								StringComparison.OrdinalIgnoreCase) < 0)
 						.Where(x =>
 							(newBnd.Files.Any(y =>
 								 y.Name.IndexOf($"c{portedChrId}.hkx", StringComparison.OrdinalIgnoreCase) >= 0) &&
 							 x.Name.IndexOf($"c{oldChrId}.hkxpwv", StringComparison.OrdinalIgnoreCase) >= 0)
 							|| (newBnd.Files.Any(y =>
-								    y.Name.IndexOf($"c{portedChrId}_c.hkx", StringComparison.OrdinalIgnoreCase) >= 0) &&
+								    y.Name.IndexOf($"c{portedChrId}_c.hkx", 
+									    StringComparison.OrdinalIgnoreCase) >= 0) &&
 							    x.Name.IndexOf($"c{oldChrId}_c.clm2", StringComparison.OrdinalIgnoreCase) >= 0))
 						.Select(
 							x =>
 							{
 								x.Name =
-									$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{portedChrId}\\{Path.GetFileName(x.Name).Replace(oldChrId, portedChrId)}";
+									@"N:\FDP\data\INTERROOT_win64\chr\" +
+									$"c{portedChrId}\\{Path.GetFileName(x.Name).Replace(oldChrId, portedChrId)}";
 								return x;
 							}).ToList());
 					// FLVER File
@@ -518,13 +520,16 @@ namespace DS3PortingTool
 					        }).ToList(),
 					        Meshes = oldFlver.Meshes
 					    };
-						FLVER2MaterialInfoBank materialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{AppDomain.CurrentDomain.BaseDirectory}Res\\BANKDS3.xml");
-					    List<FLVER2.Material> distinctMaterials = newFlver.Materials.DistinctBy(x => x.MTD).ToList();
+						FLVER2MaterialInfoBank materialInfoBank = FLVER2MaterialInfoBank
+							.ReadFromXML($"{AppDomain.CurrentDomain.BaseDirectory}Res\\BANKDS3.xml");
+					    List<FLVER2.Material> distinctMaterials = newFlver.Materials
+						    .DistinctBy(x => x.MTD).ToList();
 					    foreach (var distinctMat in distinctMaterials)
 					    {
 					        // GXLists
 					        FLVER2.GXList gxList = new FLVER2.GXList();
-					        gxList.AddRange(materialInfoBank.GetDefaultGXItemsForMTD(Path.GetFileName(distinctMat.MTD).ToLower()));
+					        gxList.AddRange(materialInfoBank
+						        .GetDefaultGXItemsForMTD(Path.GetFileName(distinctMat.MTD).ToLower()));
 					        bool isNewGxList = true;
 					        foreach (var gxl in newFlver.GXLists)
 					        {
@@ -532,7 +537,8 @@ namespace DS3PortingTool
 					            {
 					                for (int i = 0; i < gxl.Count; i++)
 					                {
-					                    if (gxl[i].Data.Length == gxList[i].Data.Length && gxl[i].Unk04 == gxList[i].Unk04 && gxl[i].ID.Equals(gxList[i].ID))
+					                    if (gxl[i].Data.Length == gxList[i].Data.Length &&
+					                        gxl[i].Unk04 == gxList[i].Unk04 && gxl[i].ID.Equals(gxList[i].ID))
 					                    {
 					                        isNewGxList = false;
 					                    }
@@ -545,7 +551,8 @@ namespace DS3PortingTool
 					        }
 					        
 					        // Set material GXIndexes
-					        foreach (var mat in newFlver.Materials.Where(x => x.MTD.Equals(distinctMat.MTD)))
+					        foreach (var mat in newFlver.Materials
+						                 .Where(x => x.MTD.Equals(distinctMat.MTD)))
 					        {
 					            mat.GXIndex = newFlver.GXLists.Count - 1;
 					        }
@@ -553,9 +560,11 @@ namespace DS3PortingTool
 					    foreach (var mesh in newFlver.Meshes)
 					    {
 					        FLVER2MaterialInfoBank.MaterialDef matDef = materialInfoBank.MaterialDefs.Values
-					            .First(x => x.MTD.Equals($"{Path.GetFileName(newFlver.Materials[mesh.MaterialIndex].MTD).ToLower()}"));
+					            .First(x => x.MTD.Equals(
+						            $"{Path.GetFileName(newFlver.Materials[mesh.MaterialIndex].MTD).ToLower()}"));
 					        
-					        List<FLVER2.BufferLayout> bufferLayouts = matDef.AcceptableVertexBufferDeclarations[0].Buffers;
+					        List<FLVER2.BufferLayout> bufferLayouts = 
+						        matDef.AcceptableVertexBufferDeclarations[0].Buffers;
 					        mesh.BoneIndices.Clear();
 					        mesh.Vertices = mesh.Vertices.Select(x => x.Pad(bufferLayouts)).ToList();
 					        List<int> layoutIndices = newFlver.GetLayoutIndices(bufferLayouts);
