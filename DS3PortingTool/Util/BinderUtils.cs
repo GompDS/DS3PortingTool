@@ -3,7 +3,7 @@ using SoulsFormats;
 
 namespace DS3PortingTool
 {
-	public static class BinderFileExtensions
+	public static class BinderUtils
 	{	
 		/// <summary>
 		///	Downgrades a newer HKX file to Havok 2014.
