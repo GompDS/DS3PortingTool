@@ -5,7 +5,7 @@ using SoulsAssetPipeline.FLVERImporting;
 
 namespace DS3PortingTool
 {
-	public class Program
+	class Program
 	{
 		public static void Main(string[] args)
 		{
@@ -139,9 +139,9 @@ namespace DS3PortingTool
 					if (portTaeOnly == false)
 					{
 						newBnd.Files = oldBnd.Files
-							.Where(x => x.Name.IndexOf(".hkx", StringComparison.OrdinalIgnoreCase) >= 0).Where(x =>
-								x.Downgrade($"{cwd}HavokDowngrade\\",
-									oldBnd.Files.Find(y => y.Name.Contains($"c{oldChrId}.compendium")))).ToList();
+							.Where(x => x.Name.IndexOf(".hkx", StringComparison.OrdinalIgnoreCase) >= 0)
+							.Where(x => x.Downgrade($"{cwd}HavokDowngrade\\", oldBnd.Files
+								.Find(y => y.Name.Contains($"c{oldChrId}.compendium")))).ToList();
 						foreach (BinderFile hkx in newBnd.Files)
 						{
 							if (hkx.Name.IndexOf("skeleton", StringComparison.OrdinalIgnoreCase) < 0)
@@ -150,7 +150,8 @@ namespace DS3PortingTool
 							}
 
 							hkx.Name =
-								$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{portedChrId}\\hkx\\{Path.GetFileName(hkx.Name)}";
+								$"N:\\FDP\\data\\INTERROOT_win64\\chr\\" +
+								$"c{portedChrId}\\hkx\\{Path.GetFileName(hkx.Name)}";
 						}
 					}
 
@@ -180,7 +181,8 @@ namespace DS3PortingTool
 							.Where(x => x.Attribute("game")!.Value == "Sekiro").Elements("animation")
 							.Select(x => int.Parse(x.Attribute("id")!.Value)).ToList();
 						List<XElement> animationRanges = xmlElements.Elements("animationDenyList")
-							.Where(x => x.Attribute("game")!.Value == "Sekiro").Elements("animationRange").ToList();
+							.Where(x => x.Attribute("game")!.Value == "Sekiro")
+							.Elements("animationRange").ToList();
 						foreach (XElement x in animationRanges)
 						{
 							int repeat = int.Parse(x.Attribute("repeat")!.Value);
@@ -190,7 +192,8 @@ namespace DS3PortingTool
 								List<XElement> animationsInRange = x.Elements("animation").ToList();
 								foreach (XElement y in animationsInRange)
 								{
-									excludedAnimations.Add(int.Parse(y.Attribute("id")!.Value) + (j * increment));
+									excludedAnimations.Add(int.Parse(y.Attribute("id")!.Value) + 
+										(j * increment));
 								}
 							}
 						}
@@ -199,23 +202,28 @@ namespace DS3PortingTool
 						List<int> excludedImportHkxAnimations = oldTae.Animations.Where(anim =>
 							anim.MiniHeader is TAE.Animation.AnimMiniHeader.Standard standardHeader &&
 							standardHeader.ImportsHKX && oldBnd.Files.All(x =>
-								x.Name != "a" + standardHeader.ImportHKXSourceAnimID.ToString("D9").Insert(3, "_") +
-								".hkx")).Select(x => Convert.ToInt32(x.ID)).ToList();
+								x.Name != "a" + standardHeader.ImportHKXSourceAnimID.ToString("D9")
+									.Insert(3, "_") + ".hkx"))
+										.Select(x => Convert.ToInt32(x.ID)).ToList();
 
 						// Exclude animations which import all from an animation that's excluded
 						List<int> excludedImportAllAnimations = oldTae.Animations.Where(anim =>
 							anim.MiniHeader is TAE.Animation.AnimMiniHeader.ImportOtherAnim otherHeader &&
 							(excludedAnimations.Contains(otherHeader.ImportFromAnimID) ||
-							 excludedImportHkxAnimations.Contains(otherHeader.ImportFromAnimID))).Select(x => Convert.ToInt32(x.ID)).ToList();
+							 excludedImportHkxAnimations.Contains(otherHeader.ImportFromAnimID)))
+								.Select(x => Convert.ToInt32(x.ID)).ToList();
 
-						// Create a dictionary of old animation ids as the keys and new animation ids as the values from xml data
+						// Create a dictionary of old animation ids as the keys and new animation ids
+						// as the values from xml data
 						xmlElements = XElement.Load($"{cwd}\\Res\\AnimationRemapping.xml");
-						Dictionary<int, int> animationRemap = xmlElements.Elements("animationRemapDictionary").Where(
-							x =>
-								x.Attribute("game")!.Value == "Sekiro").Elements("animation").ToDictionary(
-							x => int.Parse(x.Attribute("old")!.Value), x => int.Parse(x.Attribute("new")!.Value));
+						Dictionary<int, int> animationRemap = xmlElements.Elements("animationRemapDictionary")
+							.Where(x => x.Attribute("game")!.Value == "Sekiro").Elements("animation")
+							.ToDictionary(x => int.Parse(x.Attribute("old")!.Value), 
+								x => int.Parse(x.Attribute("new")!.Value)); 
+						
 						animationRanges = xmlElements.Elements("animationRemapDictionary")
-							.Where(x => x.Attribute("game")!.Value == "Sekiro").Elements("animationRange").ToList();
+							.Where(x => x.Attribute("game")!.Value == "Sekiro")
+							.Elements("animationRange").ToList();
 						foreach (XElement x in animationRanges)
 						{
 							int repeat = int.Parse(x.Attribute("repeat")!.Value);
@@ -253,7 +261,8 @@ namespace DS3PortingTool
 								nextAllowedOffset *= 100000000;
 								foreach (var anim in oldTae.Animations.Where(x => x.ID < 1000000))
 								{
-									if (oldTae.Animations.FindIndex(x => x.ID == anim.ID + nextAllowedOffset) >= 0 || (anim.ID >= 3000 && anim.ID < 4000))
+									if (oldTae.Animations.FindIndex(x => x.ID == anim.ID + 
+										nextAllowedOffset) >= 0 || (anim.ID >= 3000 && anim.ID < 4000))
 									{
 										excludedOffsetAnimations.Add(Convert.ToInt32(anim.ID));
 									}
@@ -299,11 +308,13 @@ namespace DS3PortingTool
 								{
 									int newAnimId;
 									animationRemap.TryGetValue(x.GetNoOffsetId(), out newAnimId);
-									x.SetAnimationProperties(newAnimId, x.GetNoOffsetId(), x.GetOffset());
+									x.SetAnimationProperties(newAnimId, 
+										x.GetNoOffsetId(), x.GetOffset());
 								}
 								else
 								{
-									x.SetAnimationProperties(x.GetNoOffsetId(), x.GetNoOffsetId(), x.GetOffset());
+									x.SetAnimationProperties(x.GetNoOffsetId(), 
+										x.GetNoOffsetId(), x.GetOffset());
 								}
 
 								return x;
@@ -348,7 +359,8 @@ namespace DS3PortingTool
 						{
 							anim.Events = anim.Events.Where(ev =>
 								!eventDenyList.Contains(ev.Type) &&
-								!jumpTableDenyList.Contains(ev.GetJumpTableId(newTae.BigEndian))).Select(ev =>
+								!jumpTableDenyList.Contains(ev.GetJumpTableId(newTae.BigEndian)))
+								.Select(ev =>
 							{
 								// Edit events as needed
 								byte[] paramBytes = ev.GetParameterBytes(newTae.BigEndian);
