@@ -5,9 +5,11 @@ namespace DS3PortingTool
 	public static class TaeUtils
 	{
 		/// <summary>
-		///	Change anim ID and anim name to reflect the new ID. Enables HKX importing for anim and sets HKX to import from
+		///	Change anim ID and anim name to reflect the new ID.
+		/// Enables HKX importing for anim and sets HKX to import from.
 		/// </summary>
-		public static void SetAnimationProperties(this TAE.Animation anim, int newId, int newImportHkxSourceAnimId, int animOffset)
+		public static void SetAnimationProperties(this TAE.Animation anim, int newId, int newImportHkxSourceAnimId,
+			int animOffset)
 		{
 			newId += animOffset;
 			anim.ID = Convert.ToInt64(newId);
@@ -127,7 +129,8 @@ namespace DS3PortingTool
 			int soundType = BitConverter.ToInt32(soundTypeBytes, 0);
 			int soundId = BitConverter.ToInt32(soundIdBytes, 0);
 			string soundIdString = Convert.ToString(soundId);
-			if ((soundType == 1 || soundType == 8) && soundIdString.Length == 9 && !soundIdString.Substring(0, 4).Contains("9999"))
+			if ((soundType == 1 || soundType == 8) && soundIdString.Length == 9 && !soundIdString
+				    .Substring(0, 4).Contains("9999"))
 			{
 				soundIdString = newChrId + soundIdString.Substring(4);
 				soundId = Int32.Parse(soundIdString);

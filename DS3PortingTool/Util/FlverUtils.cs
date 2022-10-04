@@ -70,7 +70,8 @@ namespace DS3PortingTool
 		        {"cloth", "_Cloth"}
 	        };
             
-	        List<string> extensions = mtd.ToLower().Split('_', '.').Where(extensionTypes.ContainsKey).Select(x => extensionTypes[x]).ToList();
+	        List<string> extensions = mtd.ToLower().Split('_', '.').Where(extensionTypes.ContainsKey)
+		        .Select(x => extensionTypes[x]).ToList();
 
 	        string newMtd = "C[ARSN]";
 	        newMtd += string.Join("", extensions);
@@ -141,7 +142,8 @@ namespace DS3PortingTool
                 for (int i = 0; i < flver.BufferLayouts.Count; i++)
                 {
                     FLVER2.BufferLayout bufferLayout = flver.BufferLayouts[i];
-                    if (bufferLayout.Select(x => (x.Type, x.Semantic)).SequenceEqual(referenceBufferLayout.Select(x => (x.Type, x.Semantic))))
+                    if (bufferLayout.Select(x => (x.Type, x.Semantic)).SequenceEqual(referenceBufferLayout
+	                        .Select(x => (x.Type, x.Semantic))))
                     {
                         indices.Add(i);
                         break;

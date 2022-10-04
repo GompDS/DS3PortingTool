@@ -15,7 +15,8 @@ namespace DS3PortingTool
 			string xmlName = Path.GetFileNameWithoutExtension(hkxFile.Name) + ".xml";
 			
 			// FileConvert
-			RunProcess($"{toolsDirectory}\\fileConvert.exe", $"-x {toolsDirectory}\\{hkxName} {toolsDirectory}\\{xmlName}");
+			RunProcess($"{toolsDirectory}\\fileConvert.exe", 
+				$"-x {toolsDirectory}\\{hkxName} {toolsDirectory}\\{xmlName}");
 			File.Delete($"{toolsDirectory}\\{hkxName}");
 			if (File.Exists($"{toolsDirectory}\\{xmlName}") == false)
 			{
@@ -24,7 +25,8 @@ namespace DS3PortingTool
 			}
 			
 			// DS3HavokConverter
-			RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", $"{toolsDirectory}\\{xmlName}");
+			RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", 
+				$"{toolsDirectory}\\{xmlName}");
 			if (File.Exists($"{toolsDirectory}\\{xmlName}.bak"))
 			{
 				File.Delete($"{toolsDirectory}\\{xmlName}.bak");
@@ -72,7 +74,8 @@ namespace DS3PortingTool
 			string xmlName = Path.GetFileNameWithoutExtension(hkxFile.Name) + ".xml";
 			
 			// FileConvert
-			RunProcess($"{toolsDirectory}\\fileConvert.exe", $"-x --compendium {compendiumPath} {toolsDirectory}\\{hkxName} {toolsDirectory}\\{xmlName}");
+			RunProcess($"{toolsDirectory}\\fileConvert.exe", 
+				$"-x --compendium {compendiumPath} {toolsDirectory}\\{hkxName} {toolsDirectory}\\{xmlName}");
 			File.Delete($"{toolsDirectory}\\{hkxName}");
 			if (File.Exists($"{toolsDirectory}\\{xmlName}") == false)
 			{
@@ -81,7 +84,8 @@ namespace DS3PortingTool
 			}
 			
 			// DS3HavokConverter
-			RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", $"{toolsDirectory}\\{xmlName}");
+			RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", 
+				$"{toolsDirectory}\\{xmlName}");
 			if (File.Exists($"{toolsDirectory}\\{xmlName}.bak"))
 			{
 				File.Delete($"{toolsDirectory}\\{xmlName}.bak");

@@ -35,7 +35,8 @@ namespace DS3PortingTool
 						}
 						else
 						{
-							errorMessages.Add("Character ID specified after flag '-c' must be 4 digits and contain only numbers.");
+							errorMessages.Add("Character ID specified after flag '-c' " +
+							                  "must be 4 digits and contain only numbers.");
 						}
 					}
 					else
@@ -62,7 +63,8 @@ namespace DS3PortingTool
 							}
 							else
 							{
-								errorMessages.Add("Excluded offsets specified after flag '-o' must be 1 digit numbers separated by commas.\nExample: -o 1,3");
+								errorMessages.Add("Excluded offsets specified after flag '-o' " +
+								                  "must be 1 digit numbers separated by commas.\nExample: -o 1,3");
 							}
 							startIndex = delimIndex + 1;
 							delimIndex = csv.Substring(startIndex).IndexOf(",");
@@ -74,7 +76,8 @@ namespace DS3PortingTool
 						}
 						else
 						{
-							errorMessages.Add("Excluded offsets specified after flag '-o' must be 1 digit numbers separated by commas.\nExample: -o 1,3");
+							errorMessages.Add("Excluded offsets specified after flag '-o' " +
+							                  "must be 1 digit numbers separated by commas.\nExample: -o 1,3");
 						}
 						i++;
 						excludedOffsets = excludedOffsets.OrderByDescending(x => x).ToList();
