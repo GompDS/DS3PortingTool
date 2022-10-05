@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Xml.Linq;
 using SoulsFormats;
 using SoulsAssetPipeline.Animation;
@@ -505,8 +506,13 @@ namespace DS3PortingTool
 					    {
 					        Header = new FLVER2.FLVERHeader
 					        {
-					            BoundingBoxMin = oldFlver.Header.BoundingBoxMin,
-					            BoundingBoxMax = oldFlver.Header.BoundingBoxMax
+						        BoundingBoxMin = oldFlver.Header.BoundingBoxMin,
+					            BoundingBoxMax = oldFlver.Header.BoundingBoxMax,
+					            Unk4A = oldFlver.Header.Unk4A,
+					            Unk4C = oldFlver.Header.Unk4C,
+					            Unk5C = oldFlver.Header.Unk5C,
+					            Unk5D = oldFlver.Header.Unk5D,
+					            Unk68 = oldFlver.Header.Unk68
 					        },
 					        Dummies = oldFlver.Dummies,
 					        Materials = oldFlver.Materials.Select(x => x.ToDummyDs3Material()).ToList(),
@@ -572,9 +578,7 @@ namespace DS3PortingTool
 					        
 					    }
 
-					    Console.WriteLine(CompareMeshes(oldFlver.Meshes, newFlver.Meshes));
-						
-						// convert flver to binderFile and add it to the new bnd
+					    // convert flver to binderFile and add it to the new bnd
 						BinderFile flverFile = new BinderFile(Binder.FileFlags.Flag1, 200,
 							$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{portedChrId}\\c{portedChrId}.flver",
 							newFlver.Write());
@@ -587,106 +591,6 @@ namespace DS3PortingTool
 						DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 				}
 			}
-		}
-
-		private static bool CompareMeshes(List<FLVER2.Mesh> meshesA, List<FLVER2.Mesh> meshesB)
-		{
-			if (meshesA.Count == meshesB.Count)
-			{
-				for (int i = 0; i < meshesA.Count; i++)
-				{
-					FLVER2.Mesh ma = meshesA[i];
-					FLVER2.Mesh mb = meshesB[i];
-					if (ma.Dynamic == mb.Dynamic &&
-					    ma.MaterialIndex == mb.MaterialIndex &&
-					    ma.DefaultBoneIndex == mb.DefaultBoneIndex &&
-					    ma.BoneIndices.SequenceEqual(mb.BoneIndices) &&
-					    CompareFaceSets(ma.FaceSets, mb.FaceSets) &&
-					    CompareVertexBuffers(ma.VertexBuffers, mb.VertexBuffers) &&
-						CompareVertices(ma.Vertices, mb.Vertices) &&
-					    ma.BoundingBox.Equals(mb.BoundingBox))
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
-
-		private static bool CompareFaceSets(List<FLVER2.FaceSet> faceSetsA, List<FLVER2.FaceSet> faceSetsB)
-		{
-			if (faceSetsA.Count == faceSetsB.Count)
-			{
-				for (int i = 0; i < faceSetsA.Count; i++)
-				{
-					FLVER2.FaceSet fa = faceSetsA[i];
-					FLVER2.FaceSet fb = faceSetsB[i];
-					if (fa.Flags == fb.Flags &&
-					    fa.TriangleStrip == fb.TriangleStrip &&
-					    fa.CullBackfaces == fb.CullBackfaces &&
-					    fa.Unk06 == fb.Unk06 &&
-					    fa.Indices.SequenceEqual(fb.Indices))
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
-
-		private static bool CompareVertexBuffers(List<FLVER2.VertexBuffer> vertexBuffersA,
-			List<FLVER2.VertexBuffer> vertexBuffersB)
-		{
-			if (vertexBuffersA.Count == vertexBuffersB.Count)
-			{
-				for (int i = 0; i < vertexBuffersA.Count; i++)
-				{
-					FLVER2.VertexBuffer va = vertexBuffersA[i];
-					FLVER2.VertexBuffer vb = vertexBuffersB[i];
-					if (va.LayoutIndex == vb.LayoutIndex)
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
-
-		private static bool CompareVertices(List<FLVER.Vertex> verticiesA, List<FLVER.Vertex> verticiesB)
-		{
-			if (verticiesA.Count == verticiesB.Count)
-			{
-				for (int i = 0; i < verticiesA.Count; i++)
-				{
-					FLVER.Vertex va = verticiesA[i];
-					FLVER.Vertex vb = verticiesB[i];
-					if (va.Position.Equals(vb.Position) &&
-
-					    va.BoneWeights.Equals(vb.BoneWeights) &&
-
-					    va.BoneIndices.Equals(vb.BoneIndices) &&
-
-					    va.Normal.Equals(vb.Normal) &&
-
-					    va.NormalW == vb.NormalW &&
-										    
-					    va.UVs.SequenceEqual(vb.UVs) &&
-										    
-					    va.Tangents.SequenceEqual(vb.Tangents) &&
-										    
-					    va.Bitangent.Equals(vb.Bitangent) &&
-											
-					    va.Colors.SequenceEqual(vb.Colors))
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
 		}
 	}
 }
