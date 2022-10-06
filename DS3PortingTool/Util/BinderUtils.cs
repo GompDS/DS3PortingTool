@@ -15,7 +15,7 @@ namespace DS3PortingTool.Util
 			string xmlName = Path.GetFileNameWithoutExtension(hkxFile.Name) + ".xml";
 			
 			// FileConvert
-			bool result = RunProcess($"{toolsDirectory}\\fileConvert.exe", 
+			bool result = RunProcess(toolsDirectory, "fileConvert.exe", 
 				$"-x {toolsDirectory}\\{hkxName} {toolsDirectory}\\{xmlName}");
 			File.Delete($"{toolsDirectory}\\{hkxName}");
 			if (result == false)
@@ -25,7 +25,7 @@ namespace DS3PortingTool.Util
 			}
 			
 			// DS3HavokConverter
-			result = RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", 
+			result = RunProcess(toolsDirectory,"DS3HavokConverter.exe", 
 				$"{toolsDirectory}\\{xmlName}");
 			if (File.Exists($"{toolsDirectory}\\{xmlName}.bak"))
 			{
@@ -40,7 +40,7 @@ namespace DS3PortingTool.Util
 			}
 			
 			// Repack xml file
-			result = RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe",
+			result = RunProcess(toolsDirectory,"hkxpackds3.exe",
 				$"{toolsDirectory}\\{xmlName}"); 
 			File.Delete($"{toolsDirectory}\\{xmlName}");
 			if (result == false)
@@ -70,7 +70,7 @@ namespace DS3PortingTool.Util
 			string xmlName = Path.GetFileNameWithoutExtension(hkxFile.Name) + ".xml";
 			
 			// FileConvert
-			bool result = RunProcess($"{toolsDirectory}\\fileConvert.exe", 
+			bool result = RunProcess(toolsDirectory,"fileConvert.exe", 
 				$"-x --compendium {compendiumPath} {toolsDirectory}\\{hkxName} {toolsDirectory}\\{xmlName}");
 			File.Delete($"{toolsDirectory}\\{hkxName}");
 			if (result == false)
@@ -80,7 +80,7 @@ namespace DS3PortingTool.Util
 			}
 			
 			// DS3HavokConverter
-			result = RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", 
+			result = RunProcess(toolsDirectory,"DS3HavokConverter.exe", 
 				$"{toolsDirectory}\\{xmlName}");
 			if (File.Exists($"{toolsDirectory}\\{xmlName}.bak"))
 			{
@@ -95,7 +95,7 @@ namespace DS3PortingTool.Util
 			}
 			
 			// Repack xml file
-			result = RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe",
+			result = RunProcess(toolsDirectory,"hkxpackds3.exe",
 				$"{toolsDirectory}\\{xmlName}"); 
 			File.Delete($"{toolsDirectory}\\{xmlName}");
 			if (result == false)
@@ -114,10 +114,20 @@ namespace DS3PortingTool.Util
 		/// <summary>
 		///	Run an external tool with the given arguments.
 		/// </summary>
-		private static bool RunProcess(string applicationName, string args)
+		private static bool RunProcess(string searchDir, string applicationName, string args)
 		{
+			string[] results = Directory.GetFiles(searchDir, $"{applicationName}",
+				SearchOption.AllDirectories);
+			
+			if (!results.Any())
+			{
+				throw new FileNotFoundException($"Could not find the application \"{applicationName}\" in HavokDowngrade.");
+			}
+
+			string toolPath = results.First();
+			
 			Process tool = new Process();
-			tool.StartInfo.FileName = applicationName;
+			tool.StartInfo.FileName = toolPath;
 			tool.StartInfo.Arguments = args;
 			tool.StartInfo.RedirectStandardOutput = true;
 			tool.StartInfo.RedirectStandardError = true;

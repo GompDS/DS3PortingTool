@@ -6,7 +6,7 @@ using DS3PortingTool.Util;
 
 namespace DS3PortingTool
 {
-	public class Program
+	class Program
 	{
 		public static void Main(string[] args)
 		{
@@ -19,6 +19,7 @@ namespace DS3PortingTool
 			
 			BND4 oldBnd = BND4.Read(sourceFile);
 
+			// Figure out what game the source binder originates from.
 			Game game = new();
 			if (oldBnd.Files.Any(x => x.Name.Contains(@"N:\FRPG\data\")))
 			{
@@ -42,6 +43,8 @@ namespace DS3PortingTool
 			List<int> flagIndices = args.Where(x => x.Length == 2 && x.Substring(0, 1).Equals("-"))
 				.Select(x => Array.IndexOf(args, x))
 				.Where(x => x != Array.IndexOf(args, sourceFile)).ToList();
+			
+			// Prompt user to input flags if none were entered initially.
 			if (!flagIndices.Any())
 			{
 				Console.Write("Enter flags: ");
@@ -54,6 +57,7 @@ namespace DS3PortingTool
 					args = flagArgs.Concat(args).ToArray();
 				}
 			}
+			
 			bool portTaeOnly = false;
 			string oldChrId = "";
 			string portedChrId = "";
@@ -63,6 +67,8 @@ namespace DS3PortingTool
 				oldChrId = Path.GetFileName(sourceFile).Substring(1, 4);
 				portedChrId = oldChrId;
 			}
+			
+			// Evaluate the program flags.
 			foreach (var i in flagIndices)
 			{
 				if (args[i].Equals("-t"))
@@ -97,6 +103,7 @@ namespace DS3PortingTool
 					throw new ArgumentException($"Unknown flag: {args[i]}");
 				}
 			}
+			
 			string cwd = AppDomain.CurrentDomain.BaseDirectory;
 			string sourceFileName = Path.GetFileName(sourceFile);
 			BND4 newBnd = new BND4();
@@ -109,7 +116,7 @@ namespace DS3PortingTool
 						.Find(x => x.Name.Contains($"c{oldChrId}.compendium"));
 					if (compendium == null)
 					{
-						throw new Exception("Source anibnd contains no compendium.");
+						throw new FileNotFoundException("Source anibnd contains no compendium.");
 					}
 					newBnd.Files = oldBnd.Files
 						.Where(x => x.Name.IndexOf(".hkx", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -130,7 +137,7 @@ namespace DS3PortingTool
 				BinderFile? file = oldBnd.Files.Find(x => x.Name.Contains(".tae"));
 				if (file == null)
 				{
-					throw new Exception("Source anibnd contains no tae.");
+					throw new FileNotFoundException("Source anibnd contains no tae.");
 				}
 
 				TAE oldTae = TAE.Read(file.Bytes);
@@ -147,11 +154,11 @@ namespace DS3PortingTool
 					EventBank = 21
 				};
 
-				// Gather a list of animations to exclude from the xml data
+				// Gather a list of animations to exclude from the xml data.
 				List<int> animationDenyList = XElement.Load($"{cwd}\\Res\\ExcludedAnimations.xml")
 					.GetXmlList(game.TypeNames[game.Type]);
 
-				// Exclude animations which import an HKX that doesn't exist
+				// Exclude animations which import an HKX that doesn't exist.
 				List<int> excludedImportHkxAnimations = oldTae.Animations.Where(anim =>
 					anim.MiniHeader is TAE.Animation.AnimMiniHeader.Standard standardHeader &&
 					standardHeader.ImportsHKX && oldBnd.Files.All(x =>
@@ -159,7 +166,7 @@ namespace DS3PortingTool
 							.Insert(3, "_") + ".hkx"))
 								.Select(x => Convert.ToInt32(x.ID)).ToList();
 
-				// Exclude animations which import all from an animation that's excluded
+				// Exclude animations which import all from an animation that's excluded.
 				List<int> excludedImportAllAnimations = oldTae.Animations.Where(anim =>
 					anim.MiniHeader is TAE.Animation.AnimMiniHeader.ImportOtherAnim otherHeader &&
 					(animationDenyList.Contains(otherHeader.ImportFromAnimID) ||
@@ -167,11 +174,11 @@ namespace DS3PortingTool
 						.Select(x => Convert.ToInt32(x.ID)).ToList();
 
 				// Create a dictionary of old animation ids as the keys and new animation ids
-				// as the values from xml data
+				// as the values from xml data.
 				Dictionary<int, int> animationRemap = XElement.Load($"{cwd}\\Res\\AnimationRemapping.xml")
 					.GetXmlDictionary(game.TypeNames[game.Type]);
 				
-				// Remove animations from excluded offsets
+				// Remove animations from excluded offsets.
 				List<int> excludedOffsetAnimations = new();
 				if (excludedOffsets.Any())
 				{
@@ -201,7 +208,7 @@ namespace DS3PortingTool
 					}
 				}
 
-				// Remove excluded animations from the list and remap animation ids 
+				// Remove excluded animations from the list and remap animation ids.
 				int oldOffset = 0;
 				int newOffset = 0;
 				newTae.Animations = oldTae.Animations
@@ -211,7 +218,7 @@ namespace DS3PortingTool
 					            !excludedOffsetAnimations.Contains(Convert.ToInt32(x.ID)))
 					.Select(x => 
 					{
-						// imports all animation ID remapping
+						// Animation id remapping for animations that import all from another.
 						if (x.MiniHeader is TAE.Animation.AnimMiniHeader.ImportOtherAnim importMiniHeader)
 						{
 							string iDString = Convert.ToString(importMiniHeader.ImportFromAnimID);
@@ -233,7 +240,7 @@ namespace DS3PortingTool
 							}
 						}
 
-						// animation ID remapping
+						// Remap animation ids.
 						if (animationRemap.ContainsKey(x.GetNoOffsetId()))
 						{
 							animationRemap.TryGetValue(x.GetNoOffsetId(), out int newAnimId);
@@ -249,6 +256,7 @@ namespace DS3PortingTool
 						return x;
 					}).Select(x =>
 					{
+						// Shift animation offsets to fill in gaps when offsets are removed.
 						if (excludedOffsets.Contains(0))
 						{
 							int nextAllowedOffset = 1;
@@ -275,7 +283,7 @@ namespace DS3PortingTool
 						return x;
 					}).OrderBy(x => x.ID).ToList();
 				
-				// Create list of excluded event, jumpTables and rumbleCams from xml data
+				// Create lists of excluded events, jumpTables and rumbleCams from xml data.
 				List<int> eventDenyList = XElement.Load($"{cwd}\\Res\\ExcludedEvents.xml")
 					.GetXmlList(game.TypeNames[game.Type]);
 				List<int> jumpTableDenyList = XElement.Load($"{cwd}\\Res\\ExcludedJumpTables.xml")
@@ -291,7 +299,6 @@ namespace DS3PortingTool
 						!rumbleCamDenyList.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
 						.Select(ev =>
 					{
-						// Edit events as needed
 						byte[] paramBytes = ev.GetParameterBytes(newTae.BigEndian);
 						switch (ev.Type)
 						{
@@ -379,10 +386,12 @@ namespace DS3PortingTool
 					return anim;
 				}).ToList();
 
-				// Convert tae to binderFile and add it to the new bnd
+				// Convert tae to binderFile and add it to the new bnd.
 				BinderFile taeFile = new BinderFile(Binder.FileFlags.Flag1, 3000000,
 					$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{portedChrId}\\tae\\c{portedChrId}.tae",
 					newTae.Write());
+				
+				// Write tae to disc and skip writing the binder if portTaeOnly is enabled.
 				if (portTaeOnly)
 				{
 					File.WriteAllBytes($"{cwd}\\c{portedChrId}.tae", taeFile.Bytes);
@@ -394,14 +403,14 @@ namespace DS3PortingTool
 
 				if (portTaeOnly == false)
 				{
-					// Compress the new bnd
+					// Compress the new binder.
 					File.WriteAllBytes($"{cwd}\\c{portedChrId}.anibnd.dcx",
 						DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 				}
 			}
 			else if (sourceFileName.Contains("chrbnd"))
 			{
-				// Downgrade HKX files
+				// Downgrade HKX files.
 				newBnd.Files = oldBnd.Files.Where(x =>
 					x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", 
 						StringComparison.OrdinalIgnoreCase) >= 0)
@@ -413,7 +422,7 @@ namespace DS3PortingTool
 						return x;
 					}).ToList();
 
-				// Add hkxpwv amd clm2
+				// Add hkxpwv amd clm2.
 				newBnd.Files.AddRange(oldBnd.Files
 					.Where(x =>
 						x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", 
@@ -434,11 +443,11 @@ namespace DS3PortingTool
 								$"c{portedChrId}\\{Path.GetFileName(x.Name).Replace(oldChrId, portedChrId)}";
 							return x;
 						}).ToList());
-				// FLVER File
+				// Flver File
 				BinderFile? file = oldBnd.Files.Find(x => x.Name.Contains(".flver"));
 				if (file == null)
 				{
-					throw new Exception("Source chrbnd contains no flver.");
+					throw new FileNotFoundException("Source chrbnd contains no flver.");
 				}
 
 				FLVER2 oldFlver = FLVER2.Read(file.Bytes);
@@ -458,6 +467,7 @@ namespace DS3PortingTool
 			        Materials = oldFlver.Materials.Select(x => x.ToDummyDs3Material()).ToList(),
 			        Bones = oldFlver.Bones.Select(x =>
 			        {
+				        // Unk3C should only be 0 or 1 in DS3.
 			            if (x.Unk3C > 1)
 			            {
 			                x.Unk3C = 0;
@@ -466,8 +476,11 @@ namespace DS3PortingTool
 			        }).ToList(),
 			        Meshes = oldFlver.Meshes
 			    };
+				
+				// Import MaterialInfoBank which contains data for creating new materials.
 				FLVER2MaterialInfoBank materialInfoBank = FLVER2MaterialInfoBank
 					.ReadFromXML($"{AppDomain.CurrentDomain.BaseDirectory}Res\\BankDS3.xml");
+				
 			    List<FLVER2.Material> distinctMaterials = newFlver.Materials
 				    .DistinctBy(x => x.MTD).ToList();
 			    foreach (var distinctMat in distinctMaterials)
@@ -476,6 +489,7 @@ namespace DS3PortingTool
 			        FLVER2.GXList gxList = new FLVER2.GXList();
 			        gxList.AddRange(materialInfoBank
 				        .GetDefaultGXItemsForMTD(Path.GetFileName(distinctMat.MTD).ToLower()));
+			        // Check if GXList is new.
 			        bool isNewGxList = true;
 			        foreach (var gxl in newFlver.GXLists)
 			        {
@@ -496,7 +510,7 @@ namespace DS3PortingTool
 			            newFlver.GXLists.Add(gxList);
 			        }
 			        
-			        // Set material GXIndexes
+			        // Set material GXIndexes.
 			        foreach (var mat in newFlver.Materials
 				                 .Where(x => x.MTD.Equals(distinctMat.MTD)))
 			        {
@@ -505,13 +519,18 @@ namespace DS3PortingTool
 			    }
 			    foreach (var mesh in newFlver.Meshes)
 			    {
+				    // Definition for the material the mesh uses.
 			        FLVER2MaterialInfoBank.MaterialDef matDef = materialInfoBank.MaterialDefs.Values
 			            .First(x => x.MTD.Equals(
 				            $"{Path.GetFileName(newFlver.Materials[mesh.MaterialIndex].MTD).ToLower()}"));
 			        
 			        List<FLVER2.BufferLayout> bufferLayouts = 
 				        matDef.AcceptableVertexBufferDeclarations[0].Buffers;
+			        
+			        // DS3 does not keep track of bone indices in each mesh.
 			        mesh.BoneIndices.Clear();
+			        
+			        // Pad vertices and map vertices to new buffer layouts.
 			        mesh.Vertices = mesh.Vertices.Select(x => x.Pad(bufferLayouts)).ToList();
 			        List<int> layoutIndices = newFlver.GetLayoutIndices(bufferLayouts);
 			        mesh.VertexBuffers = layoutIndices.Select(x => new FLVER2.VertexBuffer(x)).ToList();
@@ -525,7 +544,7 @@ namespace DS3PortingTool
 				newBnd.Files.Add(flverFile);
 				
 				newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-				// compress the new bnd
+				// Compress the new binder.
 				File.WriteAllBytes($"{cwd}\\c{portedChrId}.chrbnd.dcx",
 					DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 			}
