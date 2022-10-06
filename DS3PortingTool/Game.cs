@@ -33,9 +33,30 @@ namespace DS3PortingTool
             { GameTypes.EldenRing, "EldenRing" }
         };
 
-        public Game()
+        public Game(IBinder bnd)
         {
-            Type = GameTypes.Other;
+            if (bnd.Files.Any(x => x.Name.Contains(@"N:\FRPG\data\")))
+            {
+                Type = Game.GameTypes.Ds1;
+            }
+            else if (bnd.Files.Any(x => x.Name.Contains(@"N:\NTC\data\Target\INTERROOT_win64")))
+            {
+                Type = Game.GameTypes.Sekiro;
+            }
+            else if (bnd.Files.Any(x => x.Name.Contains(@"N:\GR\data\INTERROOT_win64")))
+            {
+                Type = Game.GameTypes.EldenRing;
+            }
+            else
+            {
+                Type = Game.GameTypes.Other;
+            }
+
+            if (Type != Game.GameTypes.Sekiro)
+            {
+                throw new ArgumentException(
+                    "Source binder does not originate from Sekiro. Currently only Sekiro is supported.");
+            }
         }
     }
 }

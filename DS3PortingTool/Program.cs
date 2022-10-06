@@ -10,115 +10,21 @@ namespace DS3PortingTool
 	{
 		public static void Main(string[] args)
 		{
-			string? sourceFile = Array.Find(args, x => File.Exists(x) && 
-			                                           Path.GetFileName(x).Contains(".dcx"));
-			if (sourceFile == null)
-			{
-				throw new ArgumentException("No path to a source binder found in arguments.");
-			}
-			
-			BND4 oldBnd = BND4.Read(sourceFile);
-
-			// Figure out what game the source binder originates from.
-			Game game = new();
-			if (oldBnd.Files.Any(x => x.Name.Contains(@"N:\FRPG\data\")))
-			{
-				game.Type = Game.GameTypes.Ds1;
-			}
-			else if (oldBnd.Files.Any(x => x.Name.Contains(@"N:\NTC\data\Target\INTERROOT_win64")))
-			{
-				game.Type = Game.GameTypes.Sekiro;
-			}
-			else if (oldBnd.Files.Any(x => x.Name.Contains(@"N:\GR\data\INTERROOT_win64")))
-			{
-				game.Type = Game.GameTypes.EldenRing;
-			}
-
-			if (game.Type != Game.GameTypes.Sekiro)
-			{
-				throw new ArgumentException(
-					"Source binder does not originate from Sekiro. Currently only Sekiro is supported.");
-			}
-			
-			List<int> flagIndices = args.Where(x => x.Length == 2 && x.Substring(0, 1).Equals("-"))
-				.Select(x => Array.IndexOf(args, x))
-				.Where(x => x != Array.IndexOf(args, sourceFile)).ToList();
-			
-			// Prompt user to input flags if none were entered initially.
-			if (!flagIndices.Any())
-			{
-				Console.Write("Enter flags: ");
-				string? flagString = Console.ReadLine();
-				if (flagString != null)
-				{
-					string[] flagArgs = flagString.Split(" ");
-					flagIndices = flagArgs.Where(x => x.Length == 2 && x.Substring(0, 1).Equals("-"))
-						.Select(x => Array.IndexOf(flagArgs, x)).ToList();
-					args = flagArgs.Concat(args).ToArray();
-				}
-			}
-			
-			bool portTaeOnly = false;
-			string oldChrId = "";
-			string portedChrId = "";
-			List<int> excludedOffsets = new();
-			if (Path.GetFileName(sourceFile).Substring(1, 4).All(char.IsDigit))
-			{
-				oldChrId = Path.GetFileName(sourceFile).Substring(1, 4);
-				portedChrId = oldChrId;
-			}
-			
-			// Evaluate the program flags.
-			foreach (var i in flagIndices)
-			{
-				if (args[i].Equals("-t"))
-				{
-					portTaeOnly = true;
-				}
-				else if (args[i].Equals("-c"))
-				{
-					if (args.Length < i + 1)
-					{
-						throw new ArgumentException($"Flag '-c' used, but no character id provided.");
-					}
-					if (args[i + 1].Length != 4 || !args[i + 1].All(char.IsDigit))
-					{
-						throw new ArgumentException($"Character id after flag '-c' must be a 4 digit number.");
-					}
-
-					portedChrId = args[i + 1];
-				}
-				else if (args[i].Equals("-o"))
-				{
-					if (args.Length < i + 1)
-					{
-						throw new ArgumentException($"Flag '-o' used, but no offsets provided.");
-					}
-					excludedOffsets = args[i + 1].Split(',')
-						.Where(x => x.All(char.IsDigit) && x.Length == 1)
-						.Select(x => Int32.Parse(x)).ToList();
-				}
-				else
-				{
-					throw new ArgumentException($"Unknown flag: {args[i]}");
-				}
-			}
-			
+			Options op = new Options(args);
 			string cwd = AppDomain.CurrentDomain.BaseDirectory;
-			string sourceFileName = Path.GetFileName(sourceFile);
 			BND4 newBnd = new BND4();
-			if (sourceFileName.Contains("anibnd"))
+			if (op.SourceFileName.Contains("anibnd"))
 			{
 				// Downgrade HKX files
-				if (portTaeOnly == false)
+				if (op.PortTaeOnly == false)
 				{
-					BinderFile? compendium = oldBnd.Files
-						.Find(x => x.Name.Contains($"c{oldChrId}.compendium"));
+					BinderFile? compendium = op.SourceBnd.Files
+						.Find(x => x.Name.Contains($"c{op.SourceChrId}.compendium"));
 					if (compendium == null)
 					{
 						throw new FileNotFoundException("Source anibnd contains no compendium.");
 					}
-					newBnd.Files = oldBnd.Files
+					newBnd.Files = op.SourceBnd.Files
 						.Where(x => x.Name.IndexOf(".hkx", StringComparison.OrdinalIgnoreCase) >= 0)
 						.Where(x => x.Downgrade($"{cwd}HavokDowngrade\\", compendium)).ToList();
 					foreach (BinderFile hkx in newBnd.Files)
@@ -129,39 +35,37 @@ namespace DS3PortingTool
 						}
 
 						hkx.Name = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\" + 
-						           $"c{portedChrId}\\hkx\\{Path.GetFileName(hkx.Name)}";
+						           $"c{op.PortedChrId}\\hkx\\{Path.GetFileName(hkx.Name)}";
 					}
 				}
-
-				// TAE File
-				BinderFile? file = oldBnd.Files.Find(x => x.Name.Contains(".tae"));
+				
+				BinderFile? file = op.SourceBnd.Files.Find(x => x.Name.Contains(".tae"));
 				if (file == null)
 				{
 					throw new FileNotFoundException("Source anibnd contains no tae.");
 				}
 
 				TAE oldTae = TAE.Read(file.Bytes);
-				// setup new DS3 tae
 				TAE newTae = new TAE
 				{
 					Format = TAE.TAEFormat.DS3,
 					BigEndian = false,
-					ID = 200000 + int.Parse(portedChrId),
+					ID = 200000 + int.Parse(op.PortedChrId),
 					Flags = new byte[] { 1, 0, 1, 2, 2, 1, 1, 1 },
 					SkeletonName = "skeleton.hkt",
-					SibName = $"c{portedChrId}.sib",
+					SibName = $"c{op.PortedChrId}.sib",
 					Animations = new List<TAE.Animation>(),
 					EventBank = 21
 				};
 
 				// Gather a list of animations to exclude from the xml data.
 				List<int> animationDenyList = XElement.Load($"{cwd}\\Res\\ExcludedAnimations.xml")
-					.GetXmlList(game.TypeNames[game.Type]);
+					.GetXmlList(op.Game.TypeNames[op.Game.Type]);
 
 				// Exclude animations which import an HKX that doesn't exist.
 				List<int> excludedImportHkxAnimations = oldTae.Animations.Where(anim =>
 					anim.MiniHeader is TAE.Animation.AnimMiniHeader.Standard standardHeader &&
-					standardHeader.ImportsHKX && oldBnd.Files.All(x =>
+					standardHeader.ImportsHKX && op.SourceBnd.Files.All(x =>
 						x.Name != "a" + standardHeader.ImportHKXSourceAnimID.ToString("D9")
 							.Insert(3, "_") + ".hkx"))
 								.Select(x => Convert.ToInt32(x.ID)).ToList();
@@ -176,23 +80,23 @@ namespace DS3PortingTool
 				// Create a dictionary of old animation ids as the keys and new animation ids
 				// as the values from xml data.
 				Dictionary<int, int> animationRemap = XElement.Load($"{cwd}\\Res\\AnimationRemapping.xml")
-					.GetXmlDictionary(game.TypeNames[game.Type]);
+					.GetXmlDictionary(op.Game.TypeNames[op.Game.Type]);
 				
 				// Remove animations from excluded offsets.
 				List<int> excludedOffsetAnimations = new();
-				if (excludedOffsets.Any())
+				if (op.ExcludedAnimOffsets.Any())
 				{
-					foreach (int offsetId in excludedOffsets.Where(x => x > 0))
+					foreach (int offsetId in op.ExcludedAnimOffsets.Where(x => x > 0))
 					{
 						excludedOffsetAnimations.AddRange(oldTae.Animations.Where(y =>
 								y.ID >= offsetId * 100000000 && y.ID < (offsetId + 1) * 100000000)
 							.Select(y => Convert.ToInt32(y.ID)).ToList());
 					}
 
-					if (excludedOffsets.Contains(0))
+					if (op.ExcludedAnimOffsets.Contains(0))
 					{
 						int nextAllowedOffset = 1;
-						while (excludedOffsets.Contains(nextAllowedOffset))
+						while (op.ExcludedAnimOffsets.Contains(nextAllowedOffset))
 						{
 							nextAllowedOffset++;
 						}
@@ -257,10 +161,10 @@ namespace DS3PortingTool
 					}).Select(x =>
 					{
 						// Shift animation offsets to fill in gaps when offsets are removed.
-						if (excludedOffsets.Contains(0))
+						if (op.ExcludedAnimOffsets.Contains(0))
 						{
 							int nextAllowedOffset = 1;
-							while (excludedOffsets.Contains(nextAllowedOffset))
+							while (op.ExcludedAnimOffsets.Contains(nextAllowedOffset))
 							{
 								nextAllowedOffset++;
 							}
@@ -285,11 +189,11 @@ namespace DS3PortingTool
 				
 				// Create lists of excluded events, jumpTables and rumbleCams from xml data.
 				List<int> eventDenyList = XElement.Load($"{cwd}\\Res\\ExcludedEvents.xml")
-					.GetXmlList(game.TypeNames[game.Type]);
+					.GetXmlList(op.Game.TypeNames[op.Game.Type]);
 				List<int> jumpTableDenyList = XElement.Load($"{cwd}\\Res\\ExcludedJumpTables.xml")
-					.GetXmlList(game.TypeNames[game.Type]);
+					.GetXmlList(op.Game.TypeNames[op.Game.Type]);
 				List<int> rumbleCamDenyList = XElement.Load($"{cwd}\\Res\\ExcludedRumbleCams.xml")
-					.GetXmlList(game.TypeNames[game.Type]);
+					.GetXmlList(op.Game.TypeNames[op.Game.Type]);
 
 				newTae.Animations = newTae.Animations.Select(anim =>
 				{
@@ -315,22 +219,22 @@ namespace DS3PortingTool
 								break;
 							// PlaySound_CenterBody
 							case 128:
-								paramBytes = ev.ChangeSoundEventChrId(newTae.BigEndian, portedChrId);
+								paramBytes = ev.ChangeSoundEventChrId(newTae.BigEndian, op.PortedChrId);
 								break;
 							// PlaySound_ByStateInfo
 							case 129:
-								paramBytes = ev.ChangeSoundEventChrId(newTae.BigEndian, portedChrId);
+								paramBytes = ev.ChangeSoundEventChrId(newTae.BigEndian, op.PortedChrId);
 								Array.Clear(paramBytes, 18, 2);
 								break;
 							// PlaySound_ByDummyPoly_PlayerVoice
 							case 130:
-								paramBytes = ev.ChangeSoundEventChrId(newTae.BigEndian, portedChrId);
+								paramBytes = ev.ChangeSoundEventChrId(newTae.BigEndian, op.PortedChrId);
 								Array.Clear(paramBytes, 16, 2);
 								Array.Resize(ref paramBytes, 32);
 								break;
 							// PlaySound_DummyPoly
 							case 131:
-								paramBytes = ev.ChangeSoundEventChrId(newTae.BigEndian, portedChrId);
+								paramBytes = ev.ChangeSoundEventChrId(newTae.BigEndian, op.PortedChrId);
 								break;
 							// SetLockCamParam_Boss
 							case 151:
@@ -388,63 +292,63 @@ namespace DS3PortingTool
 
 				// Convert tae to binderFile and add it to the new bnd.
 				BinderFile taeFile = new BinderFile(Binder.FileFlags.Flag1, 3000000,
-					$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{portedChrId}\\tae\\c{portedChrId}.tae",
+					$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\tae\\c{op.PortedChrId}.tae",
 					newTae.Write());
 				
-				// Write tae to disc and skip writing the binder if portTaeOnly is enabled.
-				if (portTaeOnly)
+				// Write tae to disc and skip writing the binder if PortTaeOnly is enabled.
+				if (op.PortTaeOnly)
 				{
-					File.WriteAllBytes($"{cwd}\\c{portedChrId}.tae", taeFile.Bytes);
+					File.WriteAllBytes($"{cwd}\\c{op.PortedChrId}.tae", taeFile.Bytes);
 				}
 				else
 				{
 					newBnd.Files.Add(taeFile);
 				}
 
-				if (portTaeOnly == false)
+				if (op.PortTaeOnly == false)
 				{
 					// Compress the new binder.
-					File.WriteAllBytes($"{cwd}\\c{portedChrId}.anibnd.dcx",
+					File.WriteAllBytes($"{cwd}\\c{op.PortedChrId}.anibnd.dcx",
 						DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 				}
 			}
-			else if (sourceFileName.Contains("chrbnd"))
+			else if (op.SourceFileName.Contains("chrbnd"))
 			{
 				// Downgrade HKX files.
-				newBnd.Files = oldBnd.Files.Where(x =>
+				newBnd.Files = op.SourceBnd.Files.Where(x =>
 					x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", 
 						StringComparison.OrdinalIgnoreCase) >= 0)
 					.Where(x => x.Downgrade($"{cwd}HavokDowngrade\\")).Select(x =>
 					{
 						x.Name =
 							@"N:\FDP\data\INTERROOT_win64\chr\" + 
-							$"c{portedChrId}\\{Path.GetFileName(x.Name).Replace(oldChrId, portedChrId)}";
+							$"c{op.PortedChrId}\\{Path.GetFileName(x.Name).Replace(op.SourceChrId, op.PortedChrId)}";
 						return x;
 					}).ToList();
 
 				// Add hkxpwv amd clm2.
-				newBnd.Files.AddRange(oldBnd.Files
+				newBnd.Files.AddRange(op.SourceBnd.Files
 					.Where(x =>
 						x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", 
 							StringComparison.OrdinalIgnoreCase) < 0)
 					.Where(x =>
 						(newBnd.Files.Any(y =>
-							 y.Name.IndexOf($"c{portedChrId}.hkx", StringComparison.OrdinalIgnoreCase) >= 0) &&
-						 x.Name.IndexOf($"c{oldChrId}.hkxpwv", StringComparison.OrdinalIgnoreCase) >= 0)
+							 y.Name.IndexOf($"c{op.PortedChrId}.hkx", StringComparison.OrdinalIgnoreCase) >= 0) &&
+						 x.Name.IndexOf($"c{op.SourceChrId}.hkxpwv", StringComparison.OrdinalIgnoreCase) >= 0)
 						|| (newBnd.Files.Any(y =>
-							    y.Name.IndexOf($"c{portedChrId}_c.hkx", 
+							    y.Name.IndexOf($"c{op.PortedChrId}_c.hkx", 
 								    StringComparison.OrdinalIgnoreCase) >= 0) &&
-						    x.Name.IndexOf($"c{oldChrId}_c.clm2", StringComparison.OrdinalIgnoreCase) >= 0))
+						    x.Name.IndexOf($"c{op.SourceChrId}_c.clm2", StringComparison.OrdinalIgnoreCase) >= 0))
 					.Select(
 						x =>
 						{
 							x.Name =
 								@"N:\FDP\data\INTERROOT_win64\chr\" +
-								$"c{portedChrId}\\{Path.GetFileName(x.Name).Replace(oldChrId, portedChrId)}";
+								$"c{op.PortedChrId}\\{Path.GetFileName(x.Name).Replace(op.SourceChrId, op.PortedChrId)}";
 							return x;
 						}).ToList());
 				// Flver File
-				BinderFile? file = oldBnd.Files.Find(x => x.Name.Contains(".flver"));
+				BinderFile? file = op.SourceBnd.Files.Find(x => x.Name.Contains(".flver"));
 				if (file == null)
 				{
 					throw new FileNotFoundException("Source chrbnd contains no flver.");
@@ -539,13 +443,13 @@ namespace DS3PortingTool
 
 			    // convert flver to binderFile and add it to the new bnd
 				BinderFile flverFile = new BinderFile(Binder.FileFlags.Flag1, 200,
-					$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{portedChrId}\\c{portedChrId}.flver",
+					$"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\c{op.PortedChrId}.flver",
 					newFlver.Write());
 				newBnd.Files.Add(flverFile);
 				
 				newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
 				// Compress the new binder.
-				File.WriteAllBytes($"{cwd}\\c{portedChrId}.chrbnd.dcx",
+				File.WriteAllBytes($"{cwd}\\c{op.PortedChrId}.chrbnd.dcx",
 					DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 			}
 			
