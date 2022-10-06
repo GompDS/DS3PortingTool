@@ -30,7 +30,7 @@ namespace DS3PortingTool.Util
 		}
 		
 		/// <summary>
-		///	Get the animation offset of a given animation ID
+		///	Get the animation offset of a given animation ID.
 		/// </summary>
 		public static int GetOffset(this TAE.Animation anim)
 		{
@@ -79,7 +79,7 @@ namespace DS3PortingTool.Util
 		}
 
 		/// <summary>
-		///	Get animation ID without the animation offset included
+		///	Get animation ID without the animation offset included.
 		/// </summary>
 		public static int GetNoOffsetId(this TAE.Animation anim)
 		{
@@ -94,7 +94,7 @@ namespace DS3PortingTool.Util
 		}
 		
 		/// <summary>
-		/// Check if event is not one of the excluded jumpTables
+		/// Given an event that is a jumpTable, return the jumpTable id.
 		/// </summary>
 		public static int GetJumpTableId(this TAE.Event ev, bool isBigEndian)
 		{
@@ -112,6 +112,9 @@ namespace DS3PortingTool.Util
 			return -1;
 		}
 		
+		/// <summary>
+		/// Given an event that invokes a rumbleCam, return the rumbleCam id.
+		/// </summary>
 		public static short GetRumbleCamId(this TAE.Event ev, bool isBigEndian)
 		{
 			if (ev.Type is >= 144 and <= 147)
@@ -157,13 +160,16 @@ namespace DS3PortingTool.Util
 			return paramBytes;
 		}
 
-		public static List<int> GetXmlList(this XElement xmlElements, string game)
+		/// <summary>
+		/// Reads data from an xml itemList and returns a list of the data.
+		/// </summary>
+		public static List<int> GetXmlList(this XElement xmlElements, string gameName)
 		{
 			List<int> itemList = xmlElements.Elements($"itemList")
-				.Where(x => x.Attribute("game")!.Value == "Sekiro").Elements("item")
+				.Where(x => x.Attribute("game")!.Value == gameName).Elements("item")
 				.Select(x => int.Parse(x.Attribute("id")!.Value)).ToList(); 
 			List<XElement> itemRanges = xmlElements.Elements("itemList")
-				.Where(x => x.Attribute("game")!.Value == game)
+				.Where(x => x.Attribute("game")!.Value == gameName)
 				.Elements($"itemRange").ToList();
 			foreach (XElement x in itemRanges)
 			{
@@ -183,15 +189,18 @@ namespace DS3PortingTool.Util
 			return itemList;
 		}
 
-		public static Dictionary<int, int> GetXmlDictionary(this XElement xmlElements, string listItemType)
+		/// <summary>
+		/// Reads data from an xml itemDictionary and returns a dictionary of the data.
+		/// </summary>
+		public static Dictionary<int, int> GetXmlDictionary(this XElement xmlElements, string gameName)
 		{
 			Dictionary<int, int> itemDict = xmlElements.Elements("itemDictionary")
-				.Where(x => x.Attribute("game")!.Value == "Sekiro").Elements("item")
+				.Where(x => x.Attribute("game")!.Value == gameName).Elements("item")
 				.ToDictionary(x => int.Parse(x.Attribute("key")!.Value), 
 					x => int.Parse(x.Attribute("value")!.Value)); 
 						
 			List<XElement> itemRanges = xmlElements.Elements("itemDictionary")
-				.Where(x => x.Attribute("game")!.Value == "Sekiro")
+				.Where(x => x.Attribute("game")!.Value == gameName)
 				.Elements("itemRange").ToList();
 			foreach (XElement x in itemRanges)
 			{

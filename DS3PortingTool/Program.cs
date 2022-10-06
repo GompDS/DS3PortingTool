@@ -6,18 +6,54 @@ using DS3PortingTool.Util;
 
 namespace DS3PortingTool
 {
-	class Program
+	public class Program
 	{
 		public static void Main(string[] args)
 		{
-			string sourceFile = args.FirstOrDefault(x => File.Exists(x) && Path.GetFileName(x).Contains(".dcx"), "");
-			if (sourceFile.Equals(""))
+			string? sourceFile = Array.Find(args, x => File.Exists(x) && 
+			                                           Path.GetFileName(x).Contains(".dcx"));
+			if (sourceFile == null)
 			{
 				throw new ArgumentException("No path to a source binder found in arguments.");
 			}
+			
+			BND4 oldBnd = BND4.Read(sourceFile);
+
+			Game game = new();
+			if (oldBnd.Files.Any(x => x.Name.Contains(@"N:\FRPG\data\")))
+			{
+				game.Type = Game.GameTypes.Ds1;
+			}
+			else if (oldBnd.Files.Any(x => x.Name.Contains(@"N:\NTC\data\Target\INTERROOT_win64")))
+			{
+				game.Type = Game.GameTypes.Sekiro;
+			}
+			else if (oldBnd.Files.Any(x => x.Name.Contains(@"N:\GR\data\INTERROOT_win64")))
+			{
+				game.Type = Game.GameTypes.EldenRing;
+			}
+
+			if (game.Type != Game.GameTypes.Sekiro)
+			{
+				throw new ArgumentException(
+					"Source binder does not originate from Sekiro. Currently only Sekiro is supported.");
+			}
+			
 			List<int> flagIndices = args.Where(x => x.Length == 2 && x.Substring(0, 1).Equals("-"))
 				.Select(x => Array.IndexOf(args, x))
 				.Where(x => x != Array.IndexOf(args, sourceFile)).ToList();
+			if (!flagIndices.Any())
+			{
+				Console.Write("Enter flags: ");
+				string? flagString = Console.ReadLine();
+				if (flagString != null)
+				{
+					string[] flagArgs = flagString.Split(" ");
+					flagIndices = flagArgs.Where(x => x.Length == 2 && x.Substring(0, 1).Equals("-"))
+						.Select(x => Array.IndexOf(flagArgs, x)).ToList();
+					args = flagArgs.Concat(args).ToArray();
+				}
+			}
 			bool portTaeOnly = false;
 			string oldChrId = "";
 			string portedChrId = "";
@@ -63,14 +99,14 @@ namespace DS3PortingTool
 			}
 			string cwd = AppDomain.CurrentDomain.BaseDirectory;
 			string sourceFileName = Path.GetFileName(sourceFile);
-			BND4 oldBnd = BND4.Read(sourceFile);
 			BND4 newBnd = new BND4();
 			if (sourceFileName.Contains("anibnd"))
 			{
 				// Downgrade HKX files
 				if (portTaeOnly == false)
 				{
-					BinderFile? compendium = oldBnd.Files.Find(x => x.Name.Contains($"c{oldChrId}.compendium"));
+					BinderFile? compendium = oldBnd.Files
+						.Find(x => x.Name.Contains($"c{oldChrId}.compendium"));
 					if (compendium == null)
 					{
 						throw new Exception("Source anibnd contains no compendium.");
@@ -113,7 +149,7 @@ namespace DS3PortingTool
 
 				// Gather a list of animations to exclude from the xml data
 				List<int> animationDenyList = XElement.Load($"{cwd}\\Res\\ExcludedAnimations.xml")
-					.GetXmlList("Sekiro");
+					.GetXmlList(game.TypeNames[game.Type]);
 
 				// Exclude animations which import an HKX that doesn't exist
 				List<int> excludedImportHkxAnimations = oldTae.Animations.Where(anim =>
@@ -133,7 +169,7 @@ namespace DS3PortingTool
 				// Create a dictionary of old animation ids as the keys and new animation ids
 				// as the values from xml data
 				Dictionary<int, int> animationRemap = XElement.Load($"{cwd}\\Res\\AnimationRemapping.xml")
-					.GetXmlDictionary("Sekiro");
+					.GetXmlDictionary(game.TypeNames[game.Type]);
 				
 				// Remove animations from excluded offsets
 				List<int> excludedOffsetAnimations = new();
@@ -241,11 +277,11 @@ namespace DS3PortingTool
 				
 				// Create list of excluded event, jumpTables and rumbleCams from xml data
 				List<int> eventDenyList = XElement.Load($"{cwd}\\Res\\ExcludedEvents.xml")
-					.GetXmlList("Sekiro");
+					.GetXmlList(game.TypeNames[game.Type]);
 				List<int> jumpTableDenyList = XElement.Load($"{cwd}\\Res\\ExcludedJumpTables.xml")
-					.GetXmlList("Sekiro");
+					.GetXmlList(game.TypeNames[game.Type]);
 				List<int> rumbleCamDenyList = XElement.Load($"{cwd}\\Res\\ExcludedRumbleCams.xml")
-					.GetXmlList("Sekiro");
+					.GetXmlList(game.TypeNames[game.Type]);
 
 				newTae.Animations = newTae.Animations.Select(anim =>
 				{
@@ -493,6 +529,7 @@ namespace DS3PortingTool
 				File.WriteAllBytes($"{cwd}\\c{portedChrId}.chrbnd.dcx",
 					DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 			}
+			
 		}
 	}
 }

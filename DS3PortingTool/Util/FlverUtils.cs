@@ -6,6 +6,9 @@ namespace DS3PortingTool.Util
 {
     public static class FlverUtils
     { 
+	    /// <summary>
+	    /// Takes a non-native DS3 material and returns a new material with as close a mtd type as possible.
+	    /// </summary>
 	    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat) 
 	    {
 	        FLVER2.Material newMat = new()
@@ -56,7 +59,10 @@ namespace DS3PortingTool.Util
             return newMat;
         }
 
-        private static string GetDs3Mtd(string mtd)
+	    /// <summary>
+	    /// Gets the closest DS3 equivalent of a mtd name that's not native to DS3.
+	    /// </summary>
+	    private static string GetDs3Mtd(string mtd)
         {
 	        Dictionary<string, string> extensionTypes = new()
 	        {
@@ -79,7 +85,10 @@ namespace DS3PortingTool.Util
 	        return $"N:\\FDP\\data\\Material\\mtd\\character\\{newMtd}.mtd";
         }
         
-        public static FLVER.Vertex Pad(this FLVER.Vertex vertex, IEnumerable<FLVER2.BufferLayout> bufferLayouts)
+	    /// <summary>
+	    /// From The12thAvenger's FBXImporter
+	    /// </summary>
+	    public static FLVER.Vertex Pad(this FLVER.Vertex vertex, IEnumerable<FLVER2.BufferLayout> bufferLayouts)
         {
             Dictionary<FLVER.LayoutSemantic, int> usageCounts = new();
             FLVER.LayoutSemantic[] paddedProperties =
@@ -133,6 +142,10 @@ namespace DS3PortingTool.Util
             return vertex;
         }
         
+	    /// <summary>
+	    /// From The12thAvenger's FBXImporter, edited to include an exception when the flver
+	    /// bufferLayouts list is empty.
+	    /// </summary>
         public static List<int> GetLayoutIndices(this FLVER2 flver, List<FLVER2.BufferLayout> bufferLayouts)
         {
             List<int> indices = new();

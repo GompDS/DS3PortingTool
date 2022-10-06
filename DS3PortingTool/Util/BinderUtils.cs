@@ -40,7 +40,8 @@ namespace DS3PortingTool.Util
 			}
 			
 			// Repack xml file
-			result = RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe", $"{toolsDirectory}\\{xmlName}"); 
+			result = RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe",
+				$"{toolsDirectory}\\{xmlName}"); 
 			File.Delete($"{toolsDirectory}\\{xmlName}");
 			if (result == false)
 			{
@@ -94,7 +95,8 @@ namespace DS3PortingTool.Util
 			}
 			
 			// Repack xml file
-			result = RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe", $"{toolsDirectory}\\{xmlName}"); 
+			result = RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe",
+				$"{toolsDirectory}\\{xmlName}"); 
 			File.Delete($"{toolsDirectory}\\{xmlName}");
 			if (result == false)
 			{
@@ -108,19 +110,7 @@ namespace DS3PortingTool.Util
 			Console.WriteLine($"Downgraded {hkxName}");
 			return true;
 		}
-		
-		public static BND4 CopyTemplateToBinder(BND4 bnd, string externalPath, string binderPath, int id)
-		{
-			if (File.Exists(externalPath))
-			{
-				byte[] bytes = File.ReadAllBytes(externalPath);
-				BinderFile newFile = new(Binder.FileFlags.Flag1, id, binderPath, bytes);
-				bnd.Files.Add(newFile);
-				bnd.Files = bnd.Files.OrderBy(file => file.ID).ToList();
-			}
-			return bnd;
-		}
-		
+
 		/// <summary>
 		///	Run an external tool with the given arguments.
 		/// </summary>
