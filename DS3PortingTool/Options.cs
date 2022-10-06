@@ -5,9 +5,13 @@ namespace DS3PortingTool
     public class Options
     {
         /// <summary>
+        /// The current-working directory.
+        /// </summary>
+        public string Cwd { get; }
+        /// <summary>
         /// Name of the source dcx file without the path.
         /// </summary>
-        public string? SourceFileName { get; }
+        public string SourceFileName { get; }
         /// <summary>
         /// The binder where data being ported is sourced from.
         /// </summary>
@@ -19,11 +23,11 @@ namespace DS3PortingTool
         /// <summary>
         /// The character id of the source binder.
         /// </summary>
-        public string? SourceChrId { get; }
+        public string SourceChrId { get; }
         /// <summary>
         /// The character id of the ported binder.
         /// </summary>
-        public string? PortedChrId { get; }
+        public string PortedChrId { get; }
         /// <summary>
         /// Flag setting which if true means only the tae will be ported when porting an anibnd.
         /// </summary>
@@ -31,10 +35,15 @@ namespace DS3PortingTool
         /// <summary>
         /// List of animation offsets which are excluded when porting an anibnd.
         /// </summary>
-        public List<int>? ExcludedAnimOffsets { get; }
+        public List<int> ExcludedAnimOffsets { get; }
 
         public Options(string[] args)
         {
+            Cwd = AppDomain.CurrentDomain.BaseDirectory;
+            SourceChrId = "";
+            PortedChrId = "";
+            ExcludedAnimOffsets = new();
+            
             string? sourceFile = Array.Find(args, x => File.Exists(x) && 
                                                        Path.GetFileName(x).Contains(".dcx"));
             if (sourceFile == null)
@@ -43,7 +52,7 @@ namespace DS3PortingTool
             }
 
             SourceFileName = Path.GetFileName(sourceFile);
-            
+
             if (BND4.Is(sourceFile))
             {
                 SourceBnd = BND4.Read(sourceFile);

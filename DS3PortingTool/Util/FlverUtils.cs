@@ -9,16 +9,14 @@ namespace DS3PortingTool.Util
 	    /// <summary>
 	    /// Takes a non-native DS3 material and returns a new material with as close a mtd type as possible.
 	    /// </summary>
-	    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat) 
+	    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat, FLVER2MaterialInfoBank materialInfoBank) 
 	    {
 	        FLVER2.Material newMat = new()
 	        {
 				Name = oldMat.Name,
 				MTD = GetDs3Mtd(oldMat.MTD)
 	        };
-
-	        FLVER2MaterialInfoBank materialInfoBank = 
-		        FLVER2MaterialInfoBank.ReadFromXML($"{AppDomain.CurrentDomain.BaseDirectory}Res\\BankDS3.xml");
+	        
 	        FLVER2MaterialInfoBank.MaterialDef matDef = materialInfoBank.MaterialDefs.Values
 		        .First(y => y.MTD.Equals($"{Path.GetFileName(newMat.MTD)}".ToLower()));
 

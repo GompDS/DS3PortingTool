@@ -1,4 +1,3 @@
-using System.Xml.Linq;
 using SoulsFormats;
 using SoulsAssetPipeline.Animation;
 using SoulsAssetPipeline.FLVERImporting;
@@ -11,7 +10,7 @@ namespace DS3PortingTool
 		public static void Main(string[] args)
 		{
 			Options op = new Options(args);
-			string cwd = AppDomain.CurrentDomain.BaseDirectory;
+			XmlData xd = new XmlData(op);
 			BND4 newBnd = new BND4();
 			if (op.SourceFileName.Contains("anibnd"))
 			{
@@ -26,7 +25,7 @@ namespace DS3PortingTool
 					}
 					newBnd.Files = op.SourceBnd.Files
 						.Where(x => x.Name.IndexOf(".hkx", StringComparison.OrdinalIgnoreCase) >= 0)
-						.Where(x => x.Downgrade($"{cwd}HavokDowngrade\\", compendium)).ToList();
+						.Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
 					foreach (BinderFile hkx in newBnd.Files)
 					{
 						if (hkx.Name.IndexOf("skeleton", StringComparison.OrdinalIgnoreCase) < 0)
@@ -58,10 +57,6 @@ namespace DS3PortingTool
 					EventBank = 21
 				};
 
-				// Gather a list of animations to exclude from the xml data.
-				List<int> animationDenyList = XElement.Load($"{cwd}\\Res\\ExcludedAnimations.xml")
-					.GetXmlList(op.Game.TypeNames[op.Game.Type]);
-
 				// Exclude animations which import an HKX that doesn't exist.
 				List<int> excludedImportHkxAnimations = oldTae.Animations.Where(anim =>
 					anim.MiniHeader is TAE.Animation.AnimMiniHeader.Standard standardHeader &&
@@ -73,15 +68,10 @@ namespace DS3PortingTool
 				// Exclude animations which import all from an animation that's excluded.
 				List<int> excludedImportAllAnimations = oldTae.Animations.Where(anim =>
 					anim.MiniHeader is TAE.Animation.AnimMiniHeader.ImportOtherAnim otherHeader &&
-					(animationDenyList.Contains(otherHeader.ImportFromAnimID) ||
+					(xd.ExcludedAnimations.Contains(otherHeader.ImportFromAnimID) ||
 					 excludedImportHkxAnimations.Contains(otherHeader.ImportFromAnimID)))
 						.Select(x => Convert.ToInt32(x.ID)).ToList();
 
-				// Create a dictionary of old animation ids as the keys and new animation ids
-				// as the values from xml data.
-				Dictionary<int, int> animationRemap = XElement.Load($"{cwd}\\Res\\AnimationRemapping.xml")
-					.GetXmlDictionary(op.Game.TypeNames[op.Game.Type]);
-				
 				// Remove animations from excluded offsets.
 				List<int> excludedOffsetAnimations = new();
 				if (op.ExcludedAnimOffsets.Any())
@@ -116,7 +106,7 @@ namespace DS3PortingTool
 				int oldOffset = 0;
 				int newOffset = 0;
 				newTae.Animations = oldTae.Animations
-					.Where(x => !animationDenyList.Contains(x.GetNoOffsetId()) && 
+					.Where(x => !xd.ExcludedAnimations.Contains(x.GetNoOffsetId()) && 
 					            !excludedImportHkxAnimations.Contains(Convert.ToInt32(x.ID)) &&
 					            !excludedImportAllAnimations.Contains(Convert.ToInt32(x.ID)) &&
 					            !excludedOffsetAnimations.Contains(Convert.ToInt32(x.ID)))
@@ -133,9 +123,9 @@ namespace DS3PortingTool
 
 							iDString = iDString.Substring(3);
 							int importId = Int32.Parse(iDString);
-							if (animationRemap.ContainsKey(importId))
+							if (xd.AnimationRemapping.ContainsKey(importId))
 							{
-								animationRemap.TryGetValue(importId, out int newImportId);
+								xd.AnimationRemapping.TryGetValue(importId, out int newImportId);
 								importMiniHeader.ImportFromAnimID = newImportId + x.GetOffset();
 							}
 							else
@@ -145,9 +135,9 @@ namespace DS3PortingTool
 						}
 
 						// Remap animation ids.
-						if (animationRemap.ContainsKey(x.GetNoOffsetId()))
+						if (xd.AnimationRemapping.ContainsKey(x.GetNoOffsetId()))
 						{
-							animationRemap.TryGetValue(x.GetNoOffsetId(), out int newAnimId);
+							xd.AnimationRemapping.TryGetValue(x.GetNoOffsetId(), out int newAnimId);
 							x.SetAnimationProperties(newAnimId, 
 								x.GetNoOffsetId(), x.GetOffset());
 						}
@@ -186,21 +176,13 @@ namespace DS3PortingTool
 						}
 						return x;
 					}).OrderBy(x => x.ID).ToList();
-				
-				// Create lists of excluded events, jumpTables and rumbleCams from xml data.
-				List<int> eventDenyList = XElement.Load($"{cwd}\\Res\\ExcludedEvents.xml")
-					.GetXmlList(op.Game.TypeNames[op.Game.Type]);
-				List<int> jumpTableDenyList = XElement.Load($"{cwd}\\Res\\ExcludedJumpTables.xml")
-					.GetXmlList(op.Game.TypeNames[op.Game.Type]);
-				List<int> rumbleCamDenyList = XElement.Load($"{cwd}\\Res\\ExcludedRumbleCams.xml")
-					.GetXmlList(op.Game.TypeNames[op.Game.Type]);
 
 				newTae.Animations = newTae.Animations.Select(anim =>
 				{
 					anim.Events = anim.Events.Where(ev =>
-						!eventDenyList.Contains(ev.Type) &&
-						!jumpTableDenyList.Contains(ev.GetJumpTableId(newTae.BigEndian)) &&
-						!rumbleCamDenyList.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
+						!xd.ExcludedEvents.Contains(ev.Type) &&
+						!xd.ExcludedJumpTables.Contains(ev.GetJumpTableId(newTae.BigEndian)) &&
+						!xd.ExcludedRumbleCams.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
 						.Select(ev =>
 					{
 						byte[] paramBytes = ev.GetParameterBytes(newTae.BigEndian);
@@ -298,7 +280,7 @@ namespace DS3PortingTool
 				// Write tae to disc and skip writing the binder if PortTaeOnly is enabled.
 				if (op.PortTaeOnly)
 				{
-					File.WriteAllBytes($"{cwd}\\c{op.PortedChrId}.tae", taeFile.Bytes);
+					File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.tae", taeFile.Bytes);
 				}
 				else
 				{
@@ -308,7 +290,7 @@ namespace DS3PortingTool
 				if (op.PortTaeOnly == false)
 				{
 					// Compress the new binder.
-					File.WriteAllBytes($"{cwd}\\c{op.PortedChrId}.anibnd.dcx",
+					File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx",
 						DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 				}
 			}
@@ -318,7 +300,7 @@ namespace DS3PortingTool
 				newBnd.Files = op.SourceBnd.Files.Where(x =>
 					x.Name.Substring(x.Name.Length - 4).IndexOf(".hkx", 
 						StringComparison.OrdinalIgnoreCase) >= 0)
-					.Where(x => x.Downgrade($"{cwd}HavokDowngrade\\")).Select(x =>
+					.Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).Select(x =>
 					{
 						x.Name =
 							@"N:\FDP\data\INTERROOT_win64\chr\" + 
@@ -368,7 +350,7 @@ namespace DS3PortingTool
 			            Unk68 = oldFlver.Header.Unk68
 			        },
 			        Dummies = oldFlver.Dummies,
-			        Materials = oldFlver.Materials.Select(x => x.ToDummyDs3Material()).ToList(),
+			        Materials = oldFlver.Materials.Select(x => x.ToDummyDs3Material(xd.MaterialInfoBank)).ToList(),
 			        Bones = oldFlver.Bones.Select(x =>
 			        {
 				        // Unk3C should only be 0 or 1 in DS3.
@@ -449,7 +431,7 @@ namespace DS3PortingTool
 				
 				newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
 				// Compress the new binder.
-				File.WriteAllBytes($"{cwd}\\c{op.PortedChrId}.chrbnd.dcx",
+				File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx",
 					DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 			}
 			
