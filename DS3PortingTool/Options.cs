@@ -121,7 +121,6 @@ namespace DS3PortingTool
                     throw new ArgumentException($"Unknown flag: {args[i]}");
                 }
             }
-            
         }
     }
 }

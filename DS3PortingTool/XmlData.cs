@@ -3,44 +3,44 @@ using SoulsAssetPipeline.FLVERImporting;
 
 namespace DS3PortingTool
 {
-    public class XmlData
-    {
-	    /// <summary>
-	    /// Contains templates for creating new materials.
-	    /// </summary>
-	    public FLVER2MaterialInfoBank MaterialInfoBank { get; }
-	    /// <summary>
-	    /// Old animations ids paired with replacement ids.
-	    /// </summary>
-	    public Dictionary<int, int> AnimationRemapping { get; }
-	    /// <summary>
-	    /// IDs of animations to exclude.
-	    /// </summary>
-        public List<int> ExcludedAnimations { get; }
-	    /// <summary>
-	    /// IDs of events to exclude.
-	    /// </summary>
-        public List<int> ExcludedEvents { get; }
-	    /// <summary>
-	    /// IDs of jumpTables to exclude.
-	    /// </summary>
-        public List<int> ExcludedJumpTables { get; }
-	    /// <summary>
-	    /// IDs of rumbleCams to exclude.
-	    /// </summary>
-        public List<int> ExcludedRumbleCams { get; }
+	public class XmlData
+	{
+		/// <summary>
+		/// Contains templates for creating new materials.
+		/// </summary>
+		public FLVER2MaterialInfoBank MaterialInfoBank { get; }
+		/// <summary>
+		/// Old animations ids paired with replacement ids.
+		/// </summary>
+		public Dictionary<int, int> AnimationRemapping { get; }
+		/// <summary>
+		/// IDs of animations to exclude.
+		/// </summary>
+		public List<int> ExcludedAnimations { get; }
+		/// <summary>
+		/// IDs of events to exclude.
+		/// </summary>
+		public List<int> ExcludedEvents { get; }
+		/// <summary>
+		/// IDs of jumpTables to exclude.
+		/// </summary>
+		public List<int> ExcludedJumpTables { get; }
+		/// <summary>
+		/// IDs of rumbleCams to exclude.
+		/// </summary>
+		public List<int> ExcludedRumbleCams { get; }
 
-        public XmlData(Options op)
-        {
-	        string gameName = op.Game.TypeNames[op.Game.Type];
-	        
-	        MaterialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{op.Cwd}Res\\BankDS3.xml");
-	        AnimationRemapping = GetXmlDictionary(XElement.Load($"{op.Cwd}\\Res\\AnimationRemapping.xml"), gameName);
-            ExcludedAnimations = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedAnimations.xml"), gameName);
-            ExcludedEvents = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedEvents.xml"), gameName);
-            ExcludedJumpTables = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedJumpTables.xml"), gameName);
-            ExcludedRumbleCams = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedRumbleCams.xml"), gameName);
-        }
+		public XmlData(Options op)
+		{
+		    string gameName = op.Game.TypeNames[op.Game.Type];
+		    
+		    MaterialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{op.Cwd}Res\\BankDS3.xml");
+		    AnimationRemapping = GetXmlDictionary(XElement.Load($"{op.Cwd}\\Res\\AnimationRemapping.xml"), gameName);
+		    ExcludedAnimations = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedAnimations.xml"), gameName);
+		    ExcludedEvents = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedEvents.xml"), gameName);
+		    ExcludedJumpTables = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedJumpTables.xml"), gameName);
+		    ExcludedRumbleCams = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedRumbleCams.xml"), gameName);
+		}
         
 		/// <summary>
 		/// Reads data from an xml itemList and returns a list of the data.
