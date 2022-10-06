@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<excludedJumpTables>
+    <itemList game="Sekiro">
+        <item id="5"/>
+        <item id="63"/>
+        <item id="73"/>
+        <item id="92"/>
+        <item id="122"/>
+    </itemList>
+</excludedJumpTables>

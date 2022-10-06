@@ -1,88 +1,11 @@
-using System.Drawing;
 using System.Numerics;
-using System.Security.Cryptography;
-using HKX2;
 using SoulsAssetPipeline.FLVERImporting;
 using SoulsFormats;
 
-namespace DS3PortingTool
+namespace DS3PortingTool.Util
 {
     public static class FlverUtils
-    {
-	    /*public static FLVER2.Mesh Clone(this FLVER2.Mesh orig)
-	    {
-		    FLVER2.Mesh clone = new()
-		    {
-				Dynamic = orig.Dynamic,
-				MaterialIndex = orig.MaterialIndex,
-				DefaultBoneIndex = orig.DefaultBoneIndex,
-				//BoneIndices = new List<int>(orig.BoneIndices),
-				FaceSets = orig.FaceSets.Select(x => x.Clone()).ToList(),
-				VertexBuffers = orig.VertexBuffers.Select(x => new FLVER2.VertexBuffer(x.LayoutIndex)).ToList(),
-				Vertices = orig.Vertices.Select(x => x.Clone()).ToList(),
-				BoundingBox = orig.BoundingBox.Clone()
-		    };
-		    return clone;
-	    }
-		
-	    public static FLVER2.FaceSet Clone(this FLVER2.FaceSet orig)
-	    {
-		    FLVER2.FaceSet clone = new()
-		    {
-				Flags = orig.Flags,
-				TriangleStrip = orig.TriangleStrip,
-				CullBackfaces = orig.CullBackfaces,
-				Unk06 = orig.Unk06,
-				Indices = new List<int>(orig.Indices)
-		    };
-		    return clone;
-	    }
-
-	    public static FLVER.Vertex Clone(this FLVER.Vertex orig)
-	    {
-		    FLVER.Vertex clone = new()
-		    {
-				Position = orig.Position.Clone(),
-				BoneWeights = new FLVER.VertexBoneWeights
-				{
-					[0] = orig.BoneWeights[0],
-					[1] = orig.BoneWeights[1],
-					[2] = orig.BoneWeights[2],
-					[3] = orig.BoneWeights[3]
-				},
-				BoneIndices = new FLVER.VertexBoneIndices
-				{
-					[0] = orig.BoneIndices[0],
-					[1] = orig.BoneIndices[1],
-					[2] = orig.BoneIndices[2],
-					[3] = orig.BoneIndices[3]
-				},
-				Normal = orig.Normal.Clone(),
-				NormalW = orig.NormalW,
-				UVs = orig.UVs.Select(x => x.Clone()).ToList(),
-				Tangents = orig.Tangents.Select(x => new Vector4(x.X, x.Y, x.Z, x.W)).ToList(),
-				Bitangent = new Vector4(orig.Bitangent.X, orig.Bitangent.Y, orig.Bitangent.Z, orig.Bitangent.W),
-				Colors = orig.Colors.Select(x => new FLVER.VertexColor(x.A, x.R, x.G, x.B)).ToList() 
-		    };
-		    return clone;
-	    }
-	    
-	    public static FLVER2.Mesh.BoundingBoxes Clone(this FLVER2.Mesh.BoundingBoxes orig)
-	    {
-		    FLVER2.Mesh.BoundingBoxes clone = new()
-		    {
-			    Min = new Vector3(orig.Min.X, orig.Min.Y, orig.Min.Z),
-			    Max = new Vector3(orig.Max.X, orig.Max.Y, orig.Max.Z)
-		    };
-		    return clone;
-	    }
-	    
-	    public static Vector3 Clone(this Vector3 orig)
-	    {
-		    Vector3 clone = new Vector3(orig.X, orig.Y, orig.Z);
-		    return clone;
-	    }*/
-
+    { 
 	    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat) 
 	    {
 	        FLVER2.Material newMat = new()
@@ -92,7 +15,7 @@ namespace DS3PortingTool
 	        };
 
 	        FLVER2MaterialInfoBank materialInfoBank = 
-		        FLVER2MaterialInfoBank.ReadFromXML($"{AppDomain.CurrentDomain.BaseDirectory}Res\\BANKDS3.xml");
+		        FLVER2MaterialInfoBank.ReadFromXML($"{AppDomain.CurrentDomain.BaseDirectory}Res\\BankDS3.xml");
 	        FLVER2MaterialInfoBank.MaterialDef matDef = materialInfoBank.MaterialDefs.Values
 		        .First(y => y.MTD.Equals($"{Path.GetFileName(newMat.MTD)}".ToLower()));
 

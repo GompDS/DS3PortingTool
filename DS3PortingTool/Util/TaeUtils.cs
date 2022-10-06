@@ -1,6 +1,7 @@
+using System.Xml.Linq;
 using SoulsAssetPipeline.Animation;
 
-namespace DS3PortingTool
+namespace DS3PortingTool.Util
 {
 	public static class TaeUtils
 	{
@@ -111,6 +112,22 @@ namespace DS3PortingTool
 			return -1;
 		}
 		
+		public static short GetRumbleCamId(this TAE.Event ev, bool isBigEndian)
+		{
+			if (ev.Type is >= 144 and <= 147)
+			{
+				byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
+				byte[] rumbleCamIdBytes = new byte[2];
+				Array.Copy(paramBytes, rumbleCamIdBytes, 2);
+				if (isBigEndian)
+				{
+					Array.Reverse(rumbleCamIdBytes);
+				}
+				return BitConverter.ToInt16(rumbleCamIdBytes, 0);
+			}
+			return -1;
+		}
+		
 		/// <summary>
 		/// Change the first four digits of the Sound ID parameter of this event to match the new character ID
 		/// </summary>
@@ -138,6 +155,61 @@ namespace DS3PortingTool
 				Array.Copy(newBytes, 0, paramBytes, 4, 4);
 			}
 			return paramBytes;
+		}
+
+		public static List<int> GetXmlList(this XElement xmlElements, string game)
+		{
+			List<int> itemList = xmlElements.Elements($"itemList")
+				.Where(x => x.Attribute("game")!.Value == "Sekiro").Elements("item")
+				.Select(x => int.Parse(x.Attribute("id")!.Value)).ToList(); 
+			List<XElement> itemRanges = xmlElements.Elements("itemList")
+				.Where(x => x.Attribute("game")!.Value == game)
+				.Elements($"itemRange").ToList();
+			foreach (XElement x in itemRanges)
+			{
+				int repeat = int.Parse(x.Attribute("repeat")!.Value);
+				int increment = int.Parse(x.Attribute("increment")!.Value);
+				for (int j = 0; j < repeat; j++)
+				{
+					List<XElement> rumbleCamsInRange = x.Elements("item").ToList();
+					foreach (XElement y in rumbleCamsInRange)
+					{
+						itemList.Add(int.Parse(y.Attribute("id")!.Value) + 
+						                       (j * increment));
+					}
+				}
+			}
+
+			return itemList;
+		}
+
+		public static Dictionary<int, int> GetXmlDictionary(this XElement xmlElements, string listItemType)
+		{
+			Dictionary<int, int> itemDict = xmlElements.Elements("itemDictionary")
+				.Where(x => x.Attribute("game")!.Value == "Sekiro").Elements("item")
+				.ToDictionary(x => int.Parse(x.Attribute("key")!.Value), 
+					x => int.Parse(x.Attribute("value")!.Value)); 
+						
+			List<XElement> itemRanges = xmlElements.Elements("itemDictionary")
+				.Where(x => x.Attribute("game")!.Value == "Sekiro")
+				.Elements("itemRange").ToList();
+			foreach (XElement x in itemRanges)
+			{
+				int repeat = int.Parse(x.Attribute("repeat")!.Value);
+				int keyIncrement = int.Parse(x.Attribute("keyIncrement")!.Value);
+				int valueIncrement = int.Parse(x.Attribute("valueIncrement")!.Value);
+				for (int j = 0; j < repeat; j++)
+				{
+					List<XElement> animationsInRange = x.Elements("item").ToList();
+					foreach (XElement y in animationsInRange)
+					{
+						itemDict.Add(int.Parse(y.Attribute("key")!.Value) + (j * keyIncrement),
+							int.Parse(y.Attribute("value")!.Value) + (j * valueIncrement));
+					}
+				}
+			}
+
+			return itemDict;
 		}
 	}
 }

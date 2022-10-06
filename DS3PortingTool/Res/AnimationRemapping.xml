@@ -1,49 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animationRemapping>
-	<animationRemapDictionary game="Sekiro">
-		<animation old="8500" new="8200"/>
-		<animation old="8510" new="8210"/>
-		<animation old="8520" new="8220"/>
-		<animation old="8550" new="8410"/>
-		<animation old="10130" new="10040"/>
-		<animation old="201000" new="1020"/>
-		<animation old="400000" new="20"/>
-		<animation old="405010" new="2100"/>
-		<animation old="401050" new="1100"/>
-		<animation old="500000" new="30"/>
-		<animation old="501040" new="1101"/>
-		<animationRange oldIncrement="100" newIncrement="10" repeat="3">
-			<animation old="7010" new="7000"/>
-			<animation old="7020" new="7400"/>
-			<animation old="7021" new="7600"/>
-		</animationRange>
-		<animationRange oldIncrement="1" newIncrement="1" repeat="4">
-			<animation old="5200" new="6000"/>
-			<animation old="5210" new="6010"/>
-			<animation old="5400" new="5000"/>
-			<animation old="8050" new="8120"/>
-			<animation old="8130" new="8100"/>
-			<animation old="8300" new="8700"/>
-			<animation old="105000" new="2300"/>
-			<animation old="105400" new="5010"/>
-			<animation old="405000" new="2000"/>
-			<animation old="405200" new="6000"/>
-			<animation old="405210" new="6010"/>
-			<animation old="405400" new="5000"/>
-			<animation old="505000" new="2030"/>
-			<animation old="505400" new="5020"/>
-		</animationRange>
-		<animationRange oldIncrement="1" newIncrement="1" repeat="9">
-			<animation old="21000" new="30000"/>
-		</animationRange>
-		<animationRange oldIncrement="10" newIncrement="1" repeat="9">
-			<animation old="401" new="700"/>
-			<animation old="402" new="1700"/>
-			<animation old="400401" new="700"/>
-			<animation old="400402" new="1700"/>
-		</animationRange>
-		<animationRange oldIncrement="1" newIncrement="1" repeat="110">
-			<animation old="503000" new="3000"/>
-		</animationRange>
-	</animationRemapDictionary>
+	<itemDictionary game="Sekiro">
+		<item key="8500" value="8200"/>
+		<item key="8510" value="8210"/>
+		<item key="8520" value="8220"/>
+		<item key="8550" value="8410"/>
+		<item key="10120" value="10040"/>
+		<item key="10121" value="10041"/>
+		<item key="201000" value="1020"/>
+		<item key="400000" value="20"/>
+		<item key="405010" value="2100"/>
+		<item key="401050" value="1100"/>
+		<item key="500000" value="30"/>
+		<item key="501040" value="1101"/>
+		<itemRange keyIncrement="100" valueIncrement="10" repeat="3">
+			<item key="7010" value="7000"/>
+			<item key="7020" value="7400"/>
+			<item key="7021" value="7600"/>
+		</itemRange>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="4">
+			<item key="5200" value="6000"/>
+			<item key="5210" value="6010"/>
+			<item key="5400" value="5000"/>
+			<item key="8050" value="8120"/>
+			<item key="8130" value="8100"/>
+			<item key="8300" value="8700"/>
+			<item key="105000" value="2300"/>
+			<item key="105400" value="5010"/>
+			<item key="405000" value="2000"/>
+			<item key="405200" value="6000"/>
+			<item key="405210" value="6010"/>
+			<item key="405400" value="5000"/>
+			<item key="505000" value="2030"/>
+			<item key="505400" value="5020"/>
+		</itemRange>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="9">
+			<item key="21000" value="30000"/>
+		</itemRange>
+		<itemRange keyIncrement="10" valueIncrement="1" repeat="9">
+			<item key="401" value="700"/>
+			<item key="402" value="1700"/>
+			<item key="400401" value="700"/>
+			<item key="400402" value="1700"/>
+		</itemRange>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="110">
+			<item key="503000" value="3000"/>
+		</itemRange>
+	</itemDictionary>
 </animationRemapping>

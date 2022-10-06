@@ -1,73 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <excludedEvents>
-	<eventDenyList game="Sekiro">
-		<jumpTables>
-			<jumpTable id="5"/>
-			<jumpTable id="63"/>
-			<jumpTable id="73"/>
-			<jumpTable id="92"/>
-			<jumpTable id="122"/>
-		</jumpTables>
-		<event id="4"/>
-		<event id="66"/>
-		<event id="67"/>
-		<event id="108"/>
-		<event id="109"/>
-		<event id="139"/>
-		<event id="146"/>
-		<event id="147"/>
-		<event id="151"/>
-		<event id="152"/>
-		<event id="153"/>
-		<event id="154"/>
-		<event id="155"/>
-		<event id="156"/>
-		<event id="170"/>
-		<event id="238"/>
-		<event id="313"/>
-		<event id="314"/>
-		<event id="401"/>
-		<event id="607"/>
-		<event id="708"/>
-		<event id="709"/>
-		<event id="716"/>
-		<event id="717"/>
-		<event id="731"/>
-		<event id="750"/>
-		<event id="900"/>
-		<event id="901"/>
-		<event id="902"/>
-		<event id="903"/>
-		<event id="904"/>
-		<event id="905"/>
-		<event id="910"/>
-		<event id="911"/>
-		<event id="912"/>
-		<event id="913"/>
-		<event id="920"/>
-		<event id="921"/>
-		<event id="922"/>
-		<event id="930"/>
-		<event id="931"/>
-		<event id="932"/>
-		<event id="933"/>
-		<event id="934"/>
-		<event id="935"/>
-		<event id="936"/>
-		<event id="940"/>
-		<event id="942"/>
-		<event id="943"/>
-		<event id="944"/>
-		<event id="945"/>
-		<event id="946"/>
-		<event id="947"/>
-		<event id="950"/>
-		<event id="951"/>
-		<event id="952"/>
-		<event id="953"/>
-		<event id="954"/>
-		<event id="960"/>
-		<event id="961"/>
-		<event id="970"/>
-	</eventDenyList>
+	<itemList game="Sekiro">
+		<item id="4"/>
+		<item id="66"/>
+		<item id="67"/>
+		<item id="108"/>
+		<item id="109"/>
+		<item id="139"/>
+		<item id="146"/>
+		<item id="147"/>
+		<item id="170"/>
+		<item id="238"/>
+		<item id="302"/>
+		<item id="313"/>
+		<item id="314"/>
+		<item id="331"/>
+		<item id="401"/>
+		<item id="607"/>
+		<item id="708"/>
+		<item id="709"/>
+		<item id="716"/>
+		<item id="717"/>
+		<item id="731"/>
+		<item id="740"/>
+		<item id="750"/>
+		<item id="797"/>
+		<item id="920"/>
+		<item id="921"/>
+		<item id="922"/>
+		<item id="940"/>
+		<item id="960"/>
+		<item id="961"/>
+		<item id="970"/>
+		<itemRange increment="1" repeat="4">
+			<item id="910"/>
+		</itemRange>
+		<itemRange increment="1" repeat="5">
+			<item id="950"/>
+		</itemRange>
+		<itemRange increment="1" repeat="6">
+			<item id="151"/>
+			<item id="900"/>
+			<item id="942"/>
+		</itemRange>
+		<itemRange increment="1" repeat="7">
+			<item id="930"/>
+		</itemRange>
+	</itemList>
 </excludedEvents>

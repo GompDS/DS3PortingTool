@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using SoulsFormats;
 
-namespace DS3PortingTool
+namespace DS3PortingTool.Util
 {
 	public static class BinderUtils
 	{	
@@ -15,23 +15,24 @@ namespace DS3PortingTool
 			string xmlName = Path.GetFileNameWithoutExtension(hkxFile.Name) + ".xml";
 			
 			// FileConvert
-			RunProcess($"{toolsDirectory}\\fileConvert.exe", 
+			bool result = RunProcess($"{toolsDirectory}\\fileConvert.exe", 
 				$"-x {toolsDirectory}\\{hkxName} {toolsDirectory}\\{xmlName}");
 			File.Delete($"{toolsDirectory}\\{hkxName}");
-			if (File.Exists($"{toolsDirectory}\\{xmlName}") == false)
+			if (result == false)
 			{
 				Console.WriteLine($"Could not downgrade {hkxName}");
 				return false;
 			}
 			
 			// DS3HavokConverter
-			RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", 
+			result = RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", 
 				$"{toolsDirectory}\\{xmlName}");
 			if (File.Exists($"{toolsDirectory}\\{xmlName}.bak"))
 			{
 				File.Delete($"{toolsDirectory}\\{xmlName}.bak");
 			}
-			else
+			
+			if (result == false)
 			{
 				File.Delete($"{toolsDirectory}\\{xmlName}");
 				Console.WriteLine($"Could not downgrade {hkxName}");
@@ -39,9 +40,9 @@ namespace DS3PortingTool
 			}
 			
 			// Repack xml file
-			RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe", $"{toolsDirectory}\\{xmlName}"); 
+			result = RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe", $"{toolsDirectory}\\{xmlName}"); 
 			File.Delete($"{toolsDirectory}\\{xmlName}");
-			if (File.Exists($"{toolsDirectory}\\{hkxName}") == false)
+			if (result == false)
 			{
 				Console.WriteLine($"Could not downgrade {hkxName}");
 				return false;
@@ -59,12 +60,6 @@ namespace DS3PortingTool
 		/// </summary>
 		public static bool Downgrade(this BinderFile hkxFile, string toolsDirectory, BinderFile compendium)
 		{
-			if (compendium == null)
-			{
-				Console.WriteLine($"Compendium could not be found.");
-				return false;
-			}
-			
 			// Copy compendium
 			string compendiumPath = $"{toolsDirectory}\\" + Path.GetFileName(compendium.Name);
 			File.WriteAllBytes(compendiumPath, compendium.Bytes);
@@ -74,32 +69,34 @@ namespace DS3PortingTool
 			string xmlName = Path.GetFileNameWithoutExtension(hkxFile.Name) + ".xml";
 			
 			// FileConvert
-			RunProcess($"{toolsDirectory}\\fileConvert.exe", 
+			bool result = RunProcess($"{toolsDirectory}\\fileConvert.exe", 
 				$"-x --compendium {compendiumPath} {toolsDirectory}\\{hkxName} {toolsDirectory}\\{xmlName}");
 			File.Delete($"{toolsDirectory}\\{hkxName}");
-			if (File.Exists($"{toolsDirectory}\\{xmlName}") == false)
+			if (result == false)
 			{
 				Console.WriteLine($"Could not downgrade {hkxName}");
 				return false;
 			}
 			
 			// DS3HavokConverter
-			RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", 
+			result = RunProcess($"{toolsDirectory}\\DS3HavokConverter\\DS3HavokConverter.exe", 
 				$"{toolsDirectory}\\{xmlName}");
 			if (File.Exists($"{toolsDirectory}\\{xmlName}.bak"))
 			{
 				File.Delete($"{toolsDirectory}\\{xmlName}.bak");
 			}
-			else
-			{ File.Delete($"{toolsDirectory}\\{xmlName}");
+			
+			if (result == false)
+			{ 
+				File.Delete($"{toolsDirectory}\\{xmlName}");
 				Console.WriteLine($"Could not downgrade {hkxName}");
 				return false;
 			}
 			
 			// Repack xml file
-			RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe", $"{toolsDirectory}\\{xmlName}"); 
+			result = RunProcess($"{toolsDirectory}\\Hkxpack\\hkxpackds3.exe", $"{toolsDirectory}\\{xmlName}"); 
 			File.Delete($"{toolsDirectory}\\{xmlName}");
-			if (File.Exists($"{toolsDirectory}\\{hkxName}") == false)
+			if (result == false)
 			{
 				Console.WriteLine($"Could not downgrade {hkxName}");
 				return false;
@@ -127,13 +124,26 @@ namespace DS3PortingTool
 		/// <summary>
 		///	Run an external tool with the given arguments.
 		/// </summary>
-		private static void RunProcess(string applicationName, string args)
+		private static bool RunProcess(string applicationName, string args)
 		{
 			Process tool = new Process();
 			tool.StartInfo.FileName = applicationName;
 			tool.StartInfo.Arguments = args;
+			tool.StartInfo.RedirectStandardOutput = true;
+			tool.StartInfo.RedirectStandardError = true;
+			tool.StartInfo.RedirectStandardInput = true;
 			tool.Start();
-			tool.WaitForExit();
+			while (tool.HasExited == false)
+			{
+				tool.StandardInput.Close();
+			}
+
+			if (tool.StandardError.ReadToEnd().Length > 0)
+			{
+				return false;
+			}
+
+			return true;
 		}
 	}
 }
