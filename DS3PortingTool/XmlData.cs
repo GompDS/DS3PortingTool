@@ -102,5 +102,5 @@ namespace DS3PortingTool
 
 			return itemDict;
 		}
-    }
+	}
 }
