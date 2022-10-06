@@ -42,7 +42,7 @@ namespace DS3PortingTool
             ExcludedRumbleCams = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedRumbleCams.xml"), gameName);
         }
         
-        /// <summary>
+		/// <summary>
 		/// Reads data from an xml itemList and returns a list of the data.
 		/// </summary>
 		private List<int> GetXmlList(XElement xmlElements, string gameName)
