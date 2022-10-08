@@ -19,7 +19,7 @@ If you use this tool for your mod I'd appreciate it if you would credit me for i
 - **Sekiro**
 
 ![Example of Divine Dragon ported.](/DS3PortingTool/Assets/Ported_Enemy_Sample.png)
-Enemies ported from Sekiro and Elden Ring will have this look to them.
+<br /> Enemies ported from Sekiro and Elden Ring will have this look to them.
 
 ------
 ## Requirements
@@ -33,7 +33,7 @@ following tools unzipped in the 'HavokDowngrade' folder.
   - Obtainable from Havok Content Tools 2018.
 
 ![This is what your HavokDowngrade folder should look like.](/DS3PortingTool/Assets/Readme_HavokDowngrade_Model.png)
- The HavokDowngrade folder should look something like this.
+<br /> The HavokDowngrade folder should look something like this.
 
 ### Additional Requirements for porting assets from Sekiro and Elden Ring
 - **oo2core_6_win64.dll**
