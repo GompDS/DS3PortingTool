@@ -114,7 +114,7 @@ namespace DS3PortingTool
                     }
                     ExcludedAnimOffsets = args[i + 1].Split(',')
                         .Where(x => x.All(char.IsDigit) && x.Length == 1)
-                        .Select(x => Int32.Parse(x)).ToList();
+                        .Select(Int32.Parse).ToList();
                 }
                 else
                 {

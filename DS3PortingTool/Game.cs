@@ -21,38 +21,46 @@ namespace DS3PortingTool
         /// <summary>
         /// The game that the source binder originates from.
         /// </summary>
-        public GameTypes Type { get; set; }
+        public GameTypes Type { get; }
 
         /// <summary>
-        /// Key-value pairs of game types and their respective names.
+        /// The name of the game the source binder originates from, used in extracting XmlData.
         /// </summary>
-        public Dictionary<GameTypes, string> TypeNames = new()
-        {
-            { GameTypes.Ds1, "DS1" },
-            { GameTypes.Sekiro, "Sekiro" },
-            { GameTypes.EldenRing, "EldenRing" }
-        };
+        public string Name { get; }
+        
+        /// <summary>
+        /// The base animation offset used by the game.
+        /// </summary>
+        public int Offset { get; }
 
         public Game(IBinder bnd)
         {
             if (bnd.Files.Any(x => x.Name.Contains(@"N:\FRPG\data\")))
             {
-                Type = Game.GameTypes.Ds1;
+                Type = GameTypes.Ds1;
+                Name = "Ds1";
+                Offset = 1000000;
             }
             else if (bnd.Files.Any(x => x.Name.Contains(@"N:\NTC\data\Target\INTERROOT_win64")))
             {
-                Type = Game.GameTypes.Sekiro;
+                Type = GameTypes.Sekiro;
+                Name = "Sekiro";
+                Offset = 100000000;
             }
             else if (bnd.Files.Any(x => x.Name.Contains(@"N:\GR\data\INTERROOT_win64")))
             {
-                Type = Game.GameTypes.EldenRing;
+                Type = GameTypes.EldenRing;
+                Name = "EldenRing";
+                Offset = 1000000;
             }
             else
             {
-                Type = Game.GameTypes.Other;
+                Type = GameTypes.Other;
+                Name = "";
+                Offset = -1;
             }
 
-            if (Type != Game.GameTypes.Sekiro)
+            if (Type != GameTypes.Sekiro)
             {
                 throw new ArgumentException(
                     "Source binder does not originate from Sekiro. Currently only Sekiro is supported.");

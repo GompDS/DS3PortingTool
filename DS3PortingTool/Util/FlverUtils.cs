@@ -177,5 +177,28 @@ namespace DS3PortingTool.Util
 
             return indices;
         }
+
+	    /// <summary>
+	    /// Checks if the given GXList already exists in the flver GxLists.
+	    /// </summary>
+	    public static bool IsNewGxList(this FLVER2 flver, FLVER2.GXList gxList)
+	    {
+			foreach (var gxl in flver.GXLists)
+		    {
+			    if (gxl.Count == gxList.Count)
+			    {
+				    for (int i = 0; i < gxl.Count; i++)
+				    {
+					    if (gxl[i].Data.Length == gxList[i].Data.Length &&
+					        gxl[i].Unk04 == gxList[i].Unk04 && gxl[i].ID.Equals(gxList[i].ID))
+					    {
+						    return false;
+					    }
+				    }
+			    }
+		    }
+
+			return true;
+	    }
     }   
 }

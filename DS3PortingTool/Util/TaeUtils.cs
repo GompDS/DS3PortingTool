@@ -1,4 +1,3 @@
-using System.Xml.Linq;
 using SoulsAssetPipeline.Animation;
 
 namespace DS3PortingTool.Util
@@ -10,9 +9,9 @@ namespace DS3PortingTool.Util
 		/// Enables HKX importing for anim and sets HKX to import from.
 		/// </summary>
 		public static void SetAnimationProperties(this TAE.Animation anim, int newId, int newImportHkxSourceAnimId,
-			int animOffset)
+			int animOffset, Options op)
 		{
-			newId += animOffset;
+			newId += animOffset * 1000000;
 			anim.ID = Convert.ToInt64(newId);
 			anim.AnimFileName = Convert.ToString(newId);
 			for (int i = anim.AnimFileName.Length; i < 9; i++)
@@ -25,7 +24,7 @@ namespace DS3PortingTool.Util
 			if (anim.MiniHeader is TAE.Animation.AnimMiniHeader.Standard standardMiniHeader)
 			{
 				standardMiniHeader.ImportsHKX = true;
-				standardMiniHeader.ImportHKXSourceAnimID = newImportHkxSourceAnimId + (animOffset * 100);
+				standardMiniHeader.ImportHKXSourceAnimID = newImportHkxSourceAnimId + (animOffset * op.Game.Offset);
 			}
 		}
 		
@@ -34,48 +33,14 @@ namespace DS3PortingTool.Util
 		/// </summary>
 		public static int GetOffset(this TAE.Animation anim)
 		{
-			int animOffset = 0;
-			if (anim.ID >= 500000000)
+			string idString = anim.ID.ToString("D9").Substring(0, 3);
+			idString = idString.Replace("0", "");
+			if (!idString.Equals(""))
 			{
-				animOffset = 5000000;
+				return Int32.Parse(idString);
 			}
-			else if (anim.ID >= 400000000)
-			{
-				animOffset = 4000000;
-			}
-			else if (anim.ID >= 300000000)
-			{
-				animOffset = 3000000;
-			}
-			else if (anim.ID >= 200000000)
-			{
-				animOffset = 2000000;
-			}
-			else if (anim.ID >= 100000000)
-			{
-				animOffset = 1000000;
-			}
-			else if (anim.ID >= 5000000)
-			{
-				animOffset = 5000000;
-			}
-			else if (anim.ID >= 4000000)
-			{
-				animOffset = 4000000;
-			}
-			else if (anim.ID >= 3000000)
-			{
-				animOffset = 3000000;
-			}
-			else if (anim.ID >= 2000000)
-			{
-				animOffset = 2000000;
-			}
-			else if (anim.ID >= 1000000)
-			{
-				animOffset = 1000000;
-			}
-			return animOffset;
+
+			return 0;
 		}
 
 		/// <summary>
@@ -134,7 +99,7 @@ namespace DS3PortingTool.Util
 		/// <summary>
 		/// Change the first four digits of the Sound ID parameter of this event to match the new character ID
 		/// </summary>
-		public static byte[] ChangeSoundEventChrId(this TAE.Event ev, bool isBigEndian, string newChrId)
+		private static byte[] ChangeSoundEventChrId(this TAE.Event ev, bool isBigEndian, string newChrId)
 		{
 			byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
 			byte[] soundTypeBytes = new byte[4];
@@ -158,6 +123,201 @@ namespace DS3PortingTool.Util
 				Array.Copy(newBytes, 0, paramBytes, 4, 4);
 			}
 			return paramBytes;
+		}
+
+		/// <summary>
+		/// Gets ids of animations that belong to excluded offsets.
+		/// </summary>
+		public static List<int> GetExcludedOffsetAnimations(this TAE sourceTae, Options op)
+		{
+			List<int> excludedOffsetAnimations = new();
+			if (op.ExcludedAnimOffsets.Any())
+			{
+				foreach (int offsetId in op.ExcludedAnimOffsets.Where(x => x > 0))
+				{
+					int idMin = offsetId * op.Game.Offset, idMax = (offsetId + 1) * op.Game.Offset;
+					excludedOffsetAnimations.AddRange(sourceTae.Animations.Where(y => 
+						y.ID >= idMin && y.ID < idMax).Select(y => Convert.ToInt32(y.ID)).ToList());
+				}
+
+				if (op.ExcludedAnimOffsets.Contains(0))
+				{
+					int nextAllowedOffset = 1;
+					while (op.ExcludedAnimOffsets.Contains(nextAllowedOffset))
+					{
+						nextAllowedOffset++;
+					}
+
+					nextAllowedOffset *= op.Game.Offset;
+					foreach (var anim in sourceTae.Animations.Where(x => x.ID < op.Game.Offset))
+					{
+						if (sourceTae.Animations.FindIndex(x => 
+							    x.ID == anim.ID + nextAllowedOffset) >= 0 || (anim.ID is >= 3000 and < 4000))
+						{
+							excludedOffsetAnimations.Add(Convert.ToInt32(anim.ID));
+						}
+					}
+				}
+			}
+
+			return excludedOffsetAnimations;
+		}
+
+		/// <summary>
+		/// Remaps the id of any animation's 'ImportFromAnimId' property.
+		/// </summary>
+		public static void RemapImportAnimationId(this TAE.Animation anim, XmlData data)
+		{
+			if (anim.MiniHeader is TAE.Animation.AnimMiniHeader.ImportOtherAnim importMiniHeader)
+			{
+				string idString = Convert.ToString(importMiniHeader.ImportFromAnimID);
+				for (int i = idString.Length; i < 9; i++)
+				{
+					idString = idString.Insert(0, "0");
+				}
+
+				idString = idString.Substring(3);
+				int importId = Int32.Parse(idString);
+				if (data.AnimationRemapping.ContainsKey(importId))
+				{
+					data.AnimationRemapping.TryGetValue(importId, out int newImportId);
+					importMiniHeader.ImportFromAnimID = newImportId + anim.GetOffset() * 1000000;
+				}
+				else
+				{
+					importMiniHeader.ImportFromAnimID = importId + anim.GetOffset() * 1000000;
+				}
+			}
+		}
+		
+		/// <summary>
+		/// Change the offsets of animations in order to fill gaps when offsets are removed.
+		/// </summary>
+		public static void ShiftAnimationOffsets(this TAE tae, Options op)
+		{
+			int oldOffset = 0, newOffset = 0;
+			foreach (var anim in tae.Animations)
+			{
+				if (op.ExcludedAnimOffsets.Contains(0))
+				{
+					int nextAllowedOffset = 1;
+					while (op.ExcludedAnimOffsets.Contains(nextAllowedOffset))
+					{
+						nextAllowedOffset++;
+					}
+
+					nextAllowedOffset *= 1000000;
+					if (anim.ID >= nextAllowedOffset && anim.ID < nextAllowedOffset + 1000000)
+					{
+						anim.ID -= nextAllowedOffset;
+					}
+				}
+
+				if (anim.GetOffset() * 1000000 > oldOffset)
+				{
+					oldOffset = anim.GetOffset() * 1000000;
+					newOffset += 1000000;
+				}
+
+				if (newOffset < oldOffset)
+				{
+					anim.ID = newOffset + anim.GetNoOffsetId();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Edit parameters of the event so that it will match with its DS3 event equivalent.
+		/// </summary>
+		public static TAE.Event Edit(this TAE.Event ev, bool bigEndian, Options op)
+		{
+			byte[] paramBytes = ev.GetParameterBytes(bigEndian);
+			
+			if (op.Game.Type == Game.GameTypes.Sekiro)
+			{
+				switch (ev.Type)
+				{
+					// SpawnOneShotFFX
+					case 96:
+						Array.Resize(ref paramBytes, 16);
+						break;
+					// SpawnFFX_100_BB
+					case 100:
+						ev.Type = 96;
+						ev.Group.GroupType = 96;
+						paramBytes[13] = paramBytes[12];
+						paramBytes[12] = 0;
+						break;
+					// PlaySound_CenterBody
+					case 128:
+						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op.PortedChrId);
+						break;
+					// PlaySound_ByStateInfo
+					case 129:
+						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op.PortedChrId);
+						Array.Clear(paramBytes, 18, 2);
+						break;
+					// PlaySound_ByDummyPoly_PlayerVoice
+					case 130:
+						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op.PortedChrId);
+						Array.Clear(paramBytes, 16, 2);
+						Array.Resize(ref paramBytes, 32);
+						break;
+					// PlaySound_DummyPoly
+					case 131:
+						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op.PortedChrId);
+						break;
+					// SetLockCamParam_Boss
+					case 151:
+						Array.Clear(paramBytes, 4, 12);
+						Array.Resize(ref paramBytes, 16);
+						break;
+					// SetOpacityKeyframe
+					case 193:
+						Array.Resize(ref paramBytes, 16);
+						break;
+					// InvokeChrClothState
+					case 310:
+						Array.Resize(ref paramBytes, 8);
+						break;
+					// AddSpEffect_Multiplayer_401
+					case 401:
+						Array.Clear(paramBytes, 8, 4);
+						break;
+					// EnableBehaviorFlags
+					case 600:
+						Array.Resize(ref paramBytes, 16);
+						break;
+					// AdditiveAnimPlayback
+					case 601:
+						Array.Clear(paramBytes, 12, 4);
+						break;
+					// 
+					case 700:
+						Array.Resize(ref paramBytes, 52);
+						break;
+					// FacingAngleCorrection
+					case 705:
+						Array.Clear(paramBytes, 8, 4);
+						break;
+					// CultCatchAttach
+					case 720:
+						Array.Clear(paramBytes, 1, 1);
+						break;
+					// OnlyForNon_c0000Enemies
+					case 730:
+						Array.Clear(paramBytes, 8, 4);
+						break;
+					// PlaySound_WanderGhost
+					case 10130:
+						Array.Clear(paramBytes, 12, 4);
+						Array.Resize(ref paramBytes, 16);
+						break;
+				}
+			}
+			
+			ev.SetParameterBytes(bigEndian, paramBytes);
+			return ev;
 		}
 	}
 }

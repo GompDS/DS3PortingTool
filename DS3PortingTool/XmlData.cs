@@ -32,7 +32,7 @@ namespace DS3PortingTool
 
 		public XmlData(Options op)
 		{
-		    string gameName = op.Game.TypeNames[op.Game.Type];
+		    string gameName = op.Game.Name;
 		    
 		    MaterialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{op.Cwd}Res\\BankDS3.xml");
 		    AnimationRemapping = GetXmlDictionary(XElement.Load($"{op.Cwd}\\Res\\AnimationRemapping.xml"), gameName);
