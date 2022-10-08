@@ -18,6 +18,9 @@ If you use this tool for your mod I'd appreciate it if you would credit me for i
 ### Games Supported
 - **Sekiro**
 
+![Example of Divine Dragon ported.](/DS3PortingTool/Assets/Ported_Enemy_Sample.png)
+Enemies ported from Sekiro and Elden Ring will have this look to them.
+
 ------
 ## Requirements
 In order for the tool to function as intended, you will need to place the
