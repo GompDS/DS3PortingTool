@@ -28,6 +28,11 @@ namespace DS3PortingTool
         /// The character id of the ported binder.
         /// </summary>
         public string PortedChrId { get; }
+        
+        /// <summary>
+        /// The character id that sound events will use.
+        /// </summary>
+        public string SoundChrId { get; }
         /// <summary>
         /// Flag setting which if true means only the tae will be ported when porting an anibnd.
         /// </summary>
@@ -42,6 +47,7 @@ namespace DS3PortingTool
             Cwd = AppDomain.CurrentDomain.BaseDirectory;
             SourceChrId = "";
             PortedChrId = "";
+            SoundChrId = "";
             ExcludedAnimOffsets = new();
             
             string? sourceFile = Array.Find(args, x => File.Exists(x) && 
@@ -105,6 +111,10 @@ namespace DS3PortingTool
                     }
 
                     PortedChrId = args[i + 1];
+                    if (SoundChrId.Equals(""))
+                    {
+                        SoundChrId = PortedChrId;
+                    }
                 }
                 else if (args[i].Equals("-o"))
                 {
@@ -115,6 +125,19 @@ namespace DS3PortingTool
                     ExcludedAnimOffsets = args[i + 1].Split(',')
                         .Where(x => x.All(char.IsDigit) && x.Length == 1)
                         .Select(Int32.Parse).ToList();
+                }
+                else if (args[i].Equals("-s"))
+                {
+                    if (args.Length < i + 1)
+                    {
+                        throw new ArgumentException($"Flag '-s' used, but no character id provided.");
+                    }
+                    if (args[i + 1].Length != 4 || !args[i + 1].All(char.IsDigit))
+                    {
+                        throw new ArgumentException($"Character id after flag '-s' must be a 4 digit number.");
+                    }
+                    
+                    SoundChrId = args[i + 1];
                 }
                 else
                 {

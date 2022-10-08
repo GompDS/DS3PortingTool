@@ -99,7 +99,7 @@ namespace DS3PortingTool.Util
 		/// <summary>
 		/// Change the first four digits of the Sound ID parameter of this event to match the new character ID
 		/// </summary>
-		private static byte[] ChangeSoundEventChrId(this TAE.Event ev, bool isBigEndian, string newChrId)
+		private static byte[] ChangeSoundEventChrId(this TAE.Event ev, bool isBigEndian, Options op)
 		{
 			byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
 			byte[] soundTypeBytes = new byte[4];
@@ -117,7 +117,7 @@ namespace DS3PortingTool.Util
 			if ((soundType == 1 || soundType == 8) && soundIdString.Length == 9 && !soundIdString
 				    .Substring(0, 4).Contains("9999"))
 			{
-				soundIdString = newChrId + soundIdString.Substring(4);
+				soundIdString = op.SoundChrId + soundIdString.Substring(4);
 				soundId = Int32.Parse(soundIdString);
 				byte[] newBytes = BitConverter.GetBytes(soundId);
 				Array.Copy(newBytes, 0, paramBytes, 4, 4);
@@ -250,22 +250,22 @@ namespace DS3PortingTool.Util
 						break;
 					// PlaySound_CenterBody
 					case 128:
-						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op.PortedChrId);
+						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
 						break;
 					// PlaySound_ByStateInfo
 					case 129:
-						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op.PortedChrId);
+						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
 						Array.Clear(paramBytes, 18, 2);
 						break;
 					// PlaySound_ByDummyPoly_PlayerVoice
 					case 130:
-						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op.PortedChrId);
+						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
 						Array.Clear(paramBytes, 16, 2);
 						Array.Resize(ref paramBytes, 32);
 						break;
 					// PlaySound_DummyPoly
 					case 131:
-						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op.PortedChrId);
+						paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
 						break;
 					// SetLockCamParam_Boss
 					case 151:
