@@ -22,6 +22,7 @@ namespace DS3PortingTool
 				
 				if (!op.PortTaeOnly)
 				{
+					newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
 					File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx",
 						DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
 				}
