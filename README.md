@@ -3,6 +3,8 @@
 Tool for porting enemies from other From Software games to Dark Souls 3.
 DS3PortingTool does the heavy lifting for you so you can get on with modding.
 
+If you use this tool for your mod I'd appreciate it if you would credit me for it.
+
 ### Features
 - Automatically converts HKX files (although it's a very lengthy process)
 - Converts ragdoll and some cloth.
