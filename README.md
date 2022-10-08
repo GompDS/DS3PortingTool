@@ -36,8 +36,8 @@ following tools unzipped in the 'HavokDowngrade' folder.
 
 ------
 ## Usage
-If using from the command line, enter options first and then the path to the
-source DCX file.
+If using from the command line, enter flags first and then the path to the
+source DCX file. Alternatively you can drag-and-drop a DCX file onto the exe.
 
 DCX file must be either an anibnd or chrbnd.
 
@@ -74,8 +74,11 @@ Example: `DS3PortingTool.exe -s 7100 c7110.anibnd.dcx`
 
 `-t` When porting an anibnd, only the tae will be ported.
 
-Example:
-`DS3PortingTool.exe -t c1000.anibnd.dcx`
+Example:`DS3PortingTool.exe -t c1000.anibnd.dcx`
+
+`-x` Runs the program without asking the user to enter flags.
+
+Example:`DS3PortingTool.exe -x c6200.anibnd.dcx`
 
 ------
 ## Special Thanks

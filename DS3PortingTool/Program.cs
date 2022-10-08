@@ -13,8 +13,11 @@ namespace DS3PortingTool
 			BND4 newBnd = new BND4();
 			if (op.SourceFileName.Contains("anibnd"))
 			{
-				ConvertHkx(newBnd, op);
-			
+				if (!op.PortTaeOnly)
+				{
+					ConvertHkx(newBnd, op);
+				}
+
 				ConvertTae(newBnd, op);
 				
 				if (!op.PortTaeOnly)
@@ -136,11 +139,6 @@ namespace DS3PortingTool
 		{
 			if (op.SourceFileName.Contains("anibnd"))
 			{
-				if (op.PortTaeOnly)
-				{
-					return;
-				}
-
 				if (op.Game.Type is Game.GameTypes.Sekiro or Game.GameTypes.EldenRing)
 				{
 					BinderFile? compendium = op.SourceBnd.Files
@@ -166,12 +164,7 @@ namespace DS3PortingTool
 			{
 				string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\";
 				string name = Path.GetFileName(hkx.Name).ToLower();
-				
-				if (name.Contains("skeleton"))
-				{
-					hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(1, 2)}");
-				}
-				
+
 				if (name.Contains($"c{op.SourceChrId}.hkx") || name.Contains($"c{op.SourceChrId}_c.hkx"))
 				{
 					hkx.Name = $"{path}{name.Replace(op.SourceChrId, op.PortedChrId)}";
@@ -179,6 +172,10 @@ namespace DS3PortingTool
 				else
 				{
 					hkx.Name = $"{path}hkx\\{name}";
+					if (!name.Contains("skeleton"))
+					{
+						hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(1, 2)}");
+					}
 				}
 			}
 		}

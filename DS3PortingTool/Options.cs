@@ -139,7 +139,7 @@ namespace DS3PortingTool
                     
                     SoundChrId = args[i + 1];
                 }
-                else
+                else if (!args[i].Equals("-x"))
                 {
                     throw new ArgumentException($"Unknown flag: {args[i]}");
                 }
