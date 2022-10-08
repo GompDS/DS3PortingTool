@@ -29,6 +29,9 @@ following tools unzipped in the 'HavokDowngrade' folder.
 - **FileConvert.exe**
   - Obtainable from Havok Content Tools 2018.
 
+![This is what your HavokDowngrade folder should look like.](/DS3PortingTool/Assets/Readme_HavokDowngrade_Model.png)
+ The HavokDowngrade folder should look something like this.
+
 ### Additional Requirements for porting assets from Sekiro and Elden Ring
 - **oo2core_6_win64.dll**
   - Copy it from your Sekiro or Elden Ring game folder to the same directory as
