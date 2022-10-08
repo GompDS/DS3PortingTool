@@ -102,26 +102,31 @@ namespace DS3PortingTool.Util
 		private static byte[] ChangeSoundEventChrId(this TAE.Event ev, bool isBigEndian, Options op)
 		{
 			byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
-			byte[] soundTypeBytes = new byte[4];
-			byte[] soundIdBytes = new byte[4];
-			Array.Copy(paramBytes, soundTypeBytes, 4);
-			Array.Copy(paramBytes, 4, soundIdBytes, 0, 4);
-			if (isBigEndian)
+			if (op.ChangeSoundIds)
 			{
-				Array.Reverse(soundTypeBytes);
-				Array.Reverse(soundIdBytes);
+				byte[] soundTypeBytes = new byte[4];
+				byte[] soundIdBytes = new byte[4];
+				Array.Copy(paramBytes, soundTypeBytes, 4);
+				Array.Copy(paramBytes, 4, soundIdBytes, 0, 4);
+				if (isBigEndian)
+				{
+					Array.Reverse(soundTypeBytes);
+					Array.Reverse(soundIdBytes);
+				}
+
+				int soundType = BitConverter.ToInt32(soundTypeBytes, 0);
+				int soundId = BitConverter.ToInt32(soundIdBytes, 0);
+				string soundIdString = Convert.ToString(soundId);
+				if ((soundType == 1 || soundType == 8) && soundIdString.Length == 9 && !soundIdString
+					    .Substring(0, 4).Contains("9999"))
+				{
+					soundIdString = op.SoundChrId + soundIdString.Substring(4);
+					soundId = Int32.Parse(soundIdString);
+					byte[] newBytes = BitConverter.GetBytes(soundId);
+					Array.Copy(newBytes, 0, paramBytes, 4, 4);
+				}
 			}
-			int soundType = BitConverter.ToInt32(soundTypeBytes, 0);
-			int soundId = BitConverter.ToInt32(soundIdBytes, 0);
-			string soundIdString = Convert.ToString(soundId);
-			if ((soundType == 1 || soundType == 8) && soundIdString.Length == 9 && !soundIdString
-				    .Substring(0, 4).Contains("9999"))
-			{
-				soundIdString = op.SoundChrId + soundIdString.Substring(4);
-				soundId = Int32.Parse(soundIdString);
-				byte[] newBytes = BitConverter.GetBytes(soundId);
-				Array.Copy(newBytes, 0, paramBytes, 4, 4);
-			}
+
 			return paramBytes;
 		}
 

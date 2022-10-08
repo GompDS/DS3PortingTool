@@ -6,6 +6,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <ApplicationIcon>Assets\DS3PortingTool-logo.ico</ApplicationIcon>
+        <Authors>Gomp</Authors>
+        <Version>1.0.1</Version>
+        <PackageProjectUrl>https://github.com/GompDS/DS3PortingTool</PackageProjectUrl>
     </PropertyGroup>
 
     <ItemGroup>

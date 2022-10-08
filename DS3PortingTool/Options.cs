@@ -1,4 +1,5 @@
 using SoulsFormats;
+using ArgumentException = System.ArgumentException;
 
 namespace DS3PortingTool
 {
@@ -38,6 +39,10 @@ namespace DS3PortingTool
         /// </summary>
         public bool PortTaeOnly { get; }
         /// <summary>
+        /// Flag setting which if true means that sound ids will be changed to match new character id.
+        /// </summary>
+        public bool ChangeSoundIds { get; }
+        /// <summary>
         /// List of animation offsets which are excluded when porting an anibnd.
         /// </summary>
         public List<int> ExcludedAnimOffsets { get; }
@@ -48,6 +53,7 @@ namespace DS3PortingTool
             SourceChrId = "";
             PortedChrId = "";
             SoundChrId = "";
+            ChangeSoundIds = true;
             ExcludedAnimOffsets = new();
             
             string? sourceFile = Array.Find(args, x => File.Exists(x) && 
@@ -130,13 +136,17 @@ namespace DS3PortingTool
                 {
                     if (args.Length < i + 1)
                     {
-                        throw new ArgumentException($"Flag '-s' used, but no character id provided.");
+                        ChangeSoundIds = false;
                     }
-                    if (args[i + 1].Length != 4 || !args[i + 1].All(char.IsDigit))
+                    else if (flagIndices.Contains(i + 1) || i + 1 == Array.IndexOf(args, sourceFile))
+                    {
+                        ChangeSoundIds = false;
+                    }
+                    else if (args[i + 1].Length != 4 || !args[i + 1].All(char.IsDigit))
                     {
                         throw new ArgumentException($"Character id after flag '-s' must be a 4 digit number.");
                     }
-                    
+
                     SoundChrId = args[i + 1];
                 }
                 else if (!args[i].Equals("-x"))

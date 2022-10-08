@@ -71,6 +71,10 @@ Example:
 
 Examples: `DS3PortingTool.exe -o 0` `DS3PortingTool.exe -o 1,2,4`
 
+`-s` The character id in sound events will not be changed.
+
+Example: `DS3PortingTool.exe -s c7110.anibnd.dcx`
+
 `-s [id]` Replace the character id in sound events with this id instead.
 
 Example: `DS3PortingTool.exe -s 7100 c7110.anibnd.dcx`
