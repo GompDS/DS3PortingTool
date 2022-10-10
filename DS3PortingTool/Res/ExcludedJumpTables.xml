@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <excludedJumpTables>
+    <itemList game="Bloodborne">
+        <item id="5"/>
+        <item id="63"/>
+        <item id="73"/>
+    </itemList>
     <itemList game="Sekiro">
         <item id="5"/>
         <item id="63"/>

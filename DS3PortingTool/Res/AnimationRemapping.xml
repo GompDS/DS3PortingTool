@@ -1,5 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animationRemapping>
+	<itemDictionary game="Bloodborne">
+		<item key="0" value="20"/>
+		<item key="9900" value="30"/>
+		<item key="500" value="2100"/>
+		<item key="1500" value="7000"/>
+		<item key="1510" value="7010"/>
+		<item key="1520" value="7020"/>
+		<item key="1750" value="7400"/>
+		<item key="1760" value="7410"/>
+		<item key="1770" value="7420"/>
+		<item key="1600" value="7600"/>
+		<item key="1610" value="7610"/>
+		<item key="1620" value="7620"/>
+		<item key="2020" value="8100"/>
+		<item key="2014" value="8101"/>
+		<item key="2040" value="8110"/>
+		<item key="2060" value="8130"/>
+		<item key="9610" value="8200"/>
+		<item key="9611" value="8210"/>
+		<item key="9612" value="8220"/>
+		<item key="9613" value="8221"/>
+		<item key="9930" value="8410"/>
+		<item key="2200" value="10000"/>
+		<item key="2250" value="10001"/>
+		<item key="2202" value="10010"/>
+		<item key="2252" value="10011"/>
+		<item key="2204" value="10030"/>
+		<item key="2254" value="10031"/>
+		<item key="2207" value="10040"/>
+		<item key="2257" value="10041"/>
+		<item key="2209" value="10050"/>
+		<item key="2259" value="10051"/>
+		<item key="2211" value="10060"/>
+		<item key="2261" value="10061"/>
+		<item key="7210" value="13000"/>
+		<item key="7220" value="13020"/>
+		<item key="7224" value="13030"/>
+		<item key="7223" value="13040"/>
+		<item key="7240" value="13050"/>
+		<item key="7230" value="13060"/>
+		<item key="7212" value="13070"/>
+		<item key="7211" value="13080"/>
+		<item key="7222" value="13090"/>
+		<item key="7221" value="13100"/>
+		<item key="7241" value="13110"/>
+		<item key="7231" value="13120"/>
+		<item key="7243" value="13130"/>
+		<item key="7233" value="13140"/>
+		<item key="7245" value="13150"/>
+		<item key="7235" value="13160"/>
+		<item key="7246" value="13170"/>
+		<item key="7236" value="13180"/>
+		<item key="7200" value="13190"/>
+		<item key="7201" value="13200"/>
+		<item key="7202" value="13210"/>
+		<item key="7204" value="13220"/>
+		<item key="7203" value="13230"/>
+		<item key="7250" value="13300"/>
+		<item key="7214" value="13320"/>
+		<item key="7213" value="13330"/>
+		<item key="7110" value="14000"/>
+		<item key="7111" value="14001"/>
+		<item key="7112" value="14010"/>
+		<item key="7113" value="14011"/>
+		<item key="7100" value="14020"/>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="4">
+			<item key="200" value="2000"/>
+			<item key="9100" value="2030"/>
+			<item key="602" value="6000"/>
+			<item key="700" value="6000"/>
+			<item key="710" value="6010"/>
+			<item key="2000" value="8000"/>
+			<item key="2004" value="8010"/>
+			<item key="2010" value="8020"/>
+			<item key="2610" value="8120"/>
+			<item key="2080" value="8140"/>
+			<item key="2030" value="9000"/>
+		</itemRange>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="99">
+			<item key="7000" value="20000"/>
+		</itemRange>
+	</itemDictionary>
 	<itemDictionary game="Sekiro">
 		<item key="8500" value="8200"/>
 		<item key="8510" value="8210"/>

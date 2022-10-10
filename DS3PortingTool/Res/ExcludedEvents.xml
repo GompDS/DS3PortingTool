@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <excludedEvents>
+	<itemList game="Bloodborne">
+		<item id="66"/>
+		<item id="67"/>
+		<item id="302"/>
+		<item id="313"/>
+		<item id="315"/>
+		<item id="316"/>
+		<item id="318"/>
+		<item id="331"/>
+		<item id="401"/>
+		<item id="797"/>
+	</itemList>
 	<itemList game="Sekiro">
 		<item id="4"/>
 		<item id="66"/>

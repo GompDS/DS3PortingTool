@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AllowedSpEffects>
+    <itemList game="Bloodborne">
+        <item id="31"/>
+        <item id="35"/>
+    </itemList>
+    <itemList game="Sekiro"></itemList>
+</AllowedSpEffects>

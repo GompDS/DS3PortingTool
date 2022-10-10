@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <excludedRumbleCams>
+    <itemList game="Bloodborne"></itemList>
     <itemList game="Sekiro">
         <item id="70"/>
         <itemRange increment="1" repeat="4">
