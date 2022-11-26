@@ -12,18 +12,14 @@ public static class TaeUtils
 	{
 		newId += animOffset * 1000000;
 		anim.ID = Convert.ToInt64(newId);
-		anim.AnimFileName = Convert.ToString(newId);
-		for (int i = anim.AnimFileName.Length; i < 9; i++)
-		{
-			anim.AnimFileName = anim.AnimFileName.Insert(0, "0");
-		}
+		anim.AnimFileName = newId.ToString("D9");
 		anim.AnimFileName = String.Concat(anim.AnimFileName, ".hkt");
 		anim.AnimFileName = anim.AnimFileName.Insert(0, "a");
 		anim.AnimFileName = anim.AnimFileName.Insert(4, "_");
 		if (anim.MiniHeader is TAE.Animation.AnimMiniHeader.Standard standardMiniHeader)
 		{
 			standardMiniHeader.ImportsHKX = true;
-			standardMiniHeader.ImportHKXSourceAnimID = newImportHkxSourceAnimId + (animOffset * op.Game.Offset);
+			standardMiniHeader.ImportHKXSourceAnimID = newImportHkxSourceAnimId + animOffset * 1000000;
 		}
 	}
 	
@@ -33,6 +29,22 @@ public static class TaeUtils
 	public static int GetOffset(this TAE.Animation anim)
 	{
 		string idString = anim.ID.ToString("D9").Substring(0, 3);
+		idString = idString.Replace("0", "");
+		if (!idString.Equals(""))
+		{
+			return Int32.Parse(idString);
+		}
+
+		return 0;
+	}
+	
+	/// <summary>
+	///	Get the animation offset of a given animation ID.
+	/// Takes a length 3 string which contains the offset (ex. 001)
+	/// </summary>
+	public static int GetOffset(this string anim)
+	{
+		string idString = anim;
 		idString = idString.Replace("0", "");
 		if (!idString.Equals(""))
 		{
@@ -191,6 +203,18 @@ public static class TaeUtils
 			{
 				importMiniHeader.ImportFromAnimID = importId + anim.GetOffset() * 1000000;
 			}
+		}
+	}
+	
+	/// <summary>
+	/// Remaps the id of any animation's 'ImportFromAnimId' property.
+	/// </summary>
+	public static void FixImportHkxOffsets(this TAE.Animation anim, XmlData data)
+	{
+		if (anim.MiniHeader is TAE.Animation.AnimMiniHeader.Standard standardHeader && standardHeader.ImportsHKX)
+		{
+			string idString = standardHeader.ImportHKXSourceAnimID.ToString("D9");
+			
 		}
 	}
 	

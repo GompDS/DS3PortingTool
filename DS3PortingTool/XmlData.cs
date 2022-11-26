@@ -16,19 +16,19 @@ public class XmlData
 	/// <summary>
 	/// IDs of animations to exclude.
 	/// </summary>
-	public List<int> ExcludedAnimations { get; }
+	public HashSet<int> ExcludedAnimations { get; }
 	/// <summary>
 	/// IDs of events to exclude.
 	/// </summary>
-	public List<int> ExcludedEvents { get; }
+	public HashSet<int> ExcludedEvents { get; }
 	/// <summary>
 	/// IDs of jumpTables to exclude.
 	/// </summary>
-	public List<int> ExcludedJumpTables { get; }
+	public HashSet<int> ExcludedJumpTables { get; }
 	/// <summary>
 	/// IDs of rumbleCams to exclude.
 	/// </summary>
-	public List<int> ExcludedRumbleCams { get; }
+	public HashSet<int> ExcludedRumbleCams { get; }
 
 	public XmlData(Options op)
 	{
@@ -36,18 +36,18 @@ public class XmlData
 	    
 	    MaterialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{op.Cwd}Res\\BankDS3.xml");
 	    AnimationRemapping = GetXmlDictionary(XElement.Load($"{op.Cwd}\\Res\\AnimationRemapping.xml"), gameName);
-	    ExcludedAnimations = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedAnimations.xml"), gameName);
-	    ExcludedEvents = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedEvents.xml"), gameName);
-	    ExcludedJumpTables = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedJumpTables.xml"), gameName);
-	    ExcludedRumbleCams = GetXmlList(XElement.Load($"{op.Cwd}\\Res\\ExcludedRumbleCams.xml"), gameName);
+	    ExcludedAnimations = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedAnimations.xml"), gameName);
+	    ExcludedEvents = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedEvents.xml"), gameName);
+	    ExcludedJumpTables = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedJumpTables.xml"), gameName);
+	    ExcludedRumbleCams = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedRumbleCams.xml"), gameName);
 	}
     
 	/// <summary>
 	/// Reads data from an xml itemList and returns a list of the data.
 	/// </summary>
-	private List<int> GetXmlList(XElement xmlElements, string gameName)
+	private HashSet<int> GetXmlSet(XElement xmlElements, string gameName)
 	{
-		List<int> itemList = xmlElements.Elements($"itemList")
+		List<int> itemSet = xmlElements.Elements($"itemList")
 			.Where(x => x.Attribute("game")!.Value == gameName).Elements("item")
 			.Select(x => int.Parse(x.Attribute("id")!.Value)).ToList(); 
 		List<XElement> itemRanges = xmlElements.Elements("itemList")
@@ -62,13 +62,13 @@ public class XmlData
 				List<XElement> rumbleCamsInRange = x.Elements("item").ToList();
 				foreach (XElement y in rumbleCamsInRange)
 				{
-					itemList.Add(int.Parse(y.Attribute("id")!.Value) + 
+					itemSet.Add(int.Parse(y.Attribute("id")!.Value) + 
 					                       (j * increment));
 				}
 			}
 		}
 
-		return itemList;
+		return itemSet.OrderBy(x => x).ToHashSet();
 	}
 
 	/// <summary>

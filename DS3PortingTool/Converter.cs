@@ -59,10 +59,10 @@ public abstract class Converter
     }
 
     protected abstract void ConvertHkx(BND4 newBnd, Options op);
-    protected void ConvertTae(BND4 newBnd, BinderFile taeFile, Options op)
+    protected virtual void ConvertTae(BND4 newBnd, BinderFile taeFile, Options op)
     {
         TAE oldTae = TAE.Read(taeFile.Bytes);
-        TAE newTae = new TAE
+        TAE newTae = new()
         {
             Format = TAE.TAEFormat.DS3,
             BigEndian = false,
@@ -74,23 +74,24 @@ public abstract class Converter
             EventBank = 21
         };
 
-        XmlData data = new XmlData(op);
+        XmlData data = new(op);
         
-        data.ExcludedAnimations.AddRange(newTae.Animations
+        data.ExcludedAnimations.AddRange(oldTae.Animations
             .Where(x => x.GetOffset() > 0 && data.ExcludedAnimations.Contains(x.GetNoOffsetId()))
             .Select(x => Convert.ToInt32(x.ID)));
-		
-        data.ExcludedAnimations.AddRange(newTae.Animations.Where(x => 
-            x.MiniHeader is TAE.Animation.AnimMiniHeader.Standard { ImportsHKX: true } standardHeader && 
-            op.SourceBnd.Files.All(y => y.Name != "a" + standardHeader.ImportHKXSourceAnimID.ToString("D9")
-                .Insert(3, "_") + ".hkx")).Select(x => Convert.ToInt32(x.ID)));
-		
-        data.ExcludedAnimations.AddRange(newTae.Animations.Where(x =>
+
+        data.ExcludedAnimations.AddRange(oldTae.Animations.Where(x => 
+                x.MiniHeader is TAE.Animation.AnimMiniHeader.Standard { ImportsHKX: true } standardHeader && 
+                op.SourceBnd.Files.All(y => y.Name != "a00" + standardHeader.ImportHKXSourceAnimID.ToString("D3").GetOffset() +
+                    "_" + standardHeader.ImportHKXSourceAnimID.ToString("D9")[3..] + ".hkx"))
+            .Select(x => Convert.ToInt32(x.ID)));
+
+        data.ExcludedAnimations.AddRange(oldTae.Animations.Where(x =>
                 x.MiniHeader is TAE.Animation.AnimMiniHeader.ImportOtherAnim otherHeader &&
                 data.ExcludedAnimations.Contains(otherHeader.ImportFromAnimID))
             .Select(x => Convert.ToInt32(x.ID)));
 		
-        data.ExcludedAnimations.AddRange(newTae.GetExcludedOffsetAnimations(op));
+        data.ExcludedAnimations.AddRange(oldTae.GetExcludedOffsetAnimations(op));
 
         newTae.Animations = oldTae.Animations
             .Where(x => !data.ExcludedAnimations.Contains(Convert.ToInt32(x.ID))).ToList();
@@ -191,6 +192,7 @@ public abstract class Converter
             {
                 BoundingBoxMin = sourceFlver.Header.BoundingBoxMin,
                 BoundingBoxMax = sourceFlver.Header.BoundingBoxMax,
+                Unicode = sourceFlver.Header.Unicode,
                 Unk4A = sourceFlver.Header.Unk4A,
                 Unk4C = sourceFlver.Header.Unk4C,
                 Unk5C = sourceFlver.Header.Unk5C,
