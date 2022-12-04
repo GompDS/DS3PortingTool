@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <excludedAnimations>
-	<itemList game="Bloodborne"></itemList>
+	<itemList game="Bloodborne"/>
 	<itemList game="Sekiro">
 		<item id="1000"/>
 		<item id="1010"/>
@@ -92,6 +92,33 @@
 			<item id="14000"/>
 			<item id="17000"/>
 			<item id="18000"/>
+			<item id="40000"/>
+			<item id="41000"/>
+		</itemRange>
+	</itemList>
+	<itemList game="EldenRing">
+		<item id="6100"/>
+		<item id="7100"/>
+		<item id="7430"/>
+		<item id="8033"/>
+		<item id="8043"/>
+		<item id="8053"/>
+		<item id="8150"/>
+		<item id="12010"/>
+		<item id="12020"/>
+		<itemRange increment="1" repeat="3">
+			<item id="8035"/>
+			<item id="8045"/>
+			<item id="8055"/>
+			<item id="11060"/>
+			<item id="11070"/>
+			<item id="12000"/>
+		</itemRange>
+		<itemRange increment="1" repeat="4">
+			<item id="8190"/>
+		</itemRange>
+		<itemRange increment="1" repeat="1000">
+			<item id="9000"/>
 			<item id="40000"/>
 			<item id="41000"/>
 		</itemRange>

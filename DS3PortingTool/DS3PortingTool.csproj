@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
         <ApplicationIcon>Assets\DS3PortingTool-logo.ico</ApplicationIcon>
         <Authors>Gomp</Authors>
-        <Version>1.0.0</Version>
+        <Version>1.1.0</Version>
         <PackageProjectUrl>https://github.com/GompDS/DS3PortingTool</PackageProjectUrl>
     </PropertyGroup>
 

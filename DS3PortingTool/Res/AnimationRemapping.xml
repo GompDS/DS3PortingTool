@@ -129,4 +129,13 @@
 			<item key="503000" value="3000"/>
 		</itemRange>
 	</itemDictionary>
+	<itemDictionary game="EldenRing">
+		<item key="1830" value="1800"/>
+		<itemRange keyIncrement="10" valueIncrement="10" repeat="3">
+			<item key="8030" value="8000"/>
+			<item key="8034" value="8001"/>
+			<item key="8032" value="8002"/>
+			<item key="8031" value="8003"/>
+		</itemRange>
+	</itemDictionary>
 </animationRemapping>

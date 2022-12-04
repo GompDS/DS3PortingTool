@@ -7,17 +7,20 @@ namespace DS3PortingTool;
 
 public abstract class Converter
 {
+    /// <summary>
+    /// Performs the steps necessary to convert a foreign binder into a DS3 compatible binder.
+    /// </summary>
     public virtual void DoConversion(Options op)
     {
         BND4 newBnd = new();
-        if (op.SourceFileName.Contains("anibnd"))
+        if (op.CurrentSourceFileName.Contains("anibnd"))
         {
             if (!op.PortTaeOnly)
             {
                 ConvertHkx(newBnd, op);
             }
             
-            BinderFile? file = op.SourceBnd.Files.Find(x => x.Name.Contains(".tae"));
+            BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".tae"));
             if (file != null)
             {
                 ConvertTae(newBnd, file, op);
@@ -30,23 +33,23 @@ public abstract class Converter
                     DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
             }
         }
-        else if (op.SourceFileName.Contains("chrbnd"))
+        else if (op.CurrentSourceFileName.Contains("chrbnd"))
         {
             ConvertHkx(newBnd, op);
 
             if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}.hkx")))
             {
-                op.SourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}.hkxpwv",  
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}.hkxpwv",  
                     @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}.hkxpwv");
             }
 		
             if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}_c.hkx")))
             {
-                op.SourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}_c.clm2",  
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}_c.clm2",  
                     @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}_c.clm2");
             }
             
-            BinderFile? file = op.SourceBnd.Files.Find(x => x.Name.Contains(".flver"));
+            BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".flver"));
             if (file != null)
             {
                 ConvertFlver(newBnd, file, op);
@@ -57,8 +60,17 @@ public abstract class Converter
                 DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
         }
     }
-
+    /// <summary>
+    /// Elden Ring Only. Finish conversion the combined anibnd. All the hkx should already be converted.
+    /// </summary>
+    public abstract void ConvertCombinedAnibnd(Options op);
+    /// <summary>
+    /// Converts a foreign HKX file into a DS3 compatible HKX file.
+    /// </summary>
     protected abstract void ConvertHkx(BND4 newBnd, Options op);
+    /// <summary>
+    /// Converts a foreign TAE file into a DS3 compatible TAE file.
+    /// </summary>
     protected virtual void ConvertTae(BND4 newBnd, BinderFile taeFile, Options op)
     {
         TAE oldTae = TAE.Read(taeFile.Bytes);
@@ -82,7 +94,7 @@ public abstract class Converter
 
         data.ExcludedAnimations.AddRange(oldTae.Animations.Where(x => 
                 x.MiniHeader is TAE.Animation.AnimMiniHeader.Standard { ImportsHKX: true } standardHeader && 
-                op.SourceBnd.Files.All(y => y.Name != "a00" + standardHeader.ImportHKXSourceAnimID.ToString("D3").GetOffset() +
+                op.CurrentSourceBnd.Files.All(y => y.Name != "a00" + standardHeader.ImportHKXSourceAnimID.ToString("D3").GetOffset() +
                     "_" + standardHeader.ImportHKXSourceAnimID.ToString("D9")[3..] + ".hkx"))
             .Select(x => Convert.ToInt32(x.ID)));
 
@@ -96,7 +108,7 @@ public abstract class Converter
         newTae.Animations = oldTae.Animations
             .Where(x => !data.ExcludedAnimations.Contains(Convert.ToInt32(x.ID))).ToList();
 
-        foreach (var anim in newTae.Animations)
+        foreach (TAE.Animation? anim in newTae.Animations)
         {
             anim.RemapImportAnimationId(data);
 			
@@ -111,10 +123,11 @@ public abstract class Converter
             }
 			
             anim.Events = anim.Events.Where(ev => 
-                    !data.ExcludedEvents.Contains(ev.Type) && 
+                    (!data.ExcludedEvents.Contains(ev.Type) || ev.IsAllowedSpEffect(newTae.BigEndian, data)) && 
                     !data.ExcludedJumpTables.Contains(ev.GetJumpTableId(newTae.BigEndian)) && 
                     !data.ExcludedRumbleCams.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
-                .Select(ev => ev.Edit(newTae.BigEndian, op)).ToList();
+                .Select(ev => EditEvent(ev, newTae.BigEndian, op)).ToList();
+            
         }
 		
         if (op.ExcludedAnimOffsets.Any())
@@ -122,6 +135,9 @@ public abstract class Converter
             newTae.ShiftAnimationOffsets(op);
         }
 
+        oldTae.Animations = oldTae.Animations.OrderBy(x => x.ID).ToList();
+        newTae.Animations = newTae.Animations.OrderBy(x => x.ID).ToList();
+        
         taeFile = new BinderFile(Binder.FileFlags.Flag1, 3000000,
             $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\tae\\c{op.PortedChrId}.tae",
             newTae.Write());
@@ -135,7 +151,13 @@ public abstract class Converter
             newBnd.Files.Add(taeFile);
         }
     }
-
+    /// <summary>
+    /// Edits parameters of the event so that it will match with its DS3 event equivalent.
+    /// </summary>
+    protected abstract TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op);
+    /// <summary>
+    /// Converts a foreign FLVER file into a DS3 compatible FLVER file.
+    /// </summary>
     protected void ConvertFlver(BND4 newBnd, BinderFile flverFile, Options op)
     {
         XmlData data = new(op);
@@ -184,6 +206,9 @@ public abstract class Converter
         newBnd.Files.Add(flverFile);
     }
 
+    /// <summary>
+    /// Creates a new DS3 FLVER using data from a foreign FLVER.
+    /// </summary>
     protected virtual FLVER2 CreateDs3Flver(FLVER2 sourceFlver, XmlData data, Options op)
     {
         FLVER2 newFlver = new FLVER2

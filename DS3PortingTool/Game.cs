@@ -11,9 +11,11 @@ public class Game
     {
         Other,
 
-        Ds1,
+        DarkSouls,
         
         Bloodborne,
+        
+        DarkSouls3,
         
         Sekiro,
         
@@ -39,7 +41,7 @@ public class Game
     {
         if (bnd.Files.Any(x => x.Name.Contains(@"N:\FRPG\data\")))
         {
-            Type = GameTypes.Ds1;
+            Type = GameTypes.DarkSouls;
             Name = "DarkSouls";
             Offset = 1000000;
         }
@@ -47,6 +49,12 @@ public class Game
         {
             Type = GameTypes.Bloodborne;
             Name = "Bloodborne";
+            Offset = 1000000;
+        }
+        else if (bnd.Files.Any(x => x.Name.Contains(@"N:\FDP\data\INTERROOT_win64\")))
+        {
+            Type = GameTypes.DarkSouls3;
+            Name = "DarkSouls3";
             Offset = 1000000;
         }
         else if (bnd.Files.Any(x => x.Name.Contains(@"N:\NTC\data\Target\INTERROOT_win64")))

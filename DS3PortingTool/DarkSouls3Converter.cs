@@ -1,14 +1,16 @@
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
+using SoulsAssetPipeline.FLVERImporting;
 using SoulsFormats;
 
 namespace DS3PortingTool;
-public class BloodborneConverter : Converter
+
+public class DarkSouls3Converter : Converter
 {
     /// <summary>
-    /// Performs the steps necessary to convert a Bloodborne binder into a DS3 compatible binder.
+    /// Performs the steps necessary to convert a DS3 binder into a new DS3 binder.
     /// </summary>
-    public override void DoConversion(Options op)
+    public virtual void DoConversion(Options op)
     {
         BND4 newBnd = new();
         if (op.CurrentSourceFileName.Contains("anibnd"))
@@ -33,100 +35,90 @@ public class BloodborneConverter : Converter
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
         {
-            //ConvertHkx(newBnd, op);
+            ConvertHkx(newBnd, op);
 
             if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}.hkx")))
             {
                 op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}.hkxpwv",  
                     @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}.hkxpwv");
             }
-
+		
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}_c.hkx")))
+            {
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}_c.clm2",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}_c.clm2");
+            }
+            
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".flver"));
             if (file != null)
             {
                 ConvertFlver(newBnd, file, op);
             }
-            
-            // Convert tpfs into texbnd
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
             File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx",
                 DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
         }
+        else if (op.CurrentSourceFileName.Contains("texbnd"))
+        {
+            //TPF oldTpf = 
+            //TPF newTpf = new();
+            
+        }
     }
-
+    
     public override void ConvertCombinedAnibnd(Options op)
     {
         throw new NotImplementedException();
     }
 
-    /// <summary>
-    /// Converts a Bloodborne HKX file into a DS3 compatible HKX file.
-    /// </summary>
-	protected override void ConvertHkx(BND4 newBnd, Options op)
+    protected override void ConvertHkx(BND4 newBnd, Options op)
     {
-	    newBnd.Files = op.CurrentSourceBnd.Files
-		    .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-		    .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
-		
+        newBnd.Files = op.CurrentSourceBnd.Files
+            .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase)).ToList();
+
         foreach (BinderFile hkx in newBnd.Files)
         {
             string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
-
-            if (name.Contains($"c{op.SourceChrId}.hkx"))
+            
+            if (name.Contains($"c{op.SourceChrId}.hkx") || name.Contains($"c{op.SourceChrId}_c.hkx"))
             {
                 hkx.Name = $"{path}{name.Replace(op.SourceChrId, op.PortedChrId)}";
             }
             else
             {
                 hkx.Name = $"{path}hkx\\{name}";
-                if (!name.Contains("skeleton"))
-                {
-                    hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(1, 2)}");
-                }
             }
         }
     }
-    /// <summary>
-    /// Edits parameters of a Bloodborne event so that it will match with its DS3 event equivalent.
-    /// </summary>
+
     protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op)
     {
-        throw new NotImplementedException();
+        return ev;
     }
-    /// <summary>
-    /// Creates a new DS3 FLVER using data from a Bloodborne FLVER.
-    /// </summary>
-    protected override FLVER2 CreateDs3Flver(FLVER2 sourceFlver, XmlData data, Options op)
-    {
-        FLVER2 newFlver = new FLVER2
-        {
-            Header = new FLVER2.FLVERHeader
-            {
-                BoundingBoxMin = sourceFlver.Header.BoundingBoxMin,
-                BoundingBoxMax = sourceFlver.Header.BoundingBoxMax,
-                Unk4A = sourceFlver.Header.Unk4A,
-                Unk4C = sourceFlver.Header.Unk4C,
-                Unk5C = sourceFlver.Header.Unk5C,
-                Unk5D = sourceFlver.Header.Unk5D,
-                Unk68 = sourceFlver.Header.Unk68
-            },
-            Dummies = sourceFlver.Dummies,
-            Materials = sourceFlver.Materials.Select(x => x.ToDs3Material(data.MaterialInfoBank, op)).ToList(),
-            Bones = sourceFlver.Bones.Select(x =>
-            {
-                // Unk3C should only be 0 or 1 in DS3.
-                if (x.Unk3C > 1)
-                {
-                    x.Unk3C = 0;
-                }
 
-                return x;
-            }).ToList(),
-            Meshes = sourceFlver.Meshes
-        };
+    /// <summary>
+    /// Converts a ds3 FLVER file into a new DS3 FLVER file.
+    /// </summary>
+    protected void ConvertFlver(BND4 newBnd, BinderFile flverFile, Options op)
+    {
+        FLVER2 newFlver = FLVER2.Read(flverFile.Bytes);
+
+        if (op.SourceFileNames.Any(x => x.Contains(".texbnd")))
+        {
+            foreach (FLVER2.Material mat in newFlver.Materials)
+            {
+                foreach (FLVER2.Texture tex in mat.Textures)
+                {
+                    tex.Path = tex.Path.Replace($"c{op.SourceChrId}", $"c{op.PortedChrId}");
+                }
+            }
+        }
         
-        return newFlver;
+        flverFile = new BinderFile(Binder.FileFlags.Flag1, 200,
+            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\c{op.PortedChrId}.flver",
+            newFlver.Write());
+        newBnd.Files.Add(flverFile);
     }
 }

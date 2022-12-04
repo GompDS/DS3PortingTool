@@ -29,6 +29,10 @@ public class XmlData
 	/// IDs of rumbleCams to exclude.
 	/// </summary>
 	public HashSet<int> ExcludedRumbleCams { get; }
+	/// <summary>
+	/// IDs of SpEffects to allow when a SpEffect event is excluded
+	/// </summary>
+	public HashSet<int> AllowedSpEffects { get; }
 
 	public XmlData(Options op)
 	{
@@ -40,6 +44,7 @@ public class XmlData
 	    ExcludedEvents = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedEvents.xml"), gameName);
 	    ExcludedJumpTables = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedJumpTables.xml"), gameName);
 	    ExcludedRumbleCams = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedRumbleCams.xml"), gameName);
+	    AllowedSpEffects = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\AllowedSpEffects.xml"), gameName);
 	}
     
 	/// <summary>

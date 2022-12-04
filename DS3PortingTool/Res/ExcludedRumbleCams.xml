@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <excludedRumbleCams>
-    <itemList game="Bloodborne"></itemList>
+    <itemList game="Bloodborne"/>
     <itemList game="Sekiro">
         <item id="70"/>
         <itemRange increment="1" repeat="4">
@@ -16,4 +16,5 @@
             <item id="100"/>
         </itemRange>
     </itemList>
+    <itemList game="EldenRing"/>
 </excludedRumbleCams>

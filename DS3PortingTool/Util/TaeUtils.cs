@@ -44,7 +44,7 @@ public static class TaeUtils
 	/// </summary>
 	public static int GetOffset(this string anim)
 	{
-		string idString = anim;
+		string idString = anim.Substring(0, 3);
 		idString = idString.Replace("0", "");
 		if (!idString.Equals(""))
 		{
@@ -108,9 +108,28 @@ public static class TaeUtils
 	}
 	
 	/// <summary>
+	/// Given an event that adds a SpEffect, return the SpEffect id.
+	/// </summary>
+	public static int GetSpEffectId(this TAE.Event ev, bool isBigEndian)
+	{
+		if (ev.Type is 66 or 67 or 302 or 331 or 401 or 797)
+		{
+			byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
+			byte[] spEffectIdBytes = new byte[4];
+			Array.Copy(paramBytes, spEffectIdBytes, 4);
+			if (isBigEndian)
+			{
+				Array.Reverse(spEffectIdBytes);
+			}
+			return BitConverter.ToInt32(spEffectIdBytes, 0);
+		}
+		return -1;
+	}
+	
+	/// <summary>
 	/// Change the first four digits of the Sound ID parameter of this event to match the new character ID
 	/// </summary>
-	private static byte[] ChangeSoundEventChrId(this TAE.Event ev, bool isBigEndian, Options op)
+	public static byte[] ChangeSoundEventChrId(this TAE.Event ev, bool isBigEndian, Options op)
 	{
 		byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
 		if (op.ChangeSoundIds)
@@ -191,17 +210,16 @@ public static class TaeUtils
 			{
 				idString = idString.Insert(0, "0");
 			}
-
-			idString = idString.Substring(3);
-			int importId = Int32.Parse(idString);
+			
+			int importId = Int32.Parse(idString.Substring(3));
 			if (data.AnimationRemapping.ContainsKey(importId))
 			{
 				data.AnimationRemapping.TryGetValue(importId, out int newImportId);
-				importMiniHeader.ImportFromAnimID = newImportId + anim.GetOffset() * 1000000;
+				importMiniHeader.ImportFromAnimID = newImportId + idString.GetOffset() * 1000000;
 			}
 			else
 			{
-				importMiniHeader.ImportFromAnimID = importId + anim.GetOffset() * 1000000;
+				importMiniHeader.ImportFromAnimID = importId + idString.GetOffset() * 1000000;
 			}
 		}
 	}
@@ -255,96 +273,11 @@ public static class TaeUtils
 	}
 
 	/// <summary>
-	/// Edit parameters of the event so that it will match with its DS3 event equivalent.
+	/// Returns true if the event is not a SpEffect event or if the SpEffect id of the event is allowed.
 	/// </summary>
-	public static TAE.Event Edit(this TAE.Event ev, bool bigEndian, Options op)
+	public static bool IsAllowedSpEffect(this TAE.Event ev, bool isBigEndian, XmlData data)
 	{
-		byte[] paramBytes = ev.GetParameterBytes(bigEndian);
-		
-		if (op.Game.Type == Game.GameTypes.Sekiro)
-		{
-			switch (ev.Type)
-			{
-				// SpawnOneShotFFX
-				case 96:
-					Array.Resize(ref paramBytes, 16);
-					break;
-				// SpawnFFX_100_BB
-				case 100:
-					ev.Type = 96;
-					ev.Group.GroupType = 96;
-					paramBytes[13] = paramBytes[12];
-					paramBytes[12] = 0;
-					break;
-				// PlaySound_CenterBody
-				case 128:
-					paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
-					break;
-				// PlaySound_ByStateInfo
-				case 129:
-					paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
-					Array.Clear(paramBytes, 18, 2);
-					break;
-				// PlaySound_ByDummyPoly_PlayerVoice
-				case 130:
-					paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
-					Array.Clear(paramBytes, 16, 2);
-					Array.Resize(ref paramBytes, 32);
-					break;
-				// PlaySound_DummyPoly
-				case 131:
-					paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
-					break;
-				// SetLockCamParam_Boss
-				case 151:
-					Array.Clear(paramBytes, 4, 12);
-					Array.Resize(ref paramBytes, 16);
-					break;
-				// SetOpacityKeyframe
-				case 193:
-					Array.Resize(ref paramBytes, 16);
-					break;
-				// InvokeChrClothState
-				case 310:
-					Array.Resize(ref paramBytes, 8);
-					break;
-				// AddSpEffect_Multiplayer_401
-				case 401:
-					Array.Clear(paramBytes, 8, 4);
-					break;
-				// EnableBehaviorFlags
-				case 600:
-					Array.Resize(ref paramBytes, 16);
-					break;
-				// AdditiveAnimPlayback
-				case 601:
-					Array.Clear(paramBytes, 12, 4);
-					break;
-				// 
-				case 700:
-					Array.Resize(ref paramBytes, 52);
-					break;
-				// FacingAngleCorrection
-				case 705:
-					Array.Clear(paramBytes, 8, 4);
-					break;
-				// CultCatchAttach
-				case 720:
-					Array.Clear(paramBytes, 1, 1);
-					break;
-				// OnlyForNon_c0000Enemies
-				case 730:
-					Array.Clear(paramBytes, 8, 4);
-					break;
-				// PlaySound_WanderGhost
-				case 10130:
-					Array.Clear(paramBytes, 12, 4);
-					Array.Resize(ref paramBytes, 16);
-					break;
-			}
-		}
-		
-		ev.SetParameterBytes(bigEndian, paramBytes);
-		return ev;
+		int spEffectId = ev.GetSpEffectId(isBigEndian);
+		return spEffectId >= 0 && data.AllowedSpEffects.Contains(spEffectId);
 	}
 }

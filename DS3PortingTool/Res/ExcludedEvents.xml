@@ -59,4 +59,38 @@
 			<item id="930"/>
 		</itemRange>
 	</itemList>
+	<itemList game="EldenRing">
+		<item id="14"/>
+		<item id="133"/>
+		<item id="134"/>
+		<item id="139"/>
+		<item id="152"/>
+		<item id="153"/>
+		<item id="198"/>
+		<item id="199"/>
+		<item id="200"/>
+		<item id="238"/>
+		<item id="339"/>
+		<item id="340"/>
+		<item id="341"/>
+		<item id="342"/>
+		<item id="343"/>
+		<item id="344"/>
+		<item id="511"/>
+		<item id="607"/>
+		<item id="608"/>
+		<item id="609"/>
+		<item id="702"/>
+		<item id="716"/>
+		<item id="717"/>
+		<item id="718"/>
+		<item id="731"/>
+		<item id="761"/>
+		<item id="787"/>
+		<item id="788"/>
+		<item id="789"/>
+		<itemRange increment="1" repeat="11">
+			<item id="900"/>
+		</itemRange>
+	</itemList>
 </excludedEvents>

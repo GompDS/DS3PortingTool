@@ -4,5 +4,6 @@
         <item id="31"/>
         <item id="35"/>
     </itemList>
-    <itemList game="Sekiro"></itemList>
+    <itemList game="Sekiro"/>
+    <itemList game="EldenRing"/>
 </AllowedSpEffects>

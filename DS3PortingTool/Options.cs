@@ -10,13 +10,21 @@ public class Options
     /// </summary>
     public string Cwd { get; }
     /// <summary>
-    /// Name of the source dcx file without the path.
+    /// Name(s) of the source dcx file(s) without the path.
     /// </summary>
-    public string SourceFileName { get; }
+    public string[] SourceFileNames { get; }
     /// <summary>
-    /// The binder where data being ported is sourced from.
+    /// The binder(s) where data being ported is sourced from.
     /// </summary>
-    public IBinder SourceBnd { get;  }
+    public IBinder[] SourceBnds { get; }
+    /// <summary>
+    /// Name of the source dcx file without the path currently being ported.
+    /// </summary>
+    public string CurrentSourceFileName { get; set; }
+    /// <summary>
+    /// The binder currently being ported.
+    /// </summary>
+    public IBinder CurrentSourceBnd { get; set; }
     /// <summary>
     /// The game that the source binder comes from.
     /// </summary>
@@ -29,7 +37,6 @@ public class Options
     /// The character id of the ported binder.
     /// </summary>
     public string PortedChrId { get; }
-    
     /// <summary>
     /// The character id that sound events will use.
     /// </summary>
@@ -54,31 +61,37 @@ public class Options
         PortedChrId = "";
         SoundChrId = "";
         ChangeSoundIds = true;
-        ExcludedAnimOffsets = new();
+        ExcludedAnimOffsets = new List<int>();
         
-        string? sourceFile = Array.Find(args, x => File.Exists(x) && 
+        string[] sourceFiles = Array.FindAll(args, x => File.Exists(x) && 
                                                    Path.GetFileName(x).Contains(".dcx"));
-        if (sourceFile == null)
+        if (sourceFiles.Length == 0)
         {
             throw new ArgumentException("No path to a source binder found in arguments.");
         }
 
-        SourceFileName = Path.GetFileName(sourceFile);
+        SourceFileNames = new string[sourceFiles.Length];
+        SourceBnds = new IBinder[sourceFiles.Length];
 
-        if (BND4.Is(sourceFile))
+        for (int i = 0; i < sourceFiles.Length; i++)
         {
-            SourceBnd = BND4.Read(sourceFile);
-        }
-        else
-        {
-            SourceBnd = BND3.Read(sourceFile);
+            SourceFileNames[i] = Path.GetFileName(sourceFiles[i]);
+            
+            if (BND4.Is(sourceFiles[i]))
+            {
+                SourceBnds[i] = BND4.Read(sourceFiles[i]);
+            }
+            else
+            {
+                SourceBnds[i] = BND3.Read(sourceFiles[i]);
+            }
         }
 
-        Game = new(SourceBnd);
-
+        Game = new(SourceBnds[0]);
+        
         List<int> flagIndices = args.Where(x => x.Length == 2 && x.Substring(0, 1).Equals("-"))
             .Select(x => Array.IndexOf(args, x))
-            .Where(x => x != Array.IndexOf(args, sourceFile)).ToList();
+            .Where(x => sourceFiles.All(y => x != Array.IndexOf(args, y))).ToList();
 		
         if (!flagIndices.Any())
         {
@@ -93,9 +106,9 @@ public class Options
             }
         }
         
-        if (Path.GetFileName(sourceFile).Substring(1, 4).All(char.IsDigit))
+        if (Path.GetFileName(sourceFiles[0]).Substring(1, 4).All(char.IsDigit))
         {
-            SourceChrId = Path.GetFileName(sourceFile).Substring(1, 4);
+            SourceChrId = Path.GetFileName(sourceFiles[0]).Substring(1, 4);
             PortedChrId = SourceChrId;
         }
 		
@@ -107,7 +120,7 @@ public class Options
             }
             else if (args[i].Equals("-c"))
             {
-                if (args.Length < i + 1)
+                if (args.Length <= i + 1)
                 {
                     throw new ArgumentException($"Flag '-c' used, but no character id provided.");
                 }
@@ -124,7 +137,7 @@ public class Options
             }
             else if (args[i].Equals("-o"))
             {
-                if (args.Length < i + 1)
+                if (args.Length <= i + 1)
                 {
                     throw new ArgumentException($"Flag '-o' used, but no offsets provided.");
                 }
@@ -134,11 +147,11 @@ public class Options
             }
             else if (args[i].Equals("-s"))
             {
-                if (args.Length < i + 1)
+                if (args.Length <= i + 1)
                 {
                     ChangeSoundIds = false;
                 }
-                else if (flagIndices.Contains(i + 1) || i + 1 == Array.IndexOf(args, sourceFile))
+                else if (flagIndices.Contains(i + 1) || sourceFiles.Any(x => i + 1 == Array.IndexOf(args, x)))
                 {
                     ChangeSoundIds = false;
                 }
@@ -146,8 +159,10 @@ public class Options
                 {
                     throw new ArgumentException($"Character id after flag '-s' must be a 4 digit number.");
                 }
-
-                SoundChrId = args[i + 1];
+                else if (args[i + 1].Length == 4 || args[i + 1].All(char.IsDigit))
+                {
+                    SoundChrId = args[i + 1];
+                }
             }
             else if (!args[i].Equals("-x"))
             {

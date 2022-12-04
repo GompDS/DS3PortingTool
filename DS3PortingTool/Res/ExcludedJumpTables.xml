@@ -12,4 +12,7 @@
         <item id="92"/>
         <item id="122"/>
     </itemList>
+    <itemList game="EldenRing">
+        <item id="34"/>
+    </itemList>
 </excludedJumpTables>

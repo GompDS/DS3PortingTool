@@ -5,24 +5,32 @@ using SoulsFormats;
 namespace DS3PortingTool;
 public class SekiroConverter : Converter
 {
+    public override void ConvertCombinedAnibnd(Options op)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Converts a Sekiro HKX file into a DS3 compatible HKX file.
+    /// </summary>
 	protected override void ConvertHkx(BND4 newBnd, Options op)
     {
-        if (op.SourceFileName.Contains("anibnd"))
+        if (op.CurrentSourceFileName.Contains("anibnd"))
         {
-            BinderFile? compendium = op.SourceBnd.Files
+            BinderFile? compendium = op.CurrentSourceBnd.Files
                 .Find(x => x.Name.Contains($"c{op.SourceChrId}.compendium"));
             if (compendium == null)
             {
                 throw new FileNotFoundException("Source anibnd contains no compendium.");
             }
 			
-            newBnd.Files = op.SourceBnd.Files
+            newBnd.Files = op.CurrentSourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
                 .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
         }
         else
         {
-            newBnd.Files = op.SourceBnd.Files
+            newBnd.Files = op.CurrentSourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
                 .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
         }
@@ -60,7 +68,9 @@ public class SekiroConverter : Converter
             }
         }
     }
-    
+    /// <summary>
+    /// Converts a Sekiro TAE file into a DS3 compatible TAE file.
+    /// </summary>
     protected override void ConvertTae(BND4 newBnd, BinderFile taeFile, Options op)
     {
         TAE oldTae = TAE.Read(taeFile.Bytes);
@@ -84,7 +94,7 @@ public class SekiroConverter : Converter
 
         data.ExcludedAnimations.AddRange(oldTae.Animations.Where(x => 
             x.MiniHeader is TAE.Animation.AnimMiniHeader.Standard { ImportsHKX: true } standardHeader && 
-            op.SourceBnd.Files.All(y => y.Name != "a00" + standardHeader.ImportHKXSourceAnimID.ToString("D3").GetOffset() +
+            op.CurrentSourceBnd.Files.All(y => y.Name != "a00" + standardHeader.ImportHKXSourceAnimID.ToString("D3").GetOffset() +
                 "_" + standardHeader.ImportHKXSourceAnimID.ToString("D9")[3..] + ".hkx"))
             .Select(x => Convert.ToInt32(x.ID)));
 
@@ -126,7 +136,7 @@ public class SekiroConverter : Converter
                     !data.ExcludedEvents.Contains(ev.Type) && 
                     !data.ExcludedJumpTables.Contains(ev.GetJumpTableId(newTae.BigEndian)) && 
                     !data.ExcludedRumbleCams.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
-                .Select(ev => ev.Edit(newTae.BigEndian, op)).ToList();
+                .Select(ev => EditEvent(ev, newTae.BigEndian, op)).ToList();
         }
 		
         if (op.ExcludedAnimOffsets.Any())
@@ -147,4 +157,94 @@ public class SekiroConverter : Converter
             newBnd.Files.Add(taeFile);
         }
     }
+    /// <summary>
+	/// Edits parameters of a Sekiro event so that it will match with its DS3 event equivalent.
+	/// </summary>
+	protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op)
+	{
+		byte[] paramBytes = ev.GetParameterBytes(bigEndian);
+		
+		switch (ev.Type)
+        {
+            // SpawnOneShotFFX
+            case 96:
+                Array.Resize(ref paramBytes, 16);
+                break;
+            // SpawnFFX_100_BB
+            case 100:
+                ev.Type = 96;
+                ev.Group.GroupType = 96;
+                paramBytes[13] = paramBytes[12];
+                paramBytes[12] = 0;
+                break;
+            // PlaySound_CenterBody
+            case 128:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                break;
+            // PlaySound_ByStateInfo
+            case 129:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                Array.Clear(paramBytes, 18, 2);
+                break;
+            // PlaySound_ByDummyPoly_PlayerVoice
+            case 130:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                Array.Clear(paramBytes, 16, 2);
+                Array.Resize(ref paramBytes, 32);
+                break;
+            // PlaySound_DummyPoly
+            case 131:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                break;
+            // SetLockCamParam_Boss
+            case 151:
+                Array.Clear(paramBytes, 4, 12);
+                Array.Resize(ref paramBytes, 16);
+                break;
+            // SetOpacityKeyframe
+            case 193:
+                Array.Resize(ref paramBytes, 16);
+                break;
+            // InvokeChrClothState
+            case 310:
+                Array.Resize(ref paramBytes, 8);
+                break;
+            // AddSpEffect_Multiplayer_401
+            case 401:
+                Array.Clear(paramBytes, 8, 4);
+                break;
+            // EnableBehaviorFlags
+            case 600:
+                Array.Resize(ref paramBytes, 16);
+                break;
+            // AdditiveAnimPlayback
+            case 601:
+                Array.Clear(paramBytes, 12, 4);
+                break;
+            // BehaviorDataUnk700
+            case 700:
+                Array.Resize(ref paramBytes, 52);
+                break;
+            // FacingAngleCorrection
+            case 705:
+                Array.Clear(paramBytes, 8, 4);
+                break;
+            // CultCatchAttach
+            case 720:
+                Array.Clear(paramBytes, 1, 1);
+                break;
+            // OnlyForNon_c0000Enemies
+            case 730:
+                Array.Clear(paramBytes, 8, 4);
+                break;
+            // PlaySound_WanderGhost
+            case 10130:
+                Array.Clear(paramBytes, 12, 4);
+                Array.Resize(ref paramBytes, 16);
+                break;
+        }
+		
+		ev.SetParameterBytes(bigEndian, paramBytes);
+		return ev;
+	}
 }
