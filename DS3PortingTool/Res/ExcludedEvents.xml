@@ -61,6 +61,8 @@
 	</itemList>
 	<itemList game="EldenRing">
 		<item id="14"/>
+		<item id="66"/>
+		<item id="67"/>
 		<item id="133"/>
 		<item id="134"/>
 		<item id="139"/>
@@ -70,12 +72,15 @@
 		<item id="199"/>
 		<item id="200"/>
 		<item id="238"/>
+		<item id="302"/>
+		<item id="331"/>
 		<item id="339"/>
 		<item id="340"/>
 		<item id="341"/>
 		<item id="342"/>
 		<item id="343"/>
 		<item id="344"/>
+		<item id="401"/>
 		<item id="511"/>
 		<item id="607"/>
 		<item id="608"/>

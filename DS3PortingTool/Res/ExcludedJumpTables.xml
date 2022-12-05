@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <excludedJumpTables>
     <itemList game="Bloodborne">
+        <item id="0"/>
         <item id="5"/>
         <item id="63"/>
         <item id="73"/>
     </itemList>
     <itemList game="Sekiro">
+        <item id="0"/>
         <item id="5"/>
         <item id="63"/>
         <item id="73"/>
@@ -13,6 +15,7 @@
         <item id="122"/>
     </itemList>
     <itemList game="EldenRing">
+        <item id="0"/>
         <item id="34"/>
     </itemList>
 </excludedJumpTables>

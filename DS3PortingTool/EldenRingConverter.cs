@@ -177,11 +177,33 @@ public class EldenRingConverter : Converter
                 break;
             // PlaySound_CenterBody
             case 128:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
                 Array.Resize(ref paramBytes, 16);
                 break;
             // PlaySound_ByStateInfo
             case 129:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
                 Array.Clear(paramBytes, 18, 14);
+                break;
+            // PlaySound_Weapon
+            case 132:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                Array.Clear(paramBytes, 8, 8);
+                break;
+            // Wwise_PlaySound_Unk133
+            case 133:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                ev.Type = 128;
+                ev.Group.GroupType = 128;
+                Array.Clear(paramBytes, 8, 6);
+                break;
+            // Wwise_PlaySound_Unk134
+            case 134:
+                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                ev.Type = 128;
+                ev.Group.GroupType = 128;
+                Array.Clear(paramBytes, 8, 12);
+                Array.Resize(ref paramBytes, 16);
                 break;
             // InvokeDecalParamID_DummyPoly
             case 138:
