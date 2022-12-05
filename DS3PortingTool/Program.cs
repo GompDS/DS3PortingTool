@@ -11,12 +11,12 @@ class Program
 
 		switch (op.Game.Type)
 		{
-			case Game.GameTypes.Bloodborne:
+			/*case Game.GameTypes.Bloodborne:
 				conv = new BloodborneConverter();
 				break;
 			case Game.GameTypes.DarkSouls3:
 				conv = new DarkSouls3Converter();
-				break;
+				break;*/
 			case Game.GameTypes.Sekiro:
 				conv = new SekiroConverter();
 				break;
