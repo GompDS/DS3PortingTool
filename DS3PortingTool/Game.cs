@@ -1,3 +1,4 @@
+using System.Linq;
 using SoulsFormats;
 
 namespace DS3PortingTool;

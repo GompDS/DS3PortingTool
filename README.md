@@ -7,7 +7,8 @@ If you use this tool for your mod I'd appreciate it if you would credit me for i
 
 ### Features
 - Automatically converts HKX files (although it's a very lengthy process)
-- Converts ragdoll and some cloth.
+- Converts ragdoll (not all Elden Ring Ragdoll)
+- Converts cloth (not all cloth)
 - Replaces materials and textures with DS3 materials and dummy textures.
 - Excludes animations and events from the tae which are not applicable or an annoyance in DS3.
 - Remaps animation ids to match their DS3 equivalents.
@@ -17,6 +18,7 @@ If you use this tool for your mod I'd appreciate it if you would credit me for i
 
 ### Games Supported
 - **Sekiro**
+- **Elden Ring**
 
 ![Example of Divine Dragon ported.](/DS3PortingTool/Assets/Ported_Enemy_Sample.png)
 <br /> Enemies ported from Sekiro and Elden Ring will have this look to them.
@@ -42,10 +44,12 @@ following tools unzipped in the 'HavokDowngrade' folder.
 
 ------
 ## Usage
-If using from the command line, enter flags first and then the path to the
-source DCX file. Alternatively you can drag-and-drop a DCX file onto the exe.
+If using from the command line, enter flags first and then the path(s) to the
+source DCX file(s). Alternatively you can drag-and-drop DCX file(s) onto the exe.
 
-DCX file must be either an anibnd or chrbnd.
+DCX file(s) must be either an anibnd or chrbnd.
+
+>For Elden Ring, make sure you select all of the enemy's anibnds and drag them onto the exe at the same time.
 
 In this example, no flags were entered initially so the user was prompted to enter flags. The user
 did not want to use any flags and so continued with the program execution.
@@ -89,6 +93,10 @@ Example:`DS3PortingTool.exe -t c1000.anibnd.dcx`
 `-x` Runs the program without asking the user to enter flags.
 
 Example:`DS3PortingTool.exe -x c6200.anibnd.dcx`
+
+------
+## Known Issues
+- Some Elden Ring ragdoll may appear to downgrade without any issues, but in game attacking the enemy causes a game crash. If this happens remove the ragdoll and hpxpwv from the chrbnd.
 
 ------
 ## Special Thanks

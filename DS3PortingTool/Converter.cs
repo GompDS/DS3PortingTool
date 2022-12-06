@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsAssetPipeline.FLVERImporting;
@@ -29,8 +33,7 @@ public abstract class Converter
             if (!op.PortTaeOnly)
             {
                 newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx",
-                    DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
+                newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
             }
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
@@ -56,14 +59,9 @@ public abstract class Converter
             }
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx",
-                DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
+            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
-    /// <summary>
-    /// Elden Ring Only. Finish conversion the combined anibnd. All the hkx should already be converted.
-    /// </summary>
-    public abstract void ConvertCombinedAnibnd(Options op);
     /// <summary>
     /// Converts a foreign HKX file into a DS3 compatible HKX file.
     /// </summary>

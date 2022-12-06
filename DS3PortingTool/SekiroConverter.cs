@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;
@@ -5,11 +9,6 @@ using SoulsFormats;
 namespace DS3PortingTool;
 public class SekiroConverter : Converter
 {
-    public override void ConvertCombinedAnibnd(Options op)
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
     /// Converts a Sekiro HKX file into a DS3 compatible HKX file.
     /// </summary>

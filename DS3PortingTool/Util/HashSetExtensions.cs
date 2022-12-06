@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace DS3PortingTool.Util;
 
 public static class HashSetExtensions

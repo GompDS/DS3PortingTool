@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using SoulsAssetPipeline.FLVERImporting;
@@ -126,7 +129,7 @@ public static class FlverUtils
     /// <summary>
     /// From The12thAvenger's FBXImporter
     /// </summary>
-    public static FLVER.Vertex Pad(this FLVER.Vertex vertex, IEnumerable<FLVER2.BufferLayout> bufferLayouts)
+    public static FLVER.Vertex Pad(this FLVER.Vertex vertex, List<FLVER2.BufferLayout> bufferLayouts)
     {
         Dictionary<FLVER.LayoutSemantic, int> usageCounts = new();
         FLVER.LayoutSemantic[] paddedProperties =

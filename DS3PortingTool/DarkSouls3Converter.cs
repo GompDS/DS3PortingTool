@@ -1,6 +1,8 @@
+using System;
+using System.IO;
+using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
-using SoulsAssetPipeline.FLVERImporting;
 using SoulsFormats;
 
 namespace DS3PortingTool;
@@ -10,7 +12,7 @@ public class DarkSouls3Converter : Converter
     /// <summary>
     /// Performs the steps necessary to convert a DS3 binder into a new DS3 binder.
     /// </summary>
-    public virtual void DoConversion(Options op)
+    public override void DoConversion(Options op)
     {
         BND4 newBnd = new();
         if (op.CurrentSourceFileName.Contains("anibnd"))
@@ -29,8 +31,7 @@ public class DarkSouls3Converter : Converter
             if (!op.PortTaeOnly)
             {
                 newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx",
-                    DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
+                newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
             }
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
@@ -56,8 +57,7 @@ public class DarkSouls3Converter : Converter
             }
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx",
-                DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
+            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
         else if (op.CurrentSourceFileName.Contains("texbnd"))
         {
@@ -65,11 +65,6 @@ public class DarkSouls3Converter : Converter
             //TPF newTpf = new();
             
         }
-    }
-    
-    public override void ConvertCombinedAnibnd(Options op)
-    {
-        throw new NotImplementedException();
     }
 
     protected override void ConvertHkx(BND4 newBnd, Options op)
@@ -101,7 +96,7 @@ public class DarkSouls3Converter : Converter
     /// <summary>
     /// Converts a ds3 FLVER file into a new DS3 FLVER file.
     /// </summary>
-    protected void ConvertFlver(BND4 newBnd, BinderFile flverFile, Options op)
+    private new void ConvertFlver(BND4 newBnd, BinderFile flverFile, Options op)
     {
         FLVER2 newFlver = FLVER2.Read(flverFile.Bytes);
 

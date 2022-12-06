@@ -1,6 +1,8 @@
+using System;
+using System.IO;
+using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
-using SoulsAssetPipeline.FLVERImporting;
 using SoulsFormats;
 
 namespace DS3PortingTool;
@@ -31,6 +33,12 @@ public class EldenRingConverter : Converter
             {
                 _combinedAnibnd.Files.Add(file);
             }
+
+            string[] anibndNames = op.SourceFileNames.Where(x => x.Contains(".anibnd")).ToArray();
+            if (Array.IndexOf(anibndNames, op.CurrentSourceFileName) == anibndNames.Length - 1)
+            {
+                ConvertCombinedAnibnd(op);
+            }
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
         {
@@ -55,15 +63,14 @@ public class EldenRingConverter : Converter
             }
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx",
-                DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
+            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
 
     /// <summary>
     /// Finish conversion the combined anibnd. All the hkx should already be converted.
     /// </summary>
-    public override void ConvertCombinedAnibnd(Options op)
+    private void ConvertCombinedAnibnd(Options op)
     {
         BND4 newBnd = new();
         
@@ -78,8 +85,7 @@ public class EldenRingConverter : Converter
         if (!op.PortTaeOnly)
         {
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx",
-                DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
+            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
 
@@ -105,20 +111,33 @@ public class EldenRingConverter : Converter
                     .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
             }
         }
+        else
+        {
+            newBnd.Files = op.CurrentSourceBnd.Files
+                .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
+                .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
+        }
 
         foreach (BinderFile hkx in newBnd.Files)
         {
             string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
 
-            hkx.Name = $"{path}hkx\\{name}";
-            if (name.Contains("skeleton"))
+            if (name.Contains($"c{op.SourceChrId}.hkx") || name.Contains($"c{op.SourceChrId}_c.hkx"))
             {
-                hkx.ID = 1000000;
+                hkx.Name = $"{path}{name.Replace(op.SourceChrId, op.PortedChrId)}";
             }
             else
             {
-                hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(1, 2)}");
+                hkx.Name = $"{path}hkx\\{name}";
+                if (name.Contains("skeleton"))
+                {
+                    hkx.ID = 1000000;
+                }
+                else
+                {
+                    hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(1, 2)}");
+                }
             }
         }
     }

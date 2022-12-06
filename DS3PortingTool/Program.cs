@@ -1,4 +1,4 @@
-using SoulsFormats;
+using System;
 
 namespace DS3PortingTool;
 class Program
@@ -33,11 +33,6 @@ class Program
 			op.CurrentSourceBnd = op.SourceBnds[i];
 			
 			conv.DoConversion(op);
-		}
-
-		if (op.Game.Type == Game.GameTypes.EldenRing && op.SourceFileNames.Any(x => x.Contains(".anibnd")))
-		{
-			conv.ConvertCombinedAnibnd(op);
 		}
 	}
 }

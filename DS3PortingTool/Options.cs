@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using SoulsFormats;
 using ArgumentException = System.ArgumentException;
 
@@ -73,6 +77,9 @@ public class Options
         SourceFileNames = new string[sourceFiles.Length];
         SourceBnds = new IBinder[sourceFiles.Length];
 
+        CurrentSourceFileName = SourceFileNames[0];
+        CurrentSourceBnd = SourceBnds[0];
+
         for (int i = 0; i < sourceFiles.Length; i++)
         {
             SourceFileNames[i] = Path.GetFileName(sourceFiles[i]);
@@ -88,10 +95,11 @@ public class Options
         }
 
         Game = new(SourceBnds[0]);
-        
+
+        string[] args1 = args;
         List<int> flagIndices = args.Where(x => x.Length == 2 && x.Substring(0, 1).Equals("-"))
             .Select(x => Array.IndexOf(args, x))
-            .Where(x => sourceFiles.All(y => x != Array.IndexOf(args, y))).ToList();
+            .Where(x => sourceFiles.All(y => x != Array.IndexOf(args1, y))).ToList();
 		
         if (!flagIndices.Any())
         {

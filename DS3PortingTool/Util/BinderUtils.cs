@@ -1,4 +1,7 @@
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using SoulsFormats;
 
 namespace DS3PortingTool.Util;

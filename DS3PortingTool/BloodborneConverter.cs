@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;
@@ -27,8 +30,7 @@ public class BloodborneConverter : Converter
             if (!op.PortTaeOnly)
             {
                 newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx",
-                    DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
+                newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
             }
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
@@ -50,16 +52,9 @@ public class BloodborneConverter : Converter
             // Convert tpfs into texbnd
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx",
-                DCX.Compress(newBnd.Write(), DCX.Type.DCX_DFLT_10000_44_9));
+            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
-
-    public override void ConvertCombinedAnibnd(Options op)
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
     /// Converts a Bloodborne HKX file into a DS3 compatible HKX file.
     /// </summary>
