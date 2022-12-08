@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsAssetPipeline.FLVERImporting;

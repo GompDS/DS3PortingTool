@@ -1,5 +1,3 @@
-using System;
-
 namespace DS3PortingTool;
 class Program
 {

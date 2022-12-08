@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;
@@ -132,7 +128,7 @@ public class SekiroConverter : Converter
             }
 			
             anim.Events = anim.Events.Where(ev => 
-                    !data.ExcludedEvents.Contains(ev.Type) && 
+                    (!data.ExcludedEvents.Contains(ev.Type) || ev.IsAllowedSpEffect(newTae.BigEndian, data)) && 
                     !data.ExcludedJumpTables.Contains(ev.GetJumpTableId(newTae.BigEndian)) && 
                     !data.ExcludedRumbleCams.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
                 .Select(ev => EditEvent(ev, newTae.BigEndian, op)).ToList();

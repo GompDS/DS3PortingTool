@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;

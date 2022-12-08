@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
 using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;
@@ -148,6 +145,7 @@ public class EldenRingConverter : Converter
 		
 		switch (ev.Type)
         {
+            // InvokeAttackBehavior
             case 1:
                 Array.Resize(ref paramBytes, 16);
                 break;

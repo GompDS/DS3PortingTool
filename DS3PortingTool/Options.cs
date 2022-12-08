@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using SoulsFormats;
 using ArgumentException = System.ArgumentException;
 
@@ -145,6 +141,8 @@ public class Options
             }
             else if (args[i].Equals("-o"))
             {
+                Console.WriteLine("Flag -o is known to have bugs in this release. Use at your own discretion.");
+                
                 if (args.Length <= i + 1)
                 {
                     throw new ArgumentException($"Flag '-o' used, but no offsets provided.");
