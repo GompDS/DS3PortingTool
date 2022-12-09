@@ -17,5 +17,7 @@
     <itemList game="EldenRing">
         <item id="0"/>
         <item id="34"/>
+        <item id="129"/>
+        <item id="132"/>
     </itemList>
 </excludedJumpTables>
