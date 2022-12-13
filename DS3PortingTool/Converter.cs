@@ -120,7 +120,7 @@ public abstract class Converter
                     (!data.ExcludedEvents.Contains(ev.Type) || ev.IsAllowedSpEffect(newTae.BigEndian, data)) && 
                     !data.ExcludedJumpTables.Contains(ev.GetJumpTableId(newTae.BigEndian)) && 
                     !data.ExcludedRumbleCams.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
-                .Select(ev => EditEvent(ev, newTae.BigEndian, op)).ToList();
+                .Select(ev => EditEvent(ev, newTae.BigEndian, op, data)).ToList();
             
         }
 		
@@ -148,7 +148,7 @@ public abstract class Converter
     /// <summary>
     /// Edits parameters of the event so that it will match with its DS3 event equivalent.
     /// </summary>
-    protected abstract TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op);
+    protected abstract TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data);
     /// <summary>
     /// Converts a foreign FLVER file into a DS3 compatible FLVER file.
     /// </summary>

@@ -83,7 +83,7 @@ public class BloodborneConverter : Converter
     /// <summary>
     /// Edits parameters of a Bloodborne event so that it will match with its DS3 event equivalent.
     /// </summary>
-    protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op)
+    protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data)
     {
         throw new NotImplementedException();
     }

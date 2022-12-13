@@ -131,7 +131,7 @@ public class SekiroConverter : Converter
                     (!data.ExcludedEvents.Contains(ev.Type) || ev.IsAllowedSpEffect(newTae.BigEndian, data)) && 
                     !data.ExcludedJumpTables.Contains(ev.GetJumpTableId(newTae.BigEndian)) && 
                     !data.ExcludedRumbleCams.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
-                .Select(ev => EditEvent(ev, newTae.BigEndian, op)).ToList();
+                .Select(ev => EditEvent(ev, newTae.BigEndian, op, data)).ToList();
         }
 		
         if (op.ExcludedAnimOffsets.Any())
@@ -155,12 +155,20 @@ public class SekiroConverter : Converter
     /// <summary>
 	/// Edits parameters of a Sekiro event so that it will match with its DS3 event equivalent.
 	/// </summary>
-	protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op)
+	protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data)
 	{
 		byte[] paramBytes = ev.GetParameterBytes(bigEndian);
 		
 		switch (ev.Type)
         {
+            // AddSpEffect_Multiplayer
+            case 66:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // AddSpEffect
+            case 67:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
             // SpawnOneShotFFX
             case 96:
                 Array.Resize(ref paramBytes, 16);
@@ -200,6 +208,14 @@ public class SekiroConverter : Converter
             case 193:
                 Array.Resize(ref paramBytes, 16);
                 break;
+            // AddSpEffect_DragonForm
+            case 302:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // AddSpEffect_WeaponArts
+            case 331:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
             // InvokeChrClothState
             case 310:
                 Array.Resize(ref paramBytes, 8);
@@ -207,6 +223,7 @@ public class SekiroConverter : Converter
             // AddSpEffect_Multiplayer_401
             case 401:
                 Array.Clear(paramBytes, 8, 4);
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
                 break;
             // EnableBehaviorFlags
             case 600:
@@ -231,6 +248,10 @@ public class SekiroConverter : Converter
             // OnlyForNon_c0000Enemies
             case 730:
                 Array.Clear(paramBytes, 8, 4);
+                break;
+            // AddSpEffect_CultRitualCompletion
+            case 797:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
                 break;
             // PlaySound_WanderGhost
             case 10130:

@@ -111,7 +111,7 @@ public static class FlverUtils
 	        {"sss", "_SSS"},
 	        {"em", "_em"},
 	        {"e", "_e"},
-	        {"glow", "_Glow"},
+	        {"glow", "_em_e_Glow"},
 	        {"m", "_m"},
 	        {"decal", "_Decal"},
 	        {"cloth", "_Cloth"}
@@ -119,6 +119,11 @@ public static class FlverUtils
         
         List<string> extensions = mtd.ToLower().Split('_', '.').Where(extensionTypes.ContainsKey)
 	        .Select(x => extensionTypes[x]).ToList();
+
+        if ((extensions.Contains("_e") || extensions.Contains("_em")) && extensions.Contains("_em_e_Glow"))
+        {
+            extensions.Remove("_e");
+        }
 
         string newMtd = "C[ARSN]";
         newMtd += string.Join("", extensions);

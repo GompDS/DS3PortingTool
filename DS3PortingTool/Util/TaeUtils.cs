@@ -159,6 +159,42 @@ public static class TaeUtils
 
 		return paramBytes;
 	}
+	
+	/// <summary>
+	/// Change the first four digits of the Sound ID parameter of this event to match the new character ID
+	/// </summary>
+	public static byte[] ChangeSpEffectId(this TAE.Event ev, bool isBigEndian, XmlData data)
+	{
+		byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
+		byte[] spEffectIdBytes = new byte[4];
+		Array.Copy(paramBytes, 0, spEffectIdBytes, 0, 4);
+		if (isBigEndian)
+		{
+			Array.Reverse(spEffectIdBytes);
+		}
+		
+		int spEffectId = BitConverter.ToInt32(spEffectIdBytes, 0);
+		if (data.SpEffectRemapping.ContainsKey(spEffectId))
+		{
+			data.SpEffectRemapping.TryGetValue(spEffectId, out spEffectId);
+		}
+		byte[] newBytes = BitConverter.GetBytes(spEffectId);
+		Array.Copy(newBytes, 0, paramBytes, 0, 4);
+
+		if (ev.Type == 331)
+		{
+			Array.Copy(paramBytes, 4, spEffectIdBytes, 0, 4);
+			spEffectId = BitConverter.ToInt32(spEffectIdBytes, 0);
+			if (data.SpEffectRemapping.ContainsKey(spEffectId))
+			{
+				data.SpEffectRemapping.TryGetValue(spEffectId, out spEffectId);
+			}
+			newBytes = BitConverter.GetBytes(spEffectId);
+			Array.Copy(newBytes, 0, paramBytes, 4, 4);
+		}
+
+		return paramBytes;
+	}
 
 	/// <summary>
 	/// Gets ids of animations that belong to excluded offsets.

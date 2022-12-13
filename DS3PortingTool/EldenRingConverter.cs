@@ -133,13 +133,13 @@ public class EldenRingConverter : Converter
                 }
                 else
                 {
-                    hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(1, 2)}");
+                    hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(0, 2)}");
                 }
             }
         }
     }
 
-    protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op)
+    protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data)
     {
         byte[] paramBytes = ev.GetParameterBytes(bigEndian);
 		
@@ -169,10 +169,12 @@ public class EldenRingConverter : Converter
             // AddSpEffect_Multiplayer
             case 66:
                 Array.Resize(ref paramBytes, 16);
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
                 break;
             // AddSpEffect
             case 67:
                 Array.Resize(ref paramBytes, 16);
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
                 break;
             // SpawnOneShotFFX_Ember
             case 95:
@@ -251,6 +253,18 @@ public class EldenRingConverter : Converter
             // SpawnAISound
             case 237:
                 Array.Resize(ref paramBytes, 16);
+                break;
+            // AddSpEffect_DragonForm
+            case 302:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // AddSpEffect_WeaponArts
+            case 331:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // AddSpEffect_Multiplayer_401
+            case 401:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
                 break;
             // IgnoreHitsPartsMask
             case 500:

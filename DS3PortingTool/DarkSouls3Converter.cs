@@ -85,7 +85,7 @@ public class DarkSouls3Converter : Converter
         }
     }
 
-    protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op)
+    protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data)
     {
         return ev;
     }
