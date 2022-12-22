@@ -177,9 +177,9 @@ public static class TaeUtils
 		if (data.SpEffectRemapping.ContainsKey(spEffectId))
 		{
 			data.SpEffectRemapping.TryGetValue(spEffectId, out spEffectId);
+			byte[] newBytes = BitConverter.GetBytes(spEffectId);
+			Array.Copy(newBytes, 0, paramBytes, 0, 4);
 		}
-		byte[] newBytes = BitConverter.GetBytes(spEffectId);
-		Array.Copy(newBytes, 0, paramBytes, 0, 4);
 
 		if (ev.Type == 331)
 		{
@@ -188,9 +188,9 @@ public static class TaeUtils
 			if (data.SpEffectRemapping.ContainsKey(spEffectId))
 			{
 				data.SpEffectRemapping.TryGetValue(spEffectId, out spEffectId);
+				byte[] newBytes = BitConverter.GetBytes(spEffectId);
+				Array.Copy(newBytes, 0, paramBytes, 4, 4);
 			}
-			newBytes = BitConverter.GetBytes(spEffectId);
-			Array.Copy(newBytes, 0, paramBytes, 4, 4);
 		}
 
 		return paramBytes;
