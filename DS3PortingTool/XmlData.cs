@@ -9,14 +9,15 @@ public class XmlData
 	/// Contains templates for creating new materials.
 	/// </summary>
 	public FLVER2MaterialInfoBank MaterialInfoBank { get; }
+
 	/// <summary>
 	/// Old animations ids paired with replacement ids.
 	/// </summary>
-	public Dictionary<int, int> AnimationRemapping { get; }
+	public Dictionary<int, int> AnimationRemapping = new();
 	/// <summary>
 	/// IDs of animations to exclude.
 	/// </summary>
-	public HashSet<int> ExcludedAnimations { get; }
+	public HashSet<int> ExcludedAnimations = new();
 	/// <summary>
 	/// IDs of events to exclude.
 	/// </summary>
@@ -32,24 +33,36 @@ public class XmlData
 	/// <summary>
 	/// IDs of SpEffects to allow when a SpEffect event is excluded.
 	/// </summary>
-	public HashSet<int> AllowedSpEffects { get; }
+	public HashSet<int> AllowedSpEffects = new();
 	/// <summary>
 	/// Old SpEffect IDs paired with replacements.
 	/// </summary>
-	public Dictionary<int, int> SpEffectRemapping { get; }
+	public Dictionary<int, int> SpEffectRemapping = new();
 
 	public XmlData(Options op)
 	{
 	    string gameName = op.Game.Name;
+	    string? xmlDirectory;
+	    switch (op.SourceBndsType)
+	    {
+		    case Options.AssetType.Character:
+			    xmlDirectory = $"{op.Cwd}Res\\CharacterXML\\";
+			    AnimationRemapping = GetXmlDictionary(XElement.Load($"{xmlDirectory}AnimationRemapping.xml"), gameName);
+			    ExcludedAnimations = GetXmlSet(XElement.Load($"{xmlDirectory}ExcludedAnimations.xml"), gameName);
+			    AllowedSpEffects = GetXmlSet(XElement.Load($"{xmlDirectory}AllowedSpEffects.xml"), gameName);
+			    SpEffectRemapping = GetXmlDictionary(XElement.Load($"{xmlDirectory}SpEffectRemapping.xml"), gameName);
+			    break;
+		    case Options.AssetType.Object:
+			    xmlDirectory = $"{op.Cwd}Res\\ObjectXML\\";
+			    break;
+		    default:
+			    throw new ArgumentException("Unsupported bnd type.");
+	    }
 	    
-	    MaterialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{op.Cwd}Res\\BankDS3.xml");
-	    AnimationRemapping = GetXmlDictionary(XElement.Load($"{op.Cwd}\\Res\\AnimationRemapping.xml"), gameName);
-	    ExcludedAnimations = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedAnimations.xml"), gameName);
-	    ExcludedEvents = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedEvents.xml"), gameName);
-	    ExcludedJumpTables = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedJumpTables.xml"), gameName);
-	    ExcludedRumbleCams = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\ExcludedRumbleCams.xml"), gameName);
-	    AllowedSpEffects = GetXmlSet(XElement.Load($"{op.Cwd}\\Res\\AllowedSpEffects.xml"), gameName);
-	    SpEffectRemapping = GetXmlDictionary(XElement.Load($"{op.Cwd}\\Res\\SpEffectRemapping.xml"), gameName);
+	    MaterialInfoBank = FLVER2MaterialInfoBank.ReadFromXML($"{op.Cwd}\\Res\\BankDS3.xml");
+	    ExcludedEvents = GetXmlSet(XElement.Load($"{xmlDirectory}ExcludedEvents.xml"), gameName);
+	    ExcludedJumpTables = GetXmlSet(XElement.Load($"{xmlDirectory}ExcludedJumpTables.xml"), gameName);
+	    ExcludedRumbleCams = GetXmlSet(XElement.Load($"{xmlDirectory}ExcludedRumbleCams.xml"), gameName);
 	}
     
 	/// <summary>

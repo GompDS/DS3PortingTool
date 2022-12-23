@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<excludedRumbleCams>
+    <itemList game="Bloodborne"/>
+    <itemList game="Sekiro">
+        <item id="70"/>
+        <itemRange increment="1" repeat="4">
+            <item id="60"/>
+        </itemRange>
+        <itemRange increment="1" repeat="7">
+            <item id="50"/>
+        </itemRange>
+        <itemRange increment="1" repeat="9">
+            <item id="370"/>
+        </itemRange>
+        <itemRange increment="1" repeat="15">
+            <item id="100"/>
+        </itemRange>
+    </itemList>
+    <itemList game="EldenRing"/>
+</excludedRumbleCams>

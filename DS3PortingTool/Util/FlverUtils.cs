@@ -146,16 +146,22 @@ public static class FlverUtils
             {"e", "_e"},
             {"glow", "_em_Glow"},
             {"m", "_m"},
-            {"cloth", "_Cloth"},
+            {"cloth", "_e_Cloth_Decal"},
             {"decal", "_Decal"}
         };
         
         List<string> extensions = mtd.ToLower().Split('_', '.').Where(extensionTypes.ContainsKey)
             .Select(x => extensionTypes[x]).ToList();
 
-        if ((extensions.Contains("_e") || extensions.Contains("_em")) && extensions.Contains("_em_e_Glow"))
+        if ((extensions.Contains("_e") || extensions.Contains("_em")) && extensions.Contains("_em_Glow"))
         {
             extensions.Remove("_e");
+        }
+        
+        if ((extensions.Contains("_e") || extensions.Contains("_Decal")) && extensions.Contains("_e_Cloth_Decal"))
+        {
+            extensions.Remove("_e");
+            extensions.Remove("_Decal");
         }
 
         string newMtd = "M[ARSN]";

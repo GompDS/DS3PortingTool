@@ -81,6 +81,12 @@ public class SekiroConverter : Converter
                         .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
                         .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
                 }
+                else
+                {
+                    newBnd.Files = anibnd.Files
+                        .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
+                        .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
+                }
             }
         }
         else
@@ -252,7 +258,16 @@ public class SekiroConverter : Converter
             // PlaySound_ByStateInfo
             case 129:
                 paramBytes = ev.ChangeSoundEventId(bigEndian, op);
-                Array.Clear(paramBytes, 18, 2);
+                switch (op.SourceBndsType)
+                {
+                    case Options.AssetType.Character:
+                        Array.Clear(paramBytes, 18, 2);
+                        break;
+                    case Options.AssetType.Object:
+                        Array.Clear(paramBytes, 12, 4);
+                        Array.Resize(ref paramBytes, 32);
+                        break;
+                }
                 break;
             // PlaySound_ByDummyPoly_PlayerVoice
             case 130:

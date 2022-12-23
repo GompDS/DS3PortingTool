@@ -59,12 +59,16 @@ public abstract class Converter
         }
         else if (op.CurrentSourceFileName.Contains("objbnd") && op.SourceBndsType == Options.AssetType.Object)
         {
-            ConvertObjectHkx(newBnd, op, false);
-            
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"o{op.PortedId}_c.hkx")))
+            if (!op.PortTaeOnly)
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"o{op.SourceId}_c.clm2",  
-                    @"N:\FDP\data\INTERROOT_win64\obj\" + $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}_c.clm2");
+                ConvertObjectHkx(newBnd, op, false);
+
+                if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"o{op.PortedId}_c.hkx")))
+                {
+                    op.CurrentSourceBnd.TransferBinderFile(newBnd, $"o{op.SourceId}_c.clm2",
+                        @"N:\FDP\data\INTERROOT_win64\obj\" +
+                        $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}_c.clm2");
+                }
             }
 
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
@@ -73,28 +77,39 @@ public abstract class Converter
                 BND4 oldAnibnd = BND4.Read(file.Bytes);
                 BND4 newAnibnd = new();
 
-                ConvertObjectHkx(newAnibnd, op, true);
-                
+                if (!op.PortTaeOnly)
+                {
+                    ConvertObjectHkx(newAnibnd, op, true);
+                }
+
                 file = oldAnibnd.Files.Find(x => x.Name.Contains(".tae"));
                 if (file != null)
                 {
                     ConvertObjectTae(newAnibnd, file, op);
                 }
-                newAnibnd.Files = newAnibnd.Files.OrderBy(x => x.ID).ToList();
-                newBnd.Files.Add(new BinderFile(Binder.FileFlags.Flag1, 400,
-                    $"N:\\FDP\\data\\INTERROOT_win64\\obj\\" +
-                    $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}.anibnd", 
-                    newAnibnd.Write()));
+
+                if (!op.PortTaeOnly)
+                {
+                    newAnibnd.Files = newAnibnd.Files.OrderBy(x => x.ID).ToList();
+                    newBnd.Files.Add(new BinderFile(Binder.FileFlags.Flag1, 400,
+                        $"N:\\FDP\\data\\INTERROOT_win64\\obj\\" +
+                        $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}.anibnd",
+                        newAnibnd.Write()));
+                }
             }
-            
-            foreach (BinderFile flver in op.CurrentSourceBnd.Files
-                         .Where(x => FLVER2.Is(x.Bytes) && !x.Name.EndsWith("_S.flver", StringComparison.OrdinalIgnoreCase)))
+
+            if (op.PortTaeOnly) return;
             {
-                ConvertFlver(newBnd, flver, op);
+                foreach (BinderFile flver in op.CurrentSourceBnd.Files
+                             .Where(x => FLVER2.Is(x.Bytes) &&
+                                         !x.Name.EndsWith("_S.flver", StringComparison.OrdinalIgnoreCase)))
+                {
+                    ConvertFlver(newBnd, flver, op);
+                }
+
+                newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
+                newBnd.Write($"{op.Cwd}\\o{op.PortedId}.objbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
             }
-            
-            newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            newBnd.Write($"{op.Cwd}\\o{op.PortedId}.objbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
     /// <summary>
@@ -204,7 +219,7 @@ public abstract class Converter
             SkeletonName = "skeleton.hkt",
             SibName = $"c{op.PortedId}.sib",
             Animations = oldTae.Animations,
-            EventBank = 19
+            EventBank = 18
         };
         
         XmlData data = new(op);

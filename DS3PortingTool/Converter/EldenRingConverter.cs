@@ -72,7 +72,10 @@ public class EldenRingConverter : Converter
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
             if (file != null)
             {
-                ConvertObjectHkx(newBnd, op, true);
+                if (!op.PortTaeOnly)
+                {
+                    ConvertObjectHkx(newBnd, op, true);
+                }
 
                 BND4 anibnd = BND4.Read(file.Bytes);
                 file = anibnd.Files.Find(x => x.Name.Contains(".tae"));
@@ -80,28 +83,38 @@ public class EldenRingConverter : Converter
                 {
                     ConvertObjectTae(newBnd, file, op);
                 }
-                newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                _combinedObjbnd.Files.Add(new BinderFile(Binder.FileFlags.Flag1, 400,
-                    $"N:\\FDP\\data\\INTERROOT_win64\\obj\\" +
-                    $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}.anibnd", 
-                    newBnd.Write()));
+
+                if (!op.PortTaeOnly)
+                {
+                    newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
+                    _combinedObjbnd.Files.Add(new BinderFile(Binder.FileFlags.Flag1, 400,
+                        $"N:\\FDP\\data\\INTERROOT_win64\\obj\\" +
+                        $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}.anibnd",
+                        newBnd.Write()));
+                }
             }
-            
-            foreach (BinderFile flver in op.CurrentSourceBnd.Files.Where(x => FLVER2.Is(x.Bytes)))
+
+            if (op.PortTaeOnly) return;
             {
-                ConvertFlver(_combinedObjbnd, flver, op);
+                foreach (BinderFile flver in op.CurrentSourceBnd.Files.Where(x => FLVER2.Is(x.Bytes)))
+                {
+                    ConvertFlver(_combinedObjbnd, flver, op);
+                }
+
+                WriteCombinedObjbnd(op);
             }
-            
-            WriteCombinedObjbnd(op);
         }
         else if (op.CurrentSourceFileName.Contains("geomhkxbnd") && op.SourceBndsType == Options.AssetType.Object)
         {
+            if (op.PortTaeOnly) return;
             ConvertObjectHkx(newBnd, op, false);
             if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"o{op.PortedId}_c.hkx")))
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"o{op.SourceId}_c.clm2",  
-                    @"N:\FDP\data\INTERROOT_win64\obj\" + $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}_c.clm2");
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"o{op.SourceId}_c.clm2",
+                    @"N:\FDP\data\INTERROOT_win64\obj\" +
+                    $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}_c.clm2");
             }
+
             _combinedObjbnd.Files.AddRange(newBnd.Files);
             WriteCombinedObjbnd(op);
         }

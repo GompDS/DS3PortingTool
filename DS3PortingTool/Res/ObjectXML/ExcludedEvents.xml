@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<excludedEvents>
+	<itemList game="Bloodborne">
+		<item id="66"/>
+		<item id="67"/>
+		<item id="302"/>
+		<item id="313"/>
+		<item id="315"/>
+		<item id="316"/>
+		<item id="318"/>
+		<item id="331"/>
+		<item id="401"/>
+		<item id="797"/>
+	</itemList>
+	<itemList game="Sekiro">
+		<item id="4"/>
+		<item id="66"/>
+		<item id="67"/>
+		<item id="108"/>
+		<item id="109"/>
+		<item id="139"/>
+		<itme id="144"/>
+		<item id="146"/>
+		<item id="147"/>
+		<item id="170"/>
+		<item id="200"/>
+		<item id="201"/>
+		<item id="238"/>
+		<item id="302"/>
+		<item id="313"/>
+		<item id="314"/>
+		<item id="331"/>
+		<item id="401"/>
+		<item id="607"/>
+		<item id="708"/>
+		<item id="709"/>
+		<item id="716"/>
+		<item id="717"/>
+		<item id="731"/>
+		<item id="740"/>
+		<item id="750"/>
+		<item id="797"/>
+		<item id="920"/>
+		<item id="921"/>
+		<item id="922"/>
+		<item id="940"/>
+		<item id="960"/>
+		<item id="961"/>
+		<item id="970"/>
+		<itemRange increment="1" repeat="4">
+			<item id="910"/>
+		</itemRange>
+		<itemRange increment="1" repeat="5">
+			<item id="950"/>
+		</itemRange>
+		<itemRange increment="1" repeat="6">
+			<item id="151"/>
+			<item id="900"/>
+			<item id="942"/>
+		</itemRange>
+		<itemRange increment="1" repeat="7">
+			<item id="930"/>
+		</itemRange>
+	</itemList>
+	<itemList game="EldenRing">
+		<item id="14"/>
+		<item id="66"/>
+		<item id="67"/>
+		<item id="133"/>
+		<item id="134"/>
+		<item id="139"/>
+		<item id="152"/>
+		<item id="153"/>
+		<item id="198"/>
+		<item id="199"/>
+		<item id="200"/>
+		<item id="238"/>
+		<item id="302"/>
+		<item id="331"/>
+		<item id="339"/>
+		<item id="340"/>
+		<item id="341"/>
+		<item id="342"/>
+		<item id="343"/>
+		<item id="344"/>
+		<item id="401"/>
+		<item id="511"/>
+		<item id="607"/>
+		<item id="608"/>
+		<item id="609"/>
+		<item id="702"/>
+		<item id="716"/>
+		<item id="717"/>
+		<item id="718"/>
+		<item id="731"/>
+		<item id="761"/>
+		<item id="787"/>
+		<item id="788"/>
+		<item id="789"/>
+		<itemRange increment="1" repeat="11">
+			<item id="900"/>
+		</itemRange>
+	</itemList>
+</excludedEvents>
