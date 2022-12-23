@@ -2,7 +2,7 @@ using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;
 
-namespace DS3PortingTool;
+namespace DS3PortingTool.Converter;
 public class BloodborneConverter : Converter
 {
     /// <summary>
@@ -81,7 +81,7 @@ public class BloodborneConverter : Converter
         }
     }
 
-    protected override void ConvertObjectHkx(BND4 newBnd, Options op)
+    protected override void ConvertObjectHkx(BND4 newBnd, Options op, bool isInnerAnibnd)
     {
         throw new NotImplementedException();
     }

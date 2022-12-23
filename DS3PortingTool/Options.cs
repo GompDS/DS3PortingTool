@@ -195,7 +195,7 @@ public class Options
                 {
                     ChangeSoundIds = false;
                 }
-                else if (args[i + 1].Length != IdLength || !args[i + IdLength].All(char.IsDigit))
+                else if (args[i + 1].Length != IdLength || !args[i + 1].All(char.IsDigit))
                 {
                     throw new ArgumentException($"The id after flag '-s' must be a {IdLength} digit number.");
                 }

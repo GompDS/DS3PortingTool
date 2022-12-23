@@ -1,11 +1,14 @@
+using DS3PortingTool.Converter;
+
 namespace DS3PortingTool;
-class Program
+
+static class Program
 {
 	public static void Main(string[] args)
 	{
 		Options op = new(args);
 
-		Converter conv;
+		Converter.Converter conv;
 
 		switch (op.Game.Type)
 		{

@@ -2,7 +2,7 @@ using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;
 
-namespace DS3PortingTool;
+namespace DS3PortingTool.Converter;
 
 public class EldenRingConverter : Converter
 {
@@ -72,7 +72,7 @@ public class EldenRingConverter : Converter
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
             if (file != null)
             {
-                ConvertObjectHkx(newBnd, op);
+                ConvertObjectHkx(newBnd, op, true);
 
                 BND4 anibnd = BND4.Read(file.Bytes);
                 file = anibnd.Files.Find(x => x.Name.Contains(".tae"));
@@ -96,7 +96,7 @@ public class EldenRingConverter : Converter
         }
         else if (op.CurrentSourceFileName.Contains("geomhkxbnd") && op.SourceBndsType == Options.AssetType.Object)
         {
-            ConvertObjectHkx(newBnd, op);
+            ConvertObjectHkx(newBnd, op, false);
             if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"o{op.PortedId}_c.hkx")))
             {
                 op.CurrentSourceBnd.TransferBinderFile(newBnd, $"o{op.SourceId}_c.clm2",  
@@ -191,7 +191,7 @@ public class EldenRingConverter : Converter
     /// <summary>
     /// Converts an Elden Ring object HKX file into a DS3 compatible HKX file.
     /// </summary>
-    protected override void ConvertObjectHkx(BND4 newBnd, Options op)
+    protected override void ConvertObjectHkx(BND4 newBnd, Options op, bool isInnerAnibnd)
     {
         if (op.CurrentSourceFileName.Contains("geombnd"))
         {

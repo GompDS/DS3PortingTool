@@ -2,7 +2,7 @@ using DS3PortingTool.Util;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;
 
-namespace DS3PortingTool;
+namespace DS3PortingTool.Converter;
 public class SekiroConverter : Converter
 {
     /// <summary>
@@ -64,9 +64,68 @@ public class SekiroConverter : Converter
         }
     }
 
-    protected override void ConvertObjectHkx(BND4 newBnd, Options op)
+    // Need to figure this one out.
+    protected override void ConvertObjectHkx(BND4 newBnd, Options op, bool isInnerAnibnd)
     {
-        throw new NotImplementedException();
+        if (isInnerAnibnd)
+        {
+            BinderFile? anibndFile = op.CurrentSourceBnd.Files.FirstOrDefault(x => x.Name.EndsWith("anibnd"));
+            if (anibndFile != null)
+            {
+                BND4 anibnd = BND4.Read(anibndFile.Bytes);
+                BinderFile? compendium = anibnd.Files
+                    .Find(x => x.Name.EndsWith(".compendium", StringComparison.OrdinalIgnoreCase));
+                if (compendium != null)
+                {
+                    newBnd.Files = anibnd.Files
+                        .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
+                        .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
+                }
+            }
+        }
+        else
+        {
+            newBnd.Files.AddRange(op.CurrentSourceBnd.Files
+                .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
+                .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList());
+        }
+
+        foreach (BinderFile hkx in newBnd.Files)
+        {
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\obj\\o{op.PortedId[..2]}\\o{op.PortedId}\\";
+            string name = Path.GetFileName(hkx.Name).ToLower();
+
+            if (op.CurrentSourceFileName.Contains("_c", StringComparison.OrdinalIgnoreCase) && !isInnerAnibnd)
+            {
+                hkx.Name = $"{path}o{op.PortedId}_c.hkx";
+            }
+            else if (!isInnerAnibnd)
+            {
+                hkx.Name = name.Contains("_1") ? $"{path}o{op.PortedId}_1.hkx" : $"{path}o{op.PortedId}.hkx";
+            }
+            else
+            {
+                if (name.Contains("skeleton"))
+                {
+                    hkx.Name = $"{path}hkx\\{name}";
+                }
+                else
+                {
+                    if (name[1..].GetOffset() > 0)
+                    {
+                        string offset = name.Substring(1, 3);
+                        char[] offsetArray = offset.ToCharArray();
+                        Array.Reverse(offsetArray);
+                        hkx.Name = $"{path}hkx\\a00{name[1..].GetOffset()}{name[4..]}";
+                    }
+                    else
+                    {
+                        hkx.Name = $"{path}hkx\\{name}";
+                    }
+                    hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(1, 2)}");
+                }
+            }
+        }
     }
 
     /// <summary>

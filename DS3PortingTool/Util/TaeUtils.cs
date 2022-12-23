@@ -148,7 +148,13 @@ public static class TaeUtils
 			int soundType = BitConverter.ToInt32(soundTypeBytes, 0);
 			int soundId = BitConverter.ToInt32(soundIdBytes, 0);
 			string soundIdString = Convert.ToString(soundId);
-			if (soundType is 1 or 8 or 14 && soundIdString.Length == 9 && 
+			bool isValidSoundType = op.SourceBndsType switch
+			{
+				Options.AssetType.Character => soundType is 1 or 8,
+				Options.AssetType.Object => soundType is 3 or 14,
+				_ => false
+			};
+			if (isValidSoundType && soundIdString.Length == 9 && 
 			    !Regex.IsMatch(soundIdString.Substring(0, op.IdLength), $"\\d9{op.IdLength}"))
 			{
 				if (soundType == 14)

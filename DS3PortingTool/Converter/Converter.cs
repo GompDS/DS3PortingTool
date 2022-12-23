@@ -3,26 +3,17 @@ using SoulsAssetPipeline.Animation;
 using SoulsAssetPipeline.FLVERImporting;
 using SoulsFormats;
 
-namespace DS3PortingTool;
+namespace DS3PortingTool.Converter;
 
 public abstract class Converter
 {
-    /// <summary>
-    /// Different types of flvers. Determines mtd for dummy materials.
-    /// </summary>
-    public enum FlverType
-    {
-        Character,
-        Asset
-    }
-    
     /// <summary>
     /// Performs the steps necessary to convert a foreign binder into a DS3 compatible binder.
     /// </summary>
     public virtual void DoConversion(Options op)
     {
         BND4 newBnd = new();
-        if (op.CurrentSourceFileName.Contains("anibnd"))
+        if (op.CurrentSourceFileName.Contains("anibnd") && op.SourceBndsType == Options.AssetType.Character)
         {
             if (!op.PortTaeOnly)
             {
@@ -41,7 +32,7 @@ public abstract class Converter
                 newBnd.Write($"{op.Cwd}\\c{op.PortedId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
             }
         }
-        else if (op.CurrentSourceFileName.Contains("chrbnd"))
+        else if (op.CurrentSourceFileName.Contains("chrbnd") && op.SourceBndsType == Options.AssetType.Character)
         {
             ConvertCharacterHkx(newBnd, op);
 
@@ -66,6 +57,45 @@ public abstract class Converter
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
             newBnd.Write($"{op.Cwd}\\c{op.PortedId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
+        else if (op.CurrentSourceFileName.Contains("objbnd") && op.SourceBndsType == Options.AssetType.Object)
+        {
+            ConvertObjectHkx(newBnd, op, false);
+            
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"o{op.PortedId}_c.hkx")))
+            {
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"o{op.SourceId}_c.clm2",  
+                    @"N:\FDP\data\INTERROOT_win64\obj\" + $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}_c.clm2");
+            }
+
+            BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
+            if (file != null)
+            {
+                BND4 oldAnibnd = BND4.Read(file.Bytes);
+                BND4 newAnibnd = new();
+
+                ConvertObjectHkx(newAnibnd, op, true);
+                
+                file = oldAnibnd.Files.Find(x => x.Name.Contains(".tae"));
+                if (file != null)
+                {
+                    ConvertObjectTae(newAnibnd, file, op);
+                }
+                newAnibnd.Files = newAnibnd.Files.OrderBy(x => x.ID).ToList();
+                newBnd.Files.Add(new BinderFile(Binder.FileFlags.Flag1, 400,
+                    $"N:\\FDP\\data\\INTERROOT_win64\\obj\\" +
+                    $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}.anibnd", 
+                    newAnibnd.Write()));
+            }
+            
+            foreach (BinderFile flver in op.CurrentSourceBnd.Files
+                         .Where(x => FLVER2.Is(x.Bytes) && !x.Name.EndsWith("_S.flver", StringComparison.OrdinalIgnoreCase)))
+            {
+                ConvertFlver(newBnd, flver, op);
+            }
+            
+            newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
+            newBnd.Write($"{op.Cwd}\\o{op.PortedId}.objbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+        }
     }
     /// <summary>
     /// Converts a foreign character HKX file into a DS3 compatible HKX file.
@@ -74,7 +104,7 @@ public abstract class Converter
     /// <summary>
     /// Converts a foreign object HKX file into a DS3 compatible HKX file.
     /// </summary>
-    protected abstract void ConvertObjectHkx(BND4 newBnd, Options op);
+    protected abstract void ConvertObjectHkx(BND4 newBnd, Options op, bool isInnerAnibnd);
     /// <summary>
     /// Converts a foreign character TAE file into a DS3 compatible TAE file.
     /// </summary>
@@ -313,6 +343,11 @@ public abstract class Converter
             }).ToList(),
             Meshes = sourceFlver.Meshes
         };
+
+        if (op.SourceBndsType == Options.AssetType.Object)
+        {
+            BoundingBoxSolver.FixAllBoundingBoxes(newFlver);
+        }
         
         return newFlver;
     }
