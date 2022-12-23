@@ -10,6 +10,11 @@ public class EldenRingConverter : Converter
     /// All tae and hkx from any source anibnds will be combined into this singular anibnd which will be converted.
     /// </summary>
     private BND4 _combinedAnibnd = new();
+
+    /// <summary>
+    /// Flver from geombnd and hkx from geomhkxbnd are stored in here.
+    /// </summary>
+    private BND4 _combinedObjbnd = new();
     
     /// <summary>
     /// Performs the steps necessary to convert an Elden Ring binder into a DS3 compatible binder.
@@ -17,11 +22,11 @@ public class EldenRingConverter : Converter
     public override void DoConversion(Options op)
     {
         BND4 newBnd = new();
-        if (op.CurrentSourceFileName.Contains("anibnd"))
+        if (op.CurrentSourceFileName.Contains("anibnd") && op.SourceBndsType == Options.AssetType.Character)
         {
             if (!op.PortTaeOnly)
             {
-                ConvertHkx(newBnd, op);
+                ConvertCharacterHkx(newBnd, op);
                 _combinedAnibnd.Files.AddRange(newBnd.Files);
             }
             
@@ -37,20 +42,20 @@ public class EldenRingConverter : Converter
                 ConvertCombinedAnibnd(op);
             }
         }
-        else if (op.CurrentSourceFileName.Contains("chrbnd"))
+        else if (op.CurrentSourceFileName.Contains("chrbnd") && op.SourceBndsType == Options.AssetType.Character)
         {
-            ConvertHkx(newBnd, op);
+            ConvertCharacterHkx(newBnd, op);
 
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}.hkx")))
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}.hkxpwv",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}.hkxpwv");
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
             }
 		
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}_c.hkx")))
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}_c.hkx")))
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}_c.clm2",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}_c.clm2");
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}_c.clm2",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}_c.clm2");
             }
             
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".flver"));
@@ -60,7 +65,45 @@ public class EldenRingConverter : Converter
             }
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+            newBnd.Write($"{op.Cwd}\\c{op.PortedId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+        }
+        else if (op.CurrentSourceFileName.Contains("geombnd") && op.SourceBndsType == Options.AssetType.Object)
+        {
+            BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
+            if (file != null)
+            {
+                ConvertObjectHkx(newBnd, op);
+
+                BND4 anibnd = BND4.Read(file.Bytes);
+                file = anibnd.Files.Find(x => x.Name.Contains(".tae"));
+                if (file != null)
+                {
+                    ConvertObjectTae(newBnd, file, op);
+                }
+                newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
+                _combinedObjbnd.Files.Add(new BinderFile(Binder.FileFlags.Flag1, 400,
+                    $"N:\\FDP\\data\\INTERROOT_win64\\obj\\" +
+                    $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}.anibnd", 
+                    newBnd.Write()));
+            }
+            
+            foreach (BinderFile flver in op.CurrentSourceBnd.Files.Where(x => FLVER2.Is(x.Bytes)))
+            {
+                ConvertFlver(_combinedObjbnd, flver, op);
+            }
+            
+            WriteCombinedObjbnd(op);
+        }
+        else if (op.CurrentSourceFileName.Contains("geomhkxbnd") && op.SourceBndsType == Options.AssetType.Object)
+        {
+            ConvertObjectHkx(newBnd, op);
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"o{op.PortedId}_c.hkx")))
+            {
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"o{op.SourceId}_c.clm2",  
+                    @"N:\FDP\data\INTERROOT_win64\obj\" + $"o{op.PortedId[..2]}\\o{op.PortedId}\\o{op.PortedId}_c.clm2");
+            }
+            _combinedObjbnd.Files.AddRange(newBnd.Files);
+            WriteCombinedObjbnd(op);
         }
     }
 
@@ -76,20 +119,33 @@ public class EldenRingConverter : Converter
         BinderFile? file = _combinedAnibnd.Files.Find(x => x.Name.Contains(".tae"));
         if (file != null)
         {
-            ConvertTae(newBnd, file, op);
+            ConvertCharacterTae(newBnd, file, op);
         }
 
         if (!op.PortTaeOnly)
         {
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+            newBnd.Write($"{op.Cwd}\\c{op.PortedId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
 
     /// <summary>
-    /// Converts an Elden Ring HKX file into a DS3 compatible HKX file.
+    /// Write the combined objbnd.
     /// </summary>
-	protected override void ConvertHkx(BND4 newBnd, Options op)
+    private void WriteCombinedObjbnd(Options op)
+    {
+        string[] geombndNames = op.SourceFileNames.Where(x => x.Contains(".geombnd") || x.Contains(".geomhkxbnd")).ToArray();
+        if (Array.IndexOf(geombndNames, op.CurrentSourceFileName) == geombndNames.Length - 1)
+        {
+            _combinedObjbnd.Files = _combinedObjbnd.Files.OrderBy(x => x.ID).ToList();
+            _combinedObjbnd.Write($"{op.Cwd}\\o{op.PortedId}.objbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+        }
+    }
+
+    /// <summary>
+    /// Converts an Elden Ring character HKX file into a DS3 compatible HKX file.
+    /// </summary>
+	protected override void ConvertCharacterHkx(BND4 newBnd, Options op)
     {
         if (op.CurrentSourceFileName.Contains("anibnd"))
         {
@@ -117,24 +173,66 @@ public class EldenRingConverter : Converter
 
         foreach (BinderFile hkx in newBnd.Files)
         {
-            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\";
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
-
-            if (name.Contains($"c{op.SourceChrId}.hkx") || name.Contains($"c{op.SourceChrId}_c.hkx"))
+            
+            if (name.EndsWith($"c{op.SourceId}.hkx") || name.EndsWith($"c{op.SourceId}_c.hkx"))
             {
-                hkx.Name = $"{path}{name.Replace(op.SourceChrId, op.PortedChrId)}";
+                hkx.Name = $"{path}{name.Replace(op.SourceId, op.PortedId)}";
             }
             else
             {
                 hkx.Name = $"{path}hkx\\{name}";
-                if (name.Contains("skeleton"))
+                hkx.ID = name.Contains("skeleton") ? 1000000 : int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(0, 2)}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Converts an Elden Ring object HKX file into a DS3 compatible HKX file.
+    /// </summary>
+    protected override void ConvertObjectHkx(BND4 newBnd, Options op)
+    {
+        if (op.CurrentSourceFileName.Contains("geombnd"))
+        {
+            BinderFile? anibndFile = op.CurrentSourceBnd.Files.FirstOrDefault(x => x.Name.EndsWith("anibnd"));
+            if (anibndFile != null)
+            {
+                BND4 anibnd = BND4.Read(anibndFile.Bytes);
+                BinderFile? compendium = anibnd.Files
+                    .Find(x => x.Name.EndsWith(".compendium", StringComparison.OrdinalIgnoreCase));
+                if (compendium != null)
                 {
-                    hkx.ID = 1000000;
+                    newBnd.Files = anibnd.Files
+                        .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
+                        .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
                 }
-                else
-                {
-                    hkx.ID = int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(0, 2)}");
-                }
+            }
+        }
+        else
+        {
+            newBnd.Files = op.CurrentSourceBnd.Files
+                .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
+                .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
+        }
+
+        foreach (BinderFile hkx in newBnd.Files)
+        {
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\obj\\o{op.PortedId[..2]}\\o{op.PortedId}\\";
+            string name = Path.GetFileName(hkx.Name).ToLower();
+
+            if (op.CurrentSourceFileName.Contains("_c", StringComparison.OrdinalIgnoreCase))
+            {
+                hkx.Name = $"{path}o{op.PortedId}_c.hkx";
+            }
+            else if (op.CurrentSourceFileName.Contains("geomhkxbnd"))
+            {
+                hkx.Name = name.Contains("_1") ? $"{path}o{op.PortedId}_1.hkx" : $"{path}o{op.PortedId}.hkx";
+            }
+            else
+            {
+                hkx.Name = $"{path}hkx\\{name}";
+                hkx.ID = name.Contains("skeleton") ? 1000000 : int.Parse($"100{hkx.ID.ToString("D9")[1..].Remove(0, 2)}");
             }
         }
     }
@@ -196,29 +294,29 @@ public class EldenRingConverter : Converter
                 break;
             // PlaySound_CenterBody
             case 128:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 Array.Resize(ref paramBytes, 16);
                 break;
             // PlaySound_ByStateInfo
             case 129:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 Array.Clear(paramBytes, 18, 14);
                 break;
             // PlaySound_Weapon
             case 132:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 Array.Clear(paramBytes, 8, 8);
                 break;
             // Wwise_PlaySound_Unk133
             case 133:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 ev.Type = 128;
                 ev.Group.GroupType = 128;
                 Array.Clear(paramBytes, 8, 6);
                 break;
             // Wwise_PlaySound_Unk134
             case 134:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 ev.Type = 128;
                 ev.Group.GroupType = 128;
                 Array.Clear(paramBytes, 8, 12);

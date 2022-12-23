@@ -8,12 +8,12 @@ public class SekiroConverter : Converter
     /// <summary>
     /// Converts a Sekiro HKX file into a DS3 compatible HKX file.
     /// </summary>
-	protected override void ConvertHkx(BND4 newBnd, Options op)
+	protected override void ConvertCharacterHkx(BND4 newBnd, Options op)
     {
         if (op.CurrentSourceFileName.Contains("anibnd"))
         {
             BinderFile? compendium = op.CurrentSourceBnd.Files
-                .Find(x => x.Name.Contains($"c{op.SourceChrId}.compendium"));
+                .Find(x => x.Name.Contains($"c{op.SourceId}.compendium"));
             if (compendium == null)
             {
                 throw new FileNotFoundException("Source anibnd contains no compendium.");
@@ -32,12 +32,12 @@ public class SekiroConverter : Converter
 		
         foreach (BinderFile hkx in newBnd.Files)
         {
-            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\";
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
 
-            if (name.Contains($"c{op.SourceChrId}.hkx") || name.Contains($"c{op.SourceChrId}_c.hkx"))
+            if (name.Contains($"c{op.SourceId}.hkx") || name.Contains($"c{op.SourceId}_c.hkx"))
             {
-                hkx.Name = $"{path}{name.Replace(op.SourceChrId, op.PortedChrId)}";
+                hkx.Name = $"{path}{name.Replace(op.SourceId, op.PortedId)}";
             }
             else
             {
@@ -63,20 +63,26 @@ public class SekiroConverter : Converter
             }
         }
     }
+
+    protected override void ConvertObjectHkx(BND4 newBnd, Options op)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Converts a Sekiro TAE file into a DS3 compatible TAE file.
     /// </summary>
-    protected override void ConvertTae(BND4 newBnd, BinderFile taeFile, Options op)
+    protected override void ConvertCharacterTae(BND4 newBnd, BinderFile taeFile, Options op)
     {
         TAE oldTae = TAE.Read(taeFile.Bytes);
         TAE newTae = new()
         {
             Format = TAE.TAEFormat.DS3,
             BigEndian = false,
-            ID = 200000 + int.Parse(op.PortedChrId),
+            ID = 200000 + int.Parse(op.PortedId),
             Flags = new byte[] { 1, 0, 1, 2, 2, 1, 1, 1 },
             SkeletonName = "skeleton.hkt",
-            SibName = $"c{op.PortedChrId}.sib",
+            SibName = $"c{op.PortedId}.sib",
             Animations = new List<TAE.Animation>(),
             EventBank = 21
         };
@@ -140,12 +146,12 @@ public class SekiroConverter : Converter
         }
 
         taeFile = new BinderFile(Binder.FileFlags.Flag1, 3000000,
-            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\tae\\c{op.PortedChrId}.tae",
+            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\tae\\c{op.PortedId}.tae",
             newTae.Write());
 		
         if (op.PortTaeOnly)
         {
-            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.tae", taeFile.Bytes);
+            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedId}.tae", taeFile.Bytes);
         }
         else
         {
@@ -182,22 +188,22 @@ public class SekiroConverter : Converter
                 break;
             // PlaySound_CenterBody
             case 128:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 break;
             // PlaySound_ByStateInfo
             case 129:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 Array.Clear(paramBytes, 18, 2);
                 break;
             // PlaySound_ByDummyPoly_PlayerVoice
             case 130:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 Array.Clear(paramBytes, 16, 2);
                 Array.Resize(ref paramBytes, 32);
                 break;
             // PlaySound_DummyPoly
             case 131:
-                paramBytes = ev.ChangeSoundEventChrId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 break;
             // SetLockCamParam_Boss
             case 151:

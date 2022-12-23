@@ -15,29 +15,29 @@ public class BloodborneConverter : Converter
         {
             if (!op.PortTaeOnly)
             {
-                ConvertHkx(newBnd, op);
+                ConvertCharacterHkx(newBnd, op);
             }
             
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".tae"));
             if (file != null)
             {
-                ConvertTae(newBnd, file, op);
+                ConvertCharacterTae(newBnd, file, op);
             }
 
             if (!op.PortTaeOnly)
             {
                 newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+                newBnd.Write($"{op.Cwd}\\c{op.PortedId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
             }
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
         {
             //ConvertHkx(newBnd, op);
 
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}.hkx")))
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}.hkxpwv",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}.hkxpwv");
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
             }
 
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".flver"));
@@ -49,13 +49,13 @@ public class BloodborneConverter : Converter
             // Convert tpfs into texbnd
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+            newBnd.Write($"{op.Cwd}\\c{op.PortedId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
     /// <summary>
     /// Converts a Bloodborne HKX file into a DS3 compatible HKX file.
     /// </summary>
-	protected override void ConvertHkx(BND4 newBnd, Options op)
+	protected override void ConvertCharacterHkx(BND4 newBnd, Options op)
     {
 	    newBnd.Files = op.CurrentSourceBnd.Files
 		    .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
@@ -63,12 +63,12 @@ public class BloodborneConverter : Converter
 		
         foreach (BinderFile hkx in newBnd.Files)
         {
-            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\";
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
 
-            if (name.Contains($"c{op.SourceChrId}.hkx"))
+            if (name.Contains($"c{op.SourceId}.hkx"))
             {
-                hkx.Name = $"{path}{name.Replace(op.SourceChrId, op.PortedChrId)}";
+                hkx.Name = $"{path}{name.Replace(op.SourceId, op.PortedId)}";
             }
             else
             {
@@ -80,6 +80,12 @@ public class BloodborneConverter : Converter
             }
         }
     }
+
+    protected override void ConvertObjectHkx(BND4 newBnd, Options op)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Edits parameters of a Bloodborne event so that it will match with its DS3 event equivalent.
     /// </summary>

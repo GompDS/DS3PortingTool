@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using SoulsAssetPipeline.FLVERImporting;
@@ -13,12 +10,12 @@ public static class FlverUtils
     /// <summary>
     /// Takes a non-native DS3 material and returns a new material with as close a mtd type as possible.
     /// </summary>
-    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat, FLVER2MaterialInfoBank materialInfoBank) 
+    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat, FLVER2MaterialInfoBank materialInfoBank, Options op) 
     {
         FLVER2.Material newMat = new()
         {
 			Name = oldMat.Name,
-			MTD = GetDs3Mtd(oldMat.MTD)
+            MTD = op.SourceBndsType == Options.AssetType.Character ? GetDs3Mtd_cARSN(oldMat.MTD) : GetDs3Mtd_mARSN(oldMat.MTD)
         };
         
         FLVER2MaterialInfoBank.MaterialDef matDef = materialInfoBank.MaterialDefs.Values
@@ -33,12 +30,15 @@ public static class FlverUtils
         return newMat;
     }
     
+    /// <summary>
+    /// Takes a non-native DS3 material and turns it into a DS3 material with original textures.
+    /// </summary>
     public static FLVER2.Material ToDs3Material(this FLVER2.Material oldMat, FLVER2MaterialInfoBank materialInfoBank, Options op) 
     {
 	    FLVER2.Material newMat = new()
 	    {
 		    Name = oldMat.Name,
-		    MTD = GetDs3Mtd(oldMat.MTD)
+		    MTD = op.SourceBndsType == Options.AssetType.Character ? GetDs3Mtd_cARSN(oldMat.MTD) : GetDs3Mtd_mARSN(oldMat.MTD)
 	    };
         
 	    FLVER2MaterialInfoBank.MaterialDef matDef = materialInfoBank.MaterialDefs.Values
@@ -53,13 +53,16 @@ public static class FlverUtils
             if (matchingTex == null) continue;
             Match texContainer = Regex.Match(matchingTex.Path, "c[0-9]{4}", RegexOptions.IgnoreCase);
             if (!texContainer.Success) continue;
-            tex.Path = $"N:\\FDP\\data\\Model\\chr\\c{op.PortedChrId}\\tex\\{Path.GetFileName(matchingTex.Path)}";
+            tex.Path = $"N:\\FDP\\data\\Model\\chr\\c{op.PortedId}\\tex\\{Path.GetFileName(matchingTex.Path)}";
             newMat.Textures.Add(tex);
         }
 
         return newMat;
     }
 
+    /// <summary>
+    /// Get the path to a dummy texture based on the texture type.
+    /// </summary>
     private static string GetDummyTexPath(string texName)
     {
         if (texName.Contains("Diffuse"))
@@ -101,9 +104,9 @@ public static class FlverUtils
     }
 
     /// <summary>
-    /// Gets the closest DS3 equivalent of a mtd name that's not native to DS3.
+    /// Gets the closest DS3 equivalent of a c[arsn] mtd name that's not native to DS3.
     /// </summary>
-    private static string GetDs3Mtd(string mtd)
+    private static string GetDs3Mtd_cARSN(string mtd)
     {
         Dictionary<string, string> extensionTypes = new()
         {
@@ -129,6 +132,36 @@ public static class FlverUtils
         newMtd += string.Join("", extensions);
         
         return $"N:\\FDP\\data\\Material\\mtd\\character\\{newMtd}.mtd";
+    }
+    
+    /// <summary>
+    /// Gets the closest DS3 equivalent of a m[arsn] mtd name that's not native to DS3.
+    /// </summary>
+    private static string GetDs3Mtd_mARSN(string mtd)
+    {
+        Dictionary<string, string> extensionTypes = new()
+        {
+            {"sss", "_SSS"},
+            {"em", "_em"},
+            {"e", "_e"},
+            {"glow", "_em_Glow"},
+            {"m", "_m"},
+            {"cloth", "_Cloth"},
+            {"decal", "_Decal"}
+        };
+        
+        List<string> extensions = mtd.ToLower().Split('_', '.').Where(extensionTypes.ContainsKey)
+            .Select(x => extensionTypes[x]).ToList();
+
+        if ((extensions.Contains("_e") || extensions.Contains("_em")) && extensions.Contains("_em_e_Glow"))
+        {
+            extensions.Remove("_e");
+        }
+
+        string newMtd = "M[ARSN]";
+        newMtd += string.Join("", extensions);
+        
+        return $"N:\\FDP\\data\\Material\\mtd\\map\\{newMtd}.mtd";
     }
     
     /// <summary>

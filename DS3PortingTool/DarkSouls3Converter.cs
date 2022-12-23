@@ -16,35 +16,35 @@ public class DarkSouls3Converter : Converter
         {
             if (!op.PortTaeOnly)
             {
-                ConvertHkx(newBnd, op);
+                ConvertCharacterHkx(newBnd, op);
             }
             
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".tae"));
             if (file != null)
             {
-                ConvertTae(newBnd, file, op);
+                ConvertCharacterTae(newBnd, file, op);
             }
 
             if (!op.PortTaeOnly)
             {
                 newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+                newBnd.Write($"{op.Cwd}\\c{op.PortedId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
             }
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
         {
-            ConvertHkx(newBnd, op);
+            ConvertCharacterHkx(newBnd, op);
 
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}.hkx")))
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}.hkxpwv",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}.hkxpwv");
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
             }
 		
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}_c.hkx")))
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}_c.hkx")))
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}_c.clm2",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}_c.clm2");
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}_c.clm2",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}_c.clm2");
             }
             
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".flver"));
@@ -54,35 +54,46 @@ public class DarkSouls3Converter : Converter
             }
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+            newBnd.Write($"{op.Cwd}\\c{op.PortedId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
-        else if (op.CurrentSourceFileName.Contains("texbnd"))
+        else if (op.CurrentSourceFileName.Contains("objbnd"))
         {
-            //TPF oldTpf = 
-            //TPF newTpf = new();
-            
+            BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
+            if (file != null)
+            {
+                file = BND4.Read(file.Bytes).Files.Find(x => x.Name.Contains(".tae"));
+                if (file != null)
+                {
+                    ConvertObjectTae(newBnd, file, op);
+                }
+            }
         }
     }
 
-    protected override void ConvertHkx(BND4 newBnd, Options op)
+    protected override void ConvertCharacterHkx(BND4 newBnd, Options op)
     {
         newBnd.Files = op.CurrentSourceBnd.Files
             .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase)).ToList();
 
         foreach (BinderFile hkx in newBnd.Files)
         {
-            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\";
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
             
-            if (name.Contains($"c{op.SourceChrId}.hkx") || name.Contains($"c{op.SourceChrId}_c.hkx"))
+            if (name.Contains($"c{op.SourceId}.hkx") || name.Contains($"c{op.SourceId}_c.hkx"))
             {
-                hkx.Name = $"{path}{name.Replace(op.SourceChrId, op.PortedChrId)}";
+                hkx.Name = $"{path}{name.Replace(op.SourceId, op.PortedId)}";
             }
             else
             {
                 hkx.Name = $"{path}hkx\\{name}";
             }
         }
+    }
+
+    protected override void ConvertObjectHkx(BND4 newBnd, Options op)
+    {
+        throw new NotImplementedException();
     }
 
     protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data)
@@ -103,13 +114,13 @@ public class DarkSouls3Converter : Converter
             {
                 foreach (FLVER2.Texture tex in mat.Textures)
                 {
-                    tex.Path = tex.Path.Replace($"c{op.SourceChrId}", $"c{op.PortedChrId}");
+                    tex.Path = tex.Path.Replace($"c{op.SourceId}", $"c{op.PortedId}");
                 }
             }
         }
         
         flverFile = new BinderFile(Binder.FileFlags.Flag1, 200,
-            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\c{op.PortedChrId}.flver",
+            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\c{op.PortedId}.flver",
             newFlver.Write());
         newBnd.Files.Add(flverFile);
     }

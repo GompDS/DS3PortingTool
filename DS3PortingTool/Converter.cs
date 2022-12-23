@@ -8,6 +8,15 @@ namespace DS3PortingTool;
 public abstract class Converter
 {
     /// <summary>
+    /// Different types of flvers. Determines mtd for dummy materials.
+    /// </summary>
+    public enum FlverType
+    {
+        Character,
+        Asset
+    }
+    
+    /// <summary>
     /// Performs the steps necessary to convert a foreign binder into a DS3 compatible binder.
     /// </summary>
     public virtual void DoConversion(Options op)
@@ -17,35 +26,35 @@ public abstract class Converter
         {
             if (!op.PortTaeOnly)
             {
-                ConvertHkx(newBnd, op);
+                ConvertCharacterHkx(newBnd, op);
             }
             
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".tae"));
             if (file != null)
             {
-                ConvertTae(newBnd, file, op);
+                ConvertCharacterTae(newBnd, file, op);
             }
 
             if (!op.PortTaeOnly)
             {
                 newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+                newBnd.Write($"{op.Cwd}\\c{op.PortedId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
             }
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
         {
-            ConvertHkx(newBnd, op);
+            ConvertCharacterHkx(newBnd, op);
 
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}.hkx")))
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}.hkxpwv",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}.hkxpwv");
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
             }
 		
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedChrId}_c.hkx")))
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}_c.hkx")))
             {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceChrId}_c.clm2",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedChrId}\\c{op.PortedChrId}_c.clm2");
+                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}_c.clm2",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}_c.clm2");
             }
             
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".flver"));
@@ -55,27 +64,31 @@ public abstract class Converter
             }
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            newBnd.Write($"{op.Cwd}\\c{op.PortedChrId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+            newBnd.Write($"{op.Cwd}\\c{op.PortedId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
     /// <summary>
-    /// Converts a foreign HKX file into a DS3 compatible HKX file.
+    /// Converts a foreign character HKX file into a DS3 compatible HKX file.
     /// </summary>
-    protected abstract void ConvertHkx(BND4 newBnd, Options op);
+    protected abstract void ConvertCharacterHkx(BND4 newBnd, Options op);
     /// <summary>
-    /// Converts a foreign TAE file into a DS3 compatible TAE file.
+    /// Converts a foreign object HKX file into a DS3 compatible HKX file.
     /// </summary>
-    protected virtual void ConvertTae(BND4 newBnd, BinderFile taeFile, Options op)
+    protected abstract void ConvertObjectHkx(BND4 newBnd, Options op);
+    /// <summary>
+    /// Converts a foreign character TAE file into a DS3 compatible TAE file.
+    /// </summary>
+    protected virtual void ConvertCharacterTae(BND4 newBnd, BinderFile taeFile, Options op)
     {
         TAE oldTae = TAE.Read(taeFile.Bytes);
         TAE newTae = new()
         {
             Format = TAE.TAEFormat.DS3,
             BigEndian = false,
-            ID = 200000 + int.Parse(op.PortedChrId),
+            ID = 200000 + int.Parse(op.PortedId),
             Flags = new byte[] { 1, 0, 1, 2, 2, 1, 1, 1 },
             SkeletonName = "skeleton.hkt",
-            SibName = $"c{op.PortedChrId}.sib",
+            SibName = $"c{op.PortedId}.sib",
             Animations = new List<TAE.Animation>(),
             EventBank = 21
         };
@@ -133,18 +146,67 @@ public abstract class Converter
         newTae.Animations = newTae.Animations.OrderBy(x => x.ID).ToList();
         
         taeFile = new BinderFile(Binder.FileFlags.Flag1, 3000000,
-            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\tae\\c{op.PortedChrId}.tae",
+            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\tae\\c{op.PortedId}.tae",
             newTae.Write());
 		
         if (op.PortTaeOnly)
         {
-            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedChrId}.tae", taeFile.Bytes);
+            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedId}.tae", taeFile.Bytes);
         }
         else
         {
             newBnd.Files.Add(taeFile);
         }
     }
+
+    /// <summary>
+    /// Converts a foreign object TAE file into a DS3 compatible TAE file.
+    /// </summary>
+    protected virtual void ConvertObjectTae(BND4 newBnd, BinderFile taeFile, Options op)
+    {
+        TAE oldTae = TAE.Read(taeFile.Bytes);
+        TAE newTae = new()
+        {
+            Format = TAE.TAEFormat.DS3,
+            BigEndian = false,
+            ID = 200000 + int.Parse(op.PortedId),
+            Flags = new byte[] { 1, 0, 1, 2, 2, 1, 1, 1 },
+            SkeletonName = "skeleton.hkt",
+            SibName = $"c{op.PortedId}.sib",
+            Animations = oldTae.Animations,
+            EventBank = 19
+        };
+        
+        XmlData data = new(op);
+
+        foreach (TAE.Animation? anim in newTae.Animations)
+        {
+            anim.SetAnimationProperties(anim.GetNoOffsetId(), anim.GetNoOffsetId(), anim.GetOffset(), op);
+			
+            anim.Events = anim.Events.Where(ev => 
+                    (!data.ExcludedEvents.Contains(ev.Type) || ev.IsAllowedSpEffect(newTae.BigEndian, data)) && 
+                    !data.ExcludedJumpTables.Contains(ev.GetJumpTableId(newTae.BigEndian)) && 
+                    !data.ExcludedRumbleCams.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
+                .Select(ev => EditEvent(ev, newTae.BigEndian, op, data)).ToList();
+            
+        }
+        
+        newTae.Animations = newTae.Animations.OrderBy(x => x.ID).ToList();
+        
+        taeFile = new BinderFile(Binder.FileFlags.Flag1, 3000000,
+            $"N:\\FDP\\data\\INTERROOT_win64\\obj\\o{op.PortedId[..2]}\\o{op.PortedId}\\tae\\o{op.PortedId}.tae",
+            newTae.Write());
+		
+        if (op.PortTaeOnly)
+        {
+            File.WriteAllBytes($"{op.Cwd}\\o{op.PortedId}.tae", taeFile.Bytes);
+        }
+        else
+        {
+            newBnd.Files.Add(taeFile);
+        }
+    }
+
     /// <summary>
     /// Edits parameters of the event so that it will match with its DS3 event equivalent.
     /// </summary>
@@ -194,9 +256,28 @@ public abstract class Converter
 
         }
 
-        flverFile = new BinderFile(Binder.FileFlags.Flag1, 200,
-            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedChrId}\\c{op.PortedChrId}.flver",
-            newFlver.Write());
+        if (op.SourceBndsType == Options.AssetType.Character)
+        {
+            flverFile = new BinderFile(Binder.FileFlags.Flag1, 200,
+                $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\c{op.PortedId}.flver",
+                newFlver.Write());
+        }
+        else if (op.SourceBndsType == Options.AssetType.Object)
+        {
+            if (flverFile.Name.EndsWith("_1.flver", StringComparison.OrdinalIgnoreCase))
+            {
+                flverFile = new BinderFile(Binder.FileFlags.Flag1, 201,
+                    $"N:\\FDP\\data\\INTERROOT_win64\\obj\\o{op.PortedId.Substring(0, 2)}\\o{op.PortedId}\\o{op.PortedId}_1.flver",
+                    newFlver.Write());
+            }
+            else
+            {
+                flverFile = new BinderFile(Binder.FileFlags.Flag1, 200,
+                    $"N:\\FDP\\data\\INTERROOT_win64\\obj\\o{op.PortedId.Substring(0, 2)}\\o{op.PortedId}\\o{op.PortedId}.flver",
+                    newFlver.Write());
+            }
+        }
+        
         newBnd.Files.Add(flverFile);
     }
 
@@ -219,7 +300,7 @@ public abstract class Converter
                 Unk68 = sourceFlver.Header.Unk68
             },
             Dummies = sourceFlver.Dummies,
-            Materials = sourceFlver.Materials.Select(x => x.ToDummyDs3Material(data.MaterialInfoBank)).ToList(),
+            Materials = sourceFlver.Materials.Select(x => x.ToDummyDs3Material(data.MaterialInfoBank, op)).ToList(),
             Bones = sourceFlver.Bones.Select(x =>
             {
                 // Unk3C should only be 0 or 1 in DS3.

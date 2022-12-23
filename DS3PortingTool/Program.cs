@@ -11,10 +11,10 @@ class Program
 		{
 			/*case Game.GameTypes.Bloodborne:
 				conv = new BloodborneConverter();
-				break;
+				break;*/
 			case Game.GameTypes.DarkSouls3:
 				conv = new DarkSouls3Converter();
-				break;*/
+				break;
 			case Game.GameTypes.Sekiro:
 				conv = new SekiroConverter();
 				break;

@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using SoulsAssetPipeline.Animation;
 
 namespace DS3PortingTool.Util;
@@ -129,13 +130,13 @@ public static class TaeUtils
 	/// <summary>
 	/// Change the first four digits of the Sound ID parameter of this event to match the new character ID
 	/// </summary>
-	public static byte[] ChangeSoundEventChrId(this TAE.Event ev, bool isBigEndian, Options op)
+	public static byte[] ChangeSoundEventId(this TAE.Event ev, bool isBigEndian, Options op)
 	{
 		byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
 		if (op.ChangeSoundIds)
 		{
-			byte[] soundTypeBytes = new byte[4];
-			byte[] soundIdBytes = new byte[4];
+			byte[] soundTypeBytes = new byte[op.IdLength];
+			byte[] soundIdBytes = new byte[op.IdLength];
 			Array.Copy(paramBytes, soundTypeBytes, 4);
 			Array.Copy(paramBytes, 4, soundIdBytes, 0, 4);
 			if (isBigEndian)
@@ -147,10 +148,16 @@ public static class TaeUtils
 			int soundType = BitConverter.ToInt32(soundTypeBytes, 0);
 			int soundId = BitConverter.ToInt32(soundIdBytes, 0);
 			string soundIdString = Convert.ToString(soundId);
-			if ((soundType == 1 || soundType == 8) && soundIdString.Length == 9 && !soundIdString
-				    .Substring(0, 4).Contains("9999"))
+			if (soundType is 1 or 8 or 14 && soundIdString.Length == 9 && 
+			    !Regex.IsMatch(soundIdString.Substring(0, op.IdLength), $"\\d9{op.IdLength}"))
 			{
-				soundIdString = op.SoundChrId + soundIdString.Substring(4);
+				if (soundType == 14)
+				{
+					soundType = 3;
+					byte[] newTypeBytes = BitConverter.GetBytes(soundType);
+					Array.Copy(newTypeBytes, 0, paramBytes, 0, 4);
+				}
+				soundIdString = op.SoundId + soundIdString.Substring(op.IdLength);
 				soundId = Int32.Parse(soundIdString);
 				byte[] newBytes = BitConverter.GetBytes(soundId);
 				Array.Copy(newBytes, 0, paramBytes, 4, 4);

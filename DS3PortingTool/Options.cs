@@ -5,6 +5,12 @@ namespace DS3PortingTool;
 
 public class Options
 {
+    public enum AssetType
+    {
+        Character,
+        Object
+    }
+    
     /// <summary>
     /// The current-working directory.
     /// </summary>
@@ -26,21 +32,29 @@ public class Options
     /// </summary>
     public IBinder CurrentSourceBnd { get; set; }
     /// <summary>
+    /// What type of asset the source bnds are for.
+    /// </summary>
+    public AssetType SourceBndsType { get; }
+    /// <summary>
     /// The game that the source binder comes from.
     /// </summary>
     public Game Game { get; }
     /// <summary>
-    /// The character id of the source binder.
+    /// The id of the source binder.
     /// </summary>
-    public string SourceChrId { get; }
+    public string SourceId { get; }
     /// <summary>
-    /// The character id of the ported binder.
+    /// The id of the ported binder.
     /// </summary>
-    public string PortedChrId { get; }
+    public string PortedId { get; }
     /// <summary>
-    /// The character id that sound events will use.
+    /// The id that sound events will use.
     /// </summary>
-    public string SoundChrId { get; }
+    public string SoundId { get; }
+    /// <summary>
+    /// The length of the source and ported id.
+    /// </summary>
+    public int IdLength { get; }
     /// <summary>
     /// Flag setting which if true means only the tae will be ported when porting an anibnd.
     /// </summary>
@@ -57,9 +71,9 @@ public class Options
     public Options(string[] args)
     {
         Cwd = AppDomain.CurrentDomain.BaseDirectory;
-        SourceChrId = "";
-        PortedChrId = "";
-        SoundChrId = "";
+        SourceId = "";
+        PortedId = "";
+        SoundId = "";
         ChangeSoundIds = true;
         ExcludedAnimOffsets = new List<int>();
         
@@ -89,6 +103,26 @@ public class Options
                 SourceBnds[i] = BND3.Read(sourceFiles[i]);
             }
         }
+        
+        if (SourceFileNames[0].EndsWith("chrbnd.dcx") || SourceFileNames[0].EndsWith("anibnd.dcx"))
+        {
+            SourceBndsType = AssetType.Character;
+            IdLength = 4;
+            SourceId = "1000";
+            PortedId = "1000";
+        }
+        else if (SourceFileNames[0].EndsWith("objbnd.dcx") || SourceFileNames[0].EndsWith("geombnd.dcx") ||
+                 SourceFileNames[0].EndsWith("geomhkxbnd.dcx"))
+        {
+            SourceBndsType = AssetType.Object;
+            IdLength = 6;
+            SourceId = "100000";
+            PortedId = "100000";
+        }
+        else
+        {
+            throw new ArgumentException("One or more bnds are not of a supported type.");
+        }
 
         Game = new(SourceBnds[0]);
 
@@ -110,33 +144,33 @@ public class Options
             }
         }
         
-        if (Path.GetFileName(sourceFiles[0]).Substring(1, 4).All(char.IsDigit))
+        if (Path.GetFileName(sourceFiles[0]).Substring(1, IdLength).All(char.IsDigit))
         {
-            SourceChrId = Path.GetFileName(sourceFiles[0]).Substring(1, 4);
-            PortedChrId = SourceChrId;
+            SourceId = Path.GetFileName(sourceFiles[0]).Substring(1, IdLength);
+            PortedId = SourceId;
         }
-		
-        foreach (var i in flagIndices)
+
+        foreach (int i in flagIndices)
         {
             if (args[i].Equals("-t"))
             {
                 PortTaeOnly = true;
             }
-            else if (args[i].Equals("-c"))
+            else if (args[i].Equals("-i"))
             {
                 if (args.Length <= i + 1)
                 {
-                    throw new ArgumentException($"Flag '-c' used, but no character id provided.");
+                    throw new ArgumentException($"Flag '-i' used, but no id provided.");
                 }
-                if (args[i + 1].Length != 4 || !args[i + 1].All(char.IsDigit))
+                if (args[i + 1].Length != IdLength || !args[i + 1].All(char.IsDigit))
                 {
-                    throw new ArgumentException($"Character id after flag '-c' must be a 4 digit number.");
+                    throw new ArgumentException($"The id after flag '-i' must be a {IdLength} digit number.");
                 }
 
-                PortedChrId = args[i + 1];
-                if (SoundChrId.Equals(""))
+                PortedId = args[i + 1];
+                if (SoundId.Equals(""))
                 {
-                    SoundChrId = PortedChrId;
+                    SoundId = PortedId;
                 }
             }
             else if (args[i].Equals("-o"))
@@ -161,13 +195,13 @@ public class Options
                 {
                     ChangeSoundIds = false;
                 }
-                else if (args[i + 1].Length != 4 || !args[i + 1].All(char.IsDigit))
+                else if (args[i + 1].Length != IdLength || !args[i + IdLength].All(char.IsDigit))
                 {
-                    throw new ArgumentException($"Character id after flag '-s' must be a 4 digit number.");
+                    throw new ArgumentException($"The id after flag '-s' must be a {IdLength} digit number.");
                 }
-                else if (args[i + 1].Length == 4 || args[i + 1].All(char.IsDigit))
+                else if (args[i + 1].Length == IdLength || args[i + 1].All(char.IsDigit))
                 {
-                    SoundChrId = args[i + 1];
+                    SoundId = args[i + 1];
                 }
             }
             else if (!args[i].Equals("-x"))
