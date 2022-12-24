@@ -82,19 +82,19 @@ DS3PortingTool.exe aeg027_025.geombnd.dcx aeg027_025.geomhkxbnd.dcx
 ## Flags
 Flags are settings for the conversion process which will alter how the program behaves.
 
----
+-----
 `-i [id]` Specify an id that will override the id of the
 original DCX. If this flag is not used and no id can be discerned from the source file names, then c1000 will be used for characters and o100000 for objects.
 
 Examples:
 - `DS3PortingTool.exe -i 1050 c1000.anibnd.dcx`
 - `DS3PortingTool.exe -i 500500 o200100.objbnd.dcx`
----
+-----
 `-o [offsets]` Specify animation offset(s) to exclude.
 
 Examples: `DS3PortingTool.exe -o 0` `DS3PortingTool.exe -o 1,2,4`
 
----
+-----
 `-s` The character id in sound events will not be changed.
 
 Example: `DS3PortingTool.exe -s c7110.anibnd.dcx`
@@ -103,17 +103,17 @@ Example: `DS3PortingTool.exe -s c7110.anibnd.dcx`
 
 Example: `DS3PortingTool.exe -s 7100 c7110.anibnd.dcx`
 
----
+-----
 `-t` When porting a character or object, only the tae will be ported.
 
 Example:`DS3PortingTool.exe -t c1000.anibnd.dcx`
 
----
+-----
 `-x` Runs the program without asking the user to enter flags.
 
 Example:`DS3PortingTool.exe -x c6200.anibnd.dcx`
 
----
+-----
 In this example, no flags were entered initially so the user was prompted to enter flags. The user
 did not want to use any flags and so continued with the program execution.
 ```
@@ -129,7 +129,7 @@ DS3PortingTool.exe -t c1000.anibnd.dcx
 
 <program executes>
 ```
-------
+----
 ## Configuring XML
 Inside the Res folder there are several XML files which determine what is excluded or replaced during the porting process. The CharacterXML folder contains settings for porting characters and the ObjectXML folder contains settings  for porting objects.
 ### XML File Explanations
@@ -150,7 +150,7 @@ Inside the Res folder there are several XML files which determine what is exclud
 ### How to Edit XML Files
 Find the itemList or itemDictionary of the game you are porting from. 
 
----
+-----
 #### Adding to an itemList
 Create a new item in the itemList. Put a numerical id inside the quotation marks.
 ```
@@ -163,7 +163,7 @@ Create an itemRange which is used to add many ids to an itemList at once. It rep
 </itemRange>
 ```
 
----
+-----
 #### Adding to an itemDictionary
 ```
 <item key="" value=""/>
