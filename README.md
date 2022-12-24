@@ -129,7 +129,7 @@ DS3PortingTool.exe -t c1000.anibnd.dcx
 
 <program executes>
 ```
-----
+
 ## Configuring XML
 Inside the Res folder there are several XML files which determine what is excluded or replaced during the porting process. The CharacterXML folder contains settings for porting characters and the ObjectXML folder contains settings  for porting objects.
 ### XML File Explanations
@@ -174,7 +174,7 @@ Create an itemRange which is used to add many key-value pairs to an itemDictiona
   <item key="" value=""/>
 </itemRange>
 ```
-----
+
 ## Known Issues
 - Object collision HKX will not downgrade successfully.
 
