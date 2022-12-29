@@ -135,8 +135,8 @@ public static class TaeUtils
 		byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
 		if (op.ChangeSoundIds)
 		{
-			byte[] soundTypeBytes = new byte[op.IdLength];
-			byte[] soundIdBytes = new byte[op.IdLength];
+			byte[] soundTypeBytes = new byte[4];
+			byte[] soundIdBytes = new byte[4];
 			Array.Copy(paramBytes, soundTypeBytes, 4);
 			Array.Copy(paramBytes, 4, soundIdBytes, 0, 4);
 			if (isBigEndian)

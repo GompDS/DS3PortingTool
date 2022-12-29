@@ -148,6 +148,7 @@ public class Options
         {
             SourceId = Path.GetFileName(sourceFiles[0]).Substring(1, IdLength);
             PortedId = SourceId;
+            SoundId = SourceId;
         }
 
         foreach (int i in flagIndices)
