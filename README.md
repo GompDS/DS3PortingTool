@@ -104,9 +104,14 @@ Example: `DS3PortingTool.exe -s c7110.anibnd.dcx`
 Example: `DS3PortingTool.exe -s 7100 c7110.anibnd.dcx`
 
 -----
-`-t` When porting a character or object, only the tae will be ported.
+`-t` When porting a character or object, only the tae will be ported if there is one.
 
 Example:`DS3PortingTool.exe -t c1000.anibnd.dcx`
+
+-----
+`-f` When porting a character or object, only the flver(s) will be ported if there are any.
+
+Example:`DS3PortingTool.exe -f c1000.chrbnd.dcx`
 
 -----
 `-x` Runs the program without asking the user to enter flags.
