@@ -44,25 +44,30 @@ public class EldenRingConverter : Converter
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd") && op.SourceBndsType == Options.AssetType.Character)
         {
-            ConvertCharacterHkx(newBnd, op);
+            if (!op.PortFlverOnly)
+            {
+                ConvertCharacterHkx(newBnd, op);
 
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
-            {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
+                if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
+                {
+                    op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",
+                        @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
+                }
+
+                if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}_c.hkx")))
+                {
+                    op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}_c.clm2",
+                        @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}_c.clm2");
+                }
             }
-		
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}_c.hkx")))
-            {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}_c.clm2",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}_c.clm2");
-            }
-            
+
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".flver"));
             if (file != null)
             {
                 ConvertFlver(newBnd, file, op);
             }
+            
+            if (op.PortFlverOnly) return;
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
             newBnd.Write($"{op.Cwd}\\c{op.PortedId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
@@ -70,7 +75,7 @@ public class EldenRingConverter : Converter
         else if (op.CurrentSourceFileName.Contains("geombnd") && op.SourceBndsType == Options.AssetType.Object)
         {
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
-            if (file != null)
+            if (file != null && !op.PortFlverOnly)
             {
                 if (!op.PortTaeOnly)
                 {
@@ -94,19 +99,16 @@ public class EldenRingConverter : Converter
                 }
             }
 
-            if (op.PortTaeOnly) return;
+            foreach (BinderFile flver in op.CurrentSourceBnd.Files.Where(x => FLVER2.Is(x.Bytes)))
             {
-                foreach (BinderFile flver in op.CurrentSourceBnd.Files.Where(x => FLVER2.Is(x.Bytes)))
-                {
-                    ConvertFlver(_combinedObjbnd, flver, op);
-                }
-
-                WriteCombinedObjbnd(op);
+                ConvertFlver(_combinedObjbnd, flver, op);
             }
+
+            WriteCombinedObjbnd(op);
         }
         else if (op.CurrentSourceFileName.Contains("geomhkxbnd") && op.SourceBndsType == Options.AssetType.Object)
         {
-            if (op.PortTaeOnly) return;
+            if (op.PortTaeOnly || op.PortFlverOnly) return;
             ConvertObjectHkx(newBnd, op, false);
             if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"o{op.PortedId}_c.hkx")))
             {
@@ -147,6 +149,8 @@ public class EldenRingConverter : Converter
     /// </summary>
     private void WriteCombinedObjbnd(Options op)
     {
+        if (op.PortTaeOnly || op.PortFlverOnly) return;
+        
         string[] geombndNames = op.SourceFileNames.Where(x => x.Contains(".geombnd") || x.Contains(".geomhkxbnd")).ToArray();
         if (Array.IndexOf(geombndNames, op.CurrentSourceFileName) == geombndNames.Length - 1)
         {

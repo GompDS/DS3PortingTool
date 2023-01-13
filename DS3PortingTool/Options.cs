@@ -60,6 +60,10 @@ public class Options
     /// </summary>
     public bool PortTaeOnly { get; }
     /// <summary>
+    /// Flag setting which if true means only the flver will be ported if there is one.
+    /// </summary>
+    public bool PortFlverOnly { get; }
+    /// <summary>
     /// Flag setting which if true means that sound ids will be changed to match new character id.
     /// </summary>
     public bool ChangeSoundIds { get; }
@@ -156,6 +160,10 @@ public class Options
             if (args[i].Equals("-t"))
             {
                 PortTaeOnly = true;
+            }
+            else if (args[i].Equals("-f"))
+            {
+                PortFlverOnly = true;
             }
             else if (args[i].Equals("-i"))
             {

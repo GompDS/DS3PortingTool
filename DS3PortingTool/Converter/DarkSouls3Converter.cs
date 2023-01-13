@@ -58,6 +58,12 @@ public class DarkSouls3Converter : Converter
         }
         else if (op.CurrentSourceFileName.Contains("objbnd"))
         {
+            BinderFile file1 = op.CurrentSourceBnd.Files.First(x => FLVER2.Is(x.Bytes));
+            FLVER2 flver1 = FLVER2.Read(file1.Bytes);
+            BinderFile file2 = op.SourceBnds[Array.IndexOf(op.SourceBnds, op.CurrentSourceBnd) + 1].Files.First(x => FLVER2.Is(x.Bytes));
+            FLVER2 flver2 = FLVER2.Read(file2.Bytes);
+            
+            
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
             if (file != null)
             {

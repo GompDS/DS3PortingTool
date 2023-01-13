@@ -26,40 +26,42 @@ public abstract class Converter
                 ConvertCharacterTae(newBnd, file, op);
             }
 
-            if (!op.PortTaeOnly)
-            {
-                newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                newBnd.Write($"{op.Cwd}\\c{op.PortedId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
-            }
+            if (op.PortTaeOnly) return;
+            newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
+            newBnd.Write($"{op.Cwd}\\c{op.PortedId}.anibnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd") && op.SourceBndsType == Options.AssetType.Character)
         {
-            ConvertCharacterHkx(newBnd, op);
+            if (!op.PortFlverOnly)
+            {
+                ConvertCharacterHkx(newBnd, op);
 
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
-            {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
+                if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
+                {
+                    op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",
+                        @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
+                }
+
+                if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}_c.hkx")))
+                {
+                    op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}_c.clm2",
+                        @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}_c.clm2");
+                }
             }
-		
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}_c.hkx")))
-            {
-                op.CurrentSourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}_c.clm2",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}_c.clm2");
-            }
-            
+
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.Contains(".flver"));
             if (file != null)
             {
                 ConvertFlver(newBnd, file, op);
             }
 
+            if (op.PortFlverOnly) return;
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
             newBnd.Write($"{op.Cwd}\\c{op.PortedId}.chrbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
         else if (op.CurrentSourceFileName.Contains("objbnd") && op.SourceBndsType == Options.AssetType.Object)
         {
-            if (!op.PortTaeOnly)
+            if (!op.PortTaeOnly && !op.PortFlverOnly)
             {
                 ConvertObjectHkx(newBnd, op, false);
 
@@ -72,7 +74,7 @@ public abstract class Converter
             }
 
             BinderFile? file = op.CurrentSourceBnd.Files.Find(x => x.Name.EndsWith(".anibnd"));
-            if (file != null)
+            if (file != null && !op.PortFlverOnly)
             {
                 BND4 oldAnibnd = BND4.Read(file.Bytes);
                 BND4 newAnibnd = new();
@@ -99,17 +101,16 @@ public abstract class Converter
             }
 
             if (op.PortTaeOnly) return;
+            foreach (BinderFile flver in op.CurrentSourceBnd.Files
+                         .Where(x => FLVER2.Is(x.Bytes) && !x.Name
+                             .EndsWith("_S.flver", StringComparison.OrdinalIgnoreCase)))
             {
-                foreach (BinderFile flver in op.CurrentSourceBnd.Files
-                             .Where(x => FLVER2.Is(x.Bytes) &&
-                                         !x.Name.EndsWith("_S.flver", StringComparison.OrdinalIgnoreCase)))
-                {
-                    ConvertFlver(newBnd, flver, op);
-                }
-
-                newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                newBnd.Write($"{op.Cwd}\\o{op.PortedId}.objbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
+                ConvertFlver(newBnd, flver, op);
             }
+            
+            if (op.PortFlverOnly) return;
+            newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
+            newBnd.Write($"{op.Cwd}\\o{op.PortedId}.objbnd.dcx", DCX.Type.DCX_DFLT_10000_44_9);
         }
     }
     /// <summary>
@@ -323,7 +324,14 @@ public abstract class Converter
             }
         }
         
-        newBnd.Files.Add(flverFile);
+        if (op.PortFlverOnly)
+        {
+            File.WriteAllBytes($"{op.Cwd}\\{Path.GetFileName(flverFile.Name)}", flverFile.Bytes);
+        }
+        else
+        {
+            newBnd.Files.Add(flverFile);
+        }
     }
 
     /// <summary>
