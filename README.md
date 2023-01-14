@@ -30,8 +30,9 @@ If you use this tool for your mod I'd appreciate it if you would credit me for i
 
 ------
 ## Requirements
-In order for the tool to function as intended, you will need to place the
+In order to port animations, ragdoll, and cloth, you will need to place the
 following tools unzipped in the 'HavokDowngrade' folder.
+If you only want to port the tae or flver then you can skip this step, just make sure to use the proper flags.
 - **DS3HavokConverter**
   - Github releases: https://github.com/The12thAvenger/DS3HavokConverter/releases/
 - **Hkxpack-souls**
