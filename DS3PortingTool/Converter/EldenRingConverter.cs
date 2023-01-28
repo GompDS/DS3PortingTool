@@ -172,20 +172,20 @@ public class EldenRingConverter : Converter
             {
                 newBnd.Files = op.CurrentSourceBnd.Files
                     .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
+                    .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList();
             }
             else
             {
                 newBnd.Files = op.CurrentSourceBnd.Files
                     .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
+                    .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
             }
         }
         else
         {
             newBnd.Files = op.CurrentSourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-                .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
+                .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList();
         }
 
         foreach (BinderFile hkx in newBnd.Files)
@@ -222,7 +222,7 @@ public class EldenRingConverter : Converter
                 {
                     newBnd.Files = anibnd.Files
                         .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
-                        .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
+                        .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
                 }
             }
         }
@@ -230,7 +230,7 @@ public class EldenRingConverter : Converter
         {
             newBnd.Files = op.CurrentSourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-                .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
+                .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList();
         }
 
         foreach (BinderFile hkx in newBnd.Files)
@@ -448,6 +448,7 @@ public class EldenRingConverter : Converter
                 break;
             // PlaySound_WanderGhost
             case 10130:
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 Array.Clear(paramBytes, 12, 4);
                 break;
             // InvokeDebugDecal1

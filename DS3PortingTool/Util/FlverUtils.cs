@@ -115,8 +115,7 @@ public static class FlverUtils
 	        {"em", "_em"},
 	        {"e", "_e"},
 	        {"glow", "_em_e_Glow"},
-	        {"m", "_m"},
-	        {"decal", "_Decal"},
+            {"decal", "_Decal"},
 	        {"cloth", "_Cloth"}
         };
         

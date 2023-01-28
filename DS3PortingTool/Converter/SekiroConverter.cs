@@ -21,13 +21,13 @@ public class SekiroConverter : Converter
 			
             newBnd.Files = op.CurrentSourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-                .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
+                .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
         }
         else
         {
             newBnd.Files = op.CurrentSourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-                .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
+                .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList();
         }
 		
         foreach (BinderFile hkx in newBnd.Files)
@@ -79,13 +79,13 @@ public class SekiroConverter : Converter
                 {
                     newBnd.Files = anibnd.Files
                         .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
-                        .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
+                        .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
                 }
                 else
                 {
                     newBnd.Files = anibnd.Files
                         .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
-                        .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
+                        .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList();
                 }
             }
         }
@@ -93,7 +93,7 @@ public class SekiroConverter : Converter
         {
             newBnd.Files.AddRange(op.CurrentSourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-                .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList());
+                .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList());
         }
 
         foreach (BinderFile hkx in newBnd.Files)
@@ -335,6 +335,7 @@ public class SekiroConverter : Converter
                 break;
             // PlaySound_WanderGhost
             case 10130:
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
                 Array.Clear(paramBytes, 12, 4);
                 Array.Resize(ref paramBytes, 16);
                 break;

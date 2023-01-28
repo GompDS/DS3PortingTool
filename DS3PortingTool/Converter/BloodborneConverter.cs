@@ -32,7 +32,7 @@ public class BloodborneConverter : Converter
         }
         else if (op.CurrentSourceFileName.Contains("chrbnd"))
         {
-            //ConvertHkx(newBnd, op);
+            ConvertCharacterHkx(newBnd, op);
 
             if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
             {
@@ -57,10 +57,19 @@ public class BloodborneConverter : Converter
     /// </summary>
 	protected override void ConvertCharacterHkx(BND4 newBnd, Options op)
     {
-	    newBnd.Files = op.CurrentSourceBnd.Files
-		    .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-		    .Where(x => x.Downgrade($"{op.Cwd}HavokDowngrade\\")).ToList();
-		
+        if (op.CurrentSourceFileName.Contains("anibnd"))
+        {
+            newBnd.Files = op.CurrentSourceBnd.Files
+                .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx") && x.Name.Contains("chr"))
+                .Where(x => PortHavok(x, $"{op.Cwd}HavokDowngrade\\")).ToList();
+        }
+        else if (op.CurrentSourceFileName.Contains("chrbnd"))
+        {
+            newBnd.Files = op.CurrentSourceBnd.Files
+                .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx") && !Path.GetFileName(x.Name).ToLower().Contains("_c"))
+                .Where(x => PortHavokRagdoll(x, $"{op.Cwd}HavokDowngrade\\")).ToList();
+        }
+
         foreach (BinderFile hkx in newBnd.Files)
         {
             string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\";
@@ -91,7 +100,88 @@ public class BloodborneConverter : Converter
     /// </summary>
     protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data)
     {
-        throw new NotImplementedException();
+        byte[] paramBytes = ev.GetParameterBytes(bigEndian);
+
+        switch (ev.Type)
+        {
+            // AddSpEffect_Multiplayer
+            case 66:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // AddSpEffect
+            case 67:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // SpawnFFX_108
+            case 108:
+                ev.Type = 96;
+                ev.Group.GroupType = 96;
+                Array.Resize(ref paramBytes, 16);
+                break;
+            // SpawnFFX_109
+            case 109:
+                ev.Type = 96;
+                ev.Group.GroupType = 96;
+                Array.Resize(ref paramBytes, 16);
+                break;
+            // PlaySound_CenterBody
+            case 128:
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                break;
+            // PlaySound_StateInfo
+            case 129:
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                break;
+            // PlaySound_ByDummyPoly_PlayerVoice
+            case 130:
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                break;
+            // PlaySound_ByDummyPoly
+            case 131:
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                break;
+            // PlaySound_Weapon
+            case 132:
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                break;
+            // AddSpEffect_DragonForm
+            case 302:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // SprjChrActionFlagModule
+            case 312:
+                Array.Resize(ref paramBytes, 32);
+                break;
+            // PlayerInputCheck
+            case 320:
+                Array.Resize(ref paramBytes, 16);
+                Array.Clear(paramBytes, 7, 9);
+                break;
+            // AddSpEffect_WeaponArts
+            case 331:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // AddSpEffect_Multiplayer_401
+            case 401:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // IgnoreHitsPartsMask
+            case 500:
+                Array.Resize(ref paramBytes, 16);
+                Array.Clear(paramBytes, 2, 14);
+                break;
+            // AddSpEffect_CultRitualCompletion
+            case 797:
+                paramBytes = ev.ChangeSpEffectId(bigEndian, data);
+                break;
+            // PlaySound_WanderGhost
+            case 10130:
+                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                break;
+        }
+        
+        ev.SetParameterBytes(bigEndian, paramBytes);
+        return ev;
     }
     /// <summary>
     /// Creates a new DS3 FLVER using data from a Bloodborne FLVER.
@@ -126,5 +216,88 @@ public class BloodborneConverter : Converter
         };
         
         return newFlver;
+    }
+    
+    /// <summary>
+    ///	Converts 2014 PS4 hkx to PC hkx
+    /// </summary>
+    protected override bool PortHavok(BinderFile hkxFile, string toolsDirectory)
+    {
+        string hkxName = Path.GetFileName(hkxFile.Name).ToLower();
+        File.WriteAllBytes($"{toolsDirectory}\\{hkxName}", hkxFile.Bytes);
+        string xmlName = Path.GetFileNameWithoutExtension(hkxFile.Name) + ".xml";
+        
+        // Unpack havok file
+        bool result = RunProcess(toolsDirectory,"hkxpackbb.exe",
+            $"{toolsDirectory}\\{hkxName}"); 
+        File.Delete($"{toolsDirectory}\\{hkxName}");
+        if (result == false)
+        {
+            Console.WriteLine($"Could not port {hkxName}");
+            return false;
+        }
+        
+        // Repack havok file
+        result = RunProcess(toolsDirectory,"hkxpackds3.exe",
+            $"{toolsDirectory}\\{xmlName}"); 
+        File.Delete($"{toolsDirectory}\\{xmlName}");
+        if (result == false)
+        {
+            Console.WriteLine($"Could not port {hkxName}");
+            return false;
+        }
+		
+        hkxFile.Bytes = File.ReadAllBytes($"{toolsDirectory}\\{hkxName}");
+        File.Delete($"{toolsDirectory}\\{hkxName}");
+        Console.WriteLine($"Ported {hkxName}");
+        return true;
+    }
+    
+    /// <summary>
+    ///	Converts 2014 PS4 hkx to PC hkx
+    /// </summary>
+    private bool PortHavokRagdoll(BinderFile hkxFile, string toolsDirectory)
+    {
+        string hkxName = Path.GetFileName(hkxFile.Name).ToLower();
+        File.WriteAllBytes($"{toolsDirectory}\\{hkxName}", hkxFile.Bytes);
+        string xmlName = Path.GetFileNameWithoutExtension(hkxFile.Name) + ".xml";
+        
+        // Unpack havok file
+        bool result = RunProcess(toolsDirectory,"hkxpackbb.exe",
+            $"{toolsDirectory}\\{hkxName}"); 
+        File.Delete($"{toolsDirectory}\\{hkxName}");
+        if (result == false)
+        {
+            Console.WriteLine($"Could not port {hkxName}");
+            return false;
+        }
+        
+        // Use Avenger's tool
+        File.Move($"{toolsDirectory}\\{xmlName}", $"{toolsDirectory}\\AvengersTool\\{xmlName}");
+        result = RunProcess(toolsDirectory,"test.exe",
+            $"{toolsDirectory}\\AvengersTool\\{xmlName}"); 
+        File.Delete($"{toolsDirectory}\\AvengersTool\\{xmlName}");
+        if (result == false)
+        {
+            Console.WriteLine($"Could not port {hkxName}");
+            return false;
+        }
+        File.Move($"{toolsDirectory}\\AvengersTool\\{Path.GetFileNameWithoutExtension(hkxFile.Name)}-out.xml", 
+            $"{toolsDirectory}\\{xmlName}");
+        
+        // Repack havok file
+        result = RunProcess(toolsDirectory,"hkxpackds3.exe",
+            $"{toolsDirectory}\\{xmlName}"); 
+        File.Delete($"{toolsDirectory}\\{xmlName}");
+        if (result == false)
+        {
+            Console.WriteLine($"Could not port {hkxName}");
+            return false;
+        }
+		
+        hkxFile.Bytes = File.ReadAllBytes($"{toolsDirectory}\\{hkxName}");
+        File.Delete($"{toolsDirectory}\\{hkxName}");
+        Console.WriteLine($"Ported {hkxName}");
+        return true;
     }
 }
