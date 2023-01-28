@@ -30,8 +30,10 @@ If you use this tool for your mod I'd appreciate it if you would credit me for i
 
 ------
 ## Requirements
-In order for the tool to function as intended, you will need to place the
+### Requirements for porting animations, ragdoll, and cloth
+In order to port animations, ragdoll, and cloth, you will need to place the
 following tools unzipped in the 'HavokDowngrade' folder.
+If you only want to port the tae or flver then you can skip this step, just make sure to use the proper flags.
 - **DS3HavokConverter**
   - Github releases: https://github.com/The12thAvenger/DS3HavokConverter/releases/
 - **Hkxpack-souls**
@@ -42,7 +44,7 @@ following tools unzipped in the 'HavokDowngrade' folder.
 ![This is what your HavokDowngrade folder should look like.](/DS3PortingTool/Assets/Readme_HavokDowngrade_Model.png)
 <br /> The HavokDowngrade folder should look something like this.
 
-### Additional Requirements for porting assets from Sekiro and Elden Ring
+### Requirements for porting anything from Sekiro and Elden Ring
 - **oo2core_6_win64.dll**
   - Copy it from your Sekiro or Elden Ring game folder to the same directory as
   DS3PortingTool.exe.
