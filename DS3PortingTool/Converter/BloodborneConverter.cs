@@ -201,7 +201,7 @@ public class BloodborneConverter : Converter
                 Unk68 = sourceFlver.Header.Unk68
             },
             Dummies = sourceFlver.Dummies,
-            Materials = sourceFlver.Materials.Select(x => x.ToDs3Material(data.MaterialInfoBank, op)).ToList(),
+            Materials = sourceFlver.Materials.Select(x => x.ToDummyDs3Material(data.MaterialInfoBank, op)).ToList(),
             Bones = sourceFlver.Bones.Select(x =>
             {
                 // Unk3C should only be 0 or 1 in DS3.
@@ -246,7 +246,7 @@ public class BloodborneConverter : Converter
             Console.WriteLine($"Could not port {hkxName}");
             return false;
         }
-		
+
         hkxFile.Bytes = File.ReadAllBytes($"{toolsDirectory}\\{hkxName}");
         File.Delete($"{toolsDirectory}\\{hkxName}");
         Console.WriteLine($"Ported {hkxName}");

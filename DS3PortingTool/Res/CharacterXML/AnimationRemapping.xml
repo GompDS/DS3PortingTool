@@ -1,31 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animationRemapping>
 	<itemDictionary game="Bloodborne">
+		<item key="20000000" value="0"/>
 		<item key="0" value="20"/>
 		<item key="9900" value="30"/>
-		<item key="500" value="2100"/>
-		<item key="1500" value="7000"/>
-		<item key="1510" value="7010"/>
-		<item key="1520" value="7020"/>
-		<item key="1750" value="7400"/>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="16">
+			<item key="9000" value="700"/>
+		</itemRange>
+		<item key="9910" value="1100"/>
+		<item key="9920" value="1101"/>
+		<item key="3600" value="1200"/>
+		<item key="800" value="1500"/>
+		<item key="810" value="1600"/>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="11">
+			<item key="9060" value="1700"/>
+		</itemRange>
+		<item key="6200" value="1800"/>
+		<item key="600" value="5004"/>
+		<item key="601" value="5005"/>
+		<itemRange keyIncrement="10" valueIncrement="10" repeat="3">
+			<item key="1500" value="7000"/>
+		</itemRange>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="3">
+			<item key="1750" value="7400"/>
+		</itemRange>
 		<item key="1760" value="7410"/>
 		<item key="1770" value="7420"/>
 		<item key="1600" value="7600"/>
 		<item key="1610" value="7610"/>
+		<item key="1560" value="7611"/>
 		<item key="1620" value="7620"/>
+		<item key="1570" value="7621"/>
+		<item key="2002" value="8000"/>
+		<item key="2003" value="8001"/>
+		<item key="2000" value="8002"/>
+		<item key="2001" value="8003"/>
+		<item key="2006" value="8010"/>
+		<item key="2007" value="8011"/>
+		<item key="2004" value="8012"/>
+		<item key="2005" value="8013"/>
+		<item key="2012" value="8020"/>
+		<item key="2013" value="8021"/>
+		<item key="2010" value="8022"/>
+		<item key="2011" value="8023"/>
 		<item key="2020" value="8100"/>
 		<item key="2014" value="8101"/>
 		<item key="2040" value="8110"/>
+		<item key="2052" value="8120"/>
+		<item key="2053" value="8121"/>
+		<item key="2050" value="8122"/>
+		<item key="2051" value="8123"/>
 		<item key="2060" value="8130"/>
-		<item key="9610" value="8200"/>
-		<item key="9611" value="8210"/>
-		<item key="9612" value="8220"/>
+		<item key="2082" value="8140"/>
+		<item key="2083" value="8141"/>
+		<item key="2080" value="8142"/>
+		<item key="2081" value="8143"/>
+		<item key="9600" value="8200"/>
+		<item key="9611" value="8201"/>
+		<item key="9610" value="8210"/>
+		<item key="9612" value="8211"/>
+		<item key="9601" value="8220"/>
 		<item key="9613" value="8221"/>
-		<item key="9930" value="8410"/>
+		<item key="3501" value="8300"/>
+		<item key="3500" value="8310"/>
+		<item key="2100" value="8500"/>
+		<item key="2110" value="8501"/>
+		<item key="2030" value="8600"/>
+		<item key="2031" value="8601"/>
+		<item key="2032" value="8602"/>
+		<item key="8030" value="8602"/>
+		<item key="8040" value="8603"/>
+		<item key="7025" value="8700"/>
+		<item key="8000" value="8700"/>
+		<item key="8010" value="8701"/>
+		<item key="8020" value="8702"/>
+		<item key="8200" value="8703"/>
+		<item key="2401" value="9000"/>
+		<item key="2402" value="9001"/>
+		<itemRange keyIncrement="1" valueIncrement="10" repeat="8">
+			<item key="2410" value="9100"/>
+			<item key="2426" value="9100"/>
+		</itemRange>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="6">
+			<item key="2418" value="9171"/>
+			<item key="2434" value="9171"/>
+		</itemRange>
+		<item key="2424" value="9177"/>
+		<item key="2425" value="9178"/>
+		<item key="2302" value="9310"/>
+		<item key="2303" value="9311"/>
+		<item key="2300" value="9312"/>
+		<item key="2301" value="9313"/>
+		<item key="2306" value="9320"/>
+		<item key="2332" value="9320"/>
+		<item key="2307" value="9321"/>
+		<item key="2333" value="9321"/>
+		<item key="2304" value="9322"/>
+		<item key="2330" value="9322"/>
+		<item key="2305" value="9323"/>
+		<item key="2331" value="9323"/>
+		<item key="2312" value="9330"/>
+		<item key="2362" value="9330"/>
+		<item key="2313" value="9331"/>
+		<item key="2363" value="9331"/>
+		<item key="2310" value="9332"/>
+		<item key="2360" value="9332"/>
+		<item key="2311" value="9333"/>
+		<item key="2361" value="9333"/>
+		<item key="2400" value="9500"/>
 		<item key="2200" value="10000"/>
 		<item key="2250" value="10001"/>
 		<item key="2202" value="10010"/>
 		<item key="2252" value="10011"/>
+		<item key="2203" value="10020"/>
+		<item key="2253" value="10021"/>
 		<item key="2204" value="10030"/>
 		<item key="2254" value="10031"/>
 		<item key="2207" value="10040"/>
@@ -34,6 +122,12 @@
 		<item key="2259" value="10051"/>
 		<item key="2211" value="10060"/>
 		<item key="2261" value="10061"/>
+		<item key="2205" value="10100"/>
+		<item key="2255" value="10101"/>
+		<item key="2220" value="10110"/>
+		<item key="2270" value="10111"/>
+		<item key="2221" value="10120"/>
+		<item key="2271" value="10121"/>
 		<item key="7210" value="13000"/>
 		<item key="7220" value="13020"/>
 		<item key="7224" value="13030"/>
@@ -68,19 +162,30 @@
 		<itemRange keyIncrement="1" valueIncrement="1" repeat="4">
 			<item key="200" value="2000"/>
 			<item key="9100" value="2030"/>
-			<item key="602" value="6000"/>
+			<item key="500" value="2100"/>
+			<item key="9200" value="2130"/>
+			<item key="3300" value="4100"/>
+			<item key="3310" value="4110"/>
+			<item key="3320" value="4120"/>
+			<item key="602" value="5000"/>
 			<item key="700" value="6000"/>
 			<item key="710" value="6010"/>
-			<item key="2000" value="8000"/>
-			<item key="2004" value="8010"/>
-			<item key="2010" value="8020"/>
-			<item key="2610" value="8120"/>
-			<item key="2080" value="8140"/>
-			<item key="2030" value="9000"/>
+			<item key="720" value="6020"/>
+			<item key="2600" value="8004"/>
+			<item key="2610" value="8014"/>
+			<item key="2620" value="8024"/>
+			<item key="2900" value="9314"/>
+			<item key="2910" value="9324"/>
+			<item key="2920" value="9334"/>
 		</itemRange>
-		<itemRange keyIncrement="1" valueIncrement="1" repeat="99">
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="19">
 			<item key="7000" value="20000"/>
 		</itemRange>
+		<itemRange keyIncrement="1" valueIncrement="1" repeat="5">
+			<item key="7019" value="30000"/>
+			<item key="10" value="40000"/>
+		</itemRange>
+		<item key="9030" value="30005"/>
 	</itemDictionary>
 	<itemDictionary game="Sekiro">
 		<item key="8500" value="8200"/>

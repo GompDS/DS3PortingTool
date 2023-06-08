@@ -318,6 +318,9 @@ public static class TaeUtils
 			{
 				anim.ID = newOffset + anim.GetNoOffsetId();
 			}
+
+			string animName = anim.ID.ToString("D9");
+			anim.AnimFileName = "a" + animName[..^6] + "_" + animName[3..] + ".hkt";
 		}
 	}
 

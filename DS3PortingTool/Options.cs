@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using SoulsFormats;
 using ArgumentException = System.ArgumentException;
 
@@ -78,7 +79,6 @@ public class Options
         SourceId = "";
         PortedId = "";
         SoundId = "";
-        ChangeSoundIds = true;
         ExcludedAnimOffsets = new List<int>();
         
         string[] sourceFiles = Array.FindAll(args, x => File.Exists(x) && 
@@ -180,6 +180,7 @@ public class Options
                 if (SoundId.Equals(""))
                 {
                     SoundId = PortedId;
+                    ChangeSoundIds = true;
                 }
             }
             else if (args[i].Equals("-o"))
@@ -211,6 +212,7 @@ public class Options
                 else if (args[i + 1].Length == IdLength || args[i + 1].All(char.IsDigit))
                 {
                     SoundId = args[i + 1];
+                    ChangeSoundIds = true;
                 }
             }
             else if (!args[i].Equals("-x"))

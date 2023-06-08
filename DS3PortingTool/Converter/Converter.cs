@@ -279,11 +279,6 @@ public abstract class Converter
             {
                 newFlver.GXLists.Add(gxList);
             }
-			
-            foreach (var mat in newFlver.Materials.Where(x => x.MTD.Equals(distinctMat.MTD)))
-            {
-                mat.GXIndex = newFlver.GXLists.Count - 1;
-            }
         }
 
         foreach (var mesh in newFlver.Meshes)
