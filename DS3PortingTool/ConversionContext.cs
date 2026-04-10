@@ -12,9 +12,10 @@ public static class ConversionContext
     /// The current-working directory.
     /// </summary>
     public static string Cwd { get; } = AppDomain.CurrentDomain.BaseDirectory;
-
-    private static string[] _assetFilePaths = [];
-
+    /// <summary>
+    /// File handlers for the assets supplied from the SourceGame
+    /// </summary>
+    public static GameAsset[] SourceAssets { get; private set; }
     /// <summary>
     /// The game that the source binder comes from.
     /// </summary>
@@ -81,6 +82,17 @@ public static class ConversionContext
         ["source_game"] = ["sekiro_sdt__windows", "elden_ring__windows", "elden_ring_nightreign__windows"],
         ["target_game"] = ["dark_souls_3__windows"]
     };
+    
+    private static readonly Dictionary<string, GameAsset.FSAssetType[]> SupportedAssetTypesLookup =
+        new Dictionary<string, GameAsset.FSAssetType[]>
+    {
+        ["elden_ring_nightreign__windows"] = [GameAsset.FSAssetType.CHRBND, GameAsset.FSAssetType.ANIBND],
+    };
+
+    private static readonly Dictionary<string, string[]> SupportedAssetTypesRegexLookup = new Dictionary<string, string[]>
+    {
+        ["elden_ring_nightreign__windows"] = [@"((\.chrbnd$)|\.chrbnd\.dcx$)", @"((\.anibnd$)|\.anibnd\.dcx$)"],
+    };
 
     public static bool TryReadArguments(string[] args)
     {
@@ -102,7 +114,7 @@ public static class ConversionContext
         SourceGame = source_game;
         TargetGame = target_game;
         
-        _assetFilePaths = new string[argQueue.Count];
+        SourceAssets = new GameAsset[argQueue.Count];
         int i = 0;
         // ReSharper disable once InlineOutVariableDeclaration
         string nextAsset;
@@ -113,12 +125,33 @@ public static class ConversionContext
                 Console.Error.WriteLine($"$ERROR: asset does not exist @ \"{nextAsset}\".");
                 return false;
             }
+
+            if (!SupportedAssetTypesRegexLookup.TryGetValue(SourceGame.GameSpecKey, out string[]? assetTypePatterns))
+            {
+                Console.Error.WriteLine($"$ERROR: \"{SourceGame}\" has no supported asset types. Aborting.");
+                return false;
+            }
+
             
-            _assetFilePaths[i] = nextAsset;
+            for (int j = 0; j < assetTypePatterns.Length; j++)
+            {
+                if (Regex.IsMatch(nextAsset, assetTypePatterns[j]))
+                {
+                    SourceAssets[i] = new GameAsset(nextAsset, SourceGame, SupportedAssetTypesLookup[SourceGame.GameSpecKey][j]);
+                    break;
+                }
+
+                if (j == assetTypePatterns.Length - 1)
+                {
+                    Console.Error.WriteLine("$ERROR: asset is not of a supported type");
+                    return false;
+                }
+            }
+
             i++;
         }
 
-        if (_assetFilePaths.Length == 0)
+        if (SourceAssets.Length == 0)
         {
             Console.Error.WriteLine("ERROR: At least one asset must be specified.");
             return false;
@@ -137,14 +170,15 @@ public static class ConversionContext
         }
         Console.WriteLine($"    source_game: {_FormatSupportedGames(SupportedGamesLookup["source_game"])}");
         Console.WriteLine($"    target_game: {_FormatSupportedGames(SupportedGamesLookup["target_game"])}");
+        Console.WriteLine($"    asset: One or more files from source_game to be converted. Only certain file types are supported.");
         Console.WriteLine();
     }
 
-    public static bool TryMatchAsset(string regex, out string? matchedAsset)
+    public static bool TryMatchAssetByFileName(string regex, out string? matchedAsset)
     {
         matchedAsset = null;
         
-        foreach (string asset in _assetFilePaths)
+        foreach (string asset in SourceAssets.Select(x => x.FileName))
         {
             if (Regex.IsMatch(asset, regex))
             {
@@ -156,11 +190,11 @@ public static class ConversionContext
         return false;
     }
 
-    public static string[] MatchAssets(string regex)
+    public static string[] MatchAssetsByFileName(string regex)
     {
         List<string> matches = new List<string>();
         
-        foreach (string asset in _assetFilePaths)
+        foreach (string asset in SourceAssets.Select(x => x.FileName))
         {
             if (Regex.IsMatch(asset, regex))
             {
