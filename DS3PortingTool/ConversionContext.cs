@@ -128,7 +128,7 @@ public static class ConversionContext
 
             if (!SupportedAssetTypesRegexLookup.TryGetValue(SourceGame.GameSpecKey, out string[]? assetTypePatterns))
             {
-                Console.Error.WriteLine($"$ERROR: \"{SourceGame}\" has no supported asset types. Aborting.");
+                Console.Error.WriteLine($"$ERROR: \"{SourceGame.GameSpecKey}\" has no supported asset types. Aborting.");
                 return false;
             }
 
@@ -269,7 +269,7 @@ public static class ConversionContext
                             throw new ArgumentException("Missing required arguments.");
                         }
 
-                        if (!_IsDigitStr(oldId) || !_IsDigitStr(newId))
+                        if (!oldId.IsDigits() || !newId.IsDigits())
                         {
                             throw new ArgumentException("old_id and new_id must only contain digits.");
                         }
@@ -332,7 +332,7 @@ public static class ConversionContext
                             throw new ArgumentException("Missing required arguments.");
                         }
                         
-                        if (!_IsDigitStr(prefix))
+                        if (!prefix.IsDigits())
                         {
                             throw new ArgumentException("prefix must only contain digits.");
                         }
@@ -360,7 +360,7 @@ public static class ConversionContext
                             throw new ArgumentException("Missing required arguments.");
                         }
                         
-                        if (!_IsDigitStr(prefix))
+                        if (!prefix.IsDigits())
                         {
                             throw new ArgumentException("id must only contain digits.");
                         }
@@ -383,11 +383,6 @@ public static class ConversionContext
         }
 
         return true;
-    }
-
-    private static bool _IsDigitStr(string s)
-    {
-        return s.All(c => c is >= '0' and <= '9');
     }
 
     private static string _FormatSupportedGames(string[] gamesList)
