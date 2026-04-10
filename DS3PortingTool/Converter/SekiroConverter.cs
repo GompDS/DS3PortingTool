@@ -7,12 +7,12 @@ public class SekiroConverter : Converter
     /// <summary>
     /// Converts a Sekiro HKX file into a DS3 compatible HKX file.
     /// </summary>
-	protected override void ConvertCharacterHkx(IBinder sourceBnd, BND4 newBnd, Options op)
+	protected override void ConvertCharacterHkx(IBinder sourceBnd, BND4 newBnd)
     {
-        if (op.CurrentTextureSourceFileName.Contains("anibnd"))
+        if (ConversionContext.CurrentTextureSourceFileName.Contains("anibnd"))
         {
             BinderFile? compendium = sourceBnd.Files
-                .Find(x => x.Name.Contains($"c{op.SourceId}.compendium"));
+                .Find(x => x.Name.Contains($"c{ConversionContext.SourceId}.compendium"));
             if (compendium == null)
             {
                 throw new FileNotFoundException("Source anibnd contains no compendium.");
@@ -20,23 +20,23 @@ public class SekiroConverter : Converter
 			
             newBnd.Files = sourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-                .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
+                .Where(x => PortHavok(x,$"{ConversionContext.Cwd}HavokDowngrade\\", compendium)).ToList();
         }
         else
         {
             newBnd.Files = sourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-                .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList();
+                .Where(x => PortHavok(x,$"{ConversionContext.Cwd}HavokDowngrade\\")).ToList();
         }
 		
         foreach (BinderFile hkx in newBnd.Files)
         {
-            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\";
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{ConversionContext.PortedId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
 
-            if (name.Contains($"c{op.SourceId}.hkx") || name.Contains($"c{op.SourceId}_c.hkx"))
+            if (name.Contains($"c{ConversionContext.SourceId}.hkx") || name.Contains($"c{ConversionContext.SourceId}_c.hkx"))
             {
-                hkx.Name = $"{path}{name.Replace(op.SourceId, op.PortedId)}";
+                hkx.Name = $"{path}{name.Replace(ConversionContext.SourceId, ConversionContext.PortedId)}";
             }
             else
             {
@@ -64,7 +64,7 @@ public class SekiroConverter : Converter
     }
 
     // Need to figure this one out.
-    protected override void ConvertObjectHkx(IBinder sourceBnd, BND4 newBnd, Options op, bool isInnerAnibnd)
+    protected override void ConvertObjectHkx(IBinder sourceBnd, BND4 newBnd, bool isInnerAnibnd)
     {
         if (isInnerAnibnd)
         {
@@ -78,13 +78,13 @@ public class SekiroConverter : Converter
                 {
                     newBnd.Files = anibnd.Files
                         .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
-                        .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\", compendium)).ToList();
+                        .Where(x => PortHavok(x,$"{ConversionContext.Cwd}HavokDowngrade\\", compendium)).ToList();
                 }
                 else
                 {
                     newBnd.Files = anibnd.Files
                         .Where(x => x.Name.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
-                        .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList();
+                        .Where(x => PortHavok(x,$"{ConversionContext.Cwd}HavokDowngrade\\")).ToList();
                 }
             }
         }
@@ -92,21 +92,21 @@ public class SekiroConverter : Converter
         {
             newBnd.Files.AddRange(sourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx"))
-                .Where(x => PortHavok(x,$"{op.Cwd}HavokDowngrade\\")).ToList());
+                .Where(x => PortHavok(x,$"{ConversionContext.Cwd}HavokDowngrade\\")).ToList());
         }
 
         foreach (BinderFile hkx in newBnd.Files)
         {
-            string path = $"N:\\FDP\\data\\INTERROOT_win64\\obj\\o{op.PortedId[..2]}\\o{op.PortedId}\\";
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\obj\\o{ConversionContext.PortedId[..2]}\\o{ConversionContext.PortedId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
 
-            if (op.CurrentTextureSourceFileName.Contains("_c", StringComparison.OrdinalIgnoreCase) && !isInnerAnibnd)
+            if (ConversionContext.CurrentTextureSourceFileName.Contains("_c", StringComparison.OrdinalIgnoreCase) && !isInnerAnibnd)
             {
-                hkx.Name = $"{path}o{op.PortedId}_c.hkx";
+                hkx.Name = $"{path}o{ConversionContext.PortedId}_c.hkx";
             }
             else if (!isInnerAnibnd)
             {
-                hkx.Name = name.Contains("_1") ? $"{path}o{op.PortedId}_1.hkx" : $"{path}o{op.PortedId}.hkx";
+                hkx.Name = name.Contains("_1") ? $"{path}o{ConversionContext.PortedId}_1.hkx" : $"{path}o{ConversionContext.PortedId}.hkx";
             }
             else
             {
@@ -136,22 +136,22 @@ public class SekiroConverter : Converter
     /// <summary>
     /// Converts a Sekiro TAE file into a DS3 compatible TAE file.
     /// </summary>
-    protected override void ConvertCharacterTae(IBinder sourceBnd, BND4 newBnd, BinderFile taeFile, Options op)
+    protected override void ConvertCharacterTae(IBinder sourceBnd, BND4 newBnd, BinderFile taeFile)
     {
         TAE oldTae = TAE.Read(taeFile.Bytes);
         TAE newTae = new()
         {
             Format = TAE.TAEFormat.DS3,
             BigEndian = false,
-            ID = 200000 + int.Parse(op.PortedId),
+            ID = 200000 + int.Parse(ConversionContext.PortedId),
             Flags = new byte[] { 1, 0, 1, 2, 2, 1, 1, 1 },
             SkeletonName = "skeleton.hkt",
-            SibName = $"c{op.PortedId}.sib",
+            SibName = $"c{ConversionContext.PortedId}.sib",
             Animations = new List<TAE.Animation>(),
             EventBank = 21
         };
 
-        XmlData data = new(op);
+        XmlData data = new();
 
         data.ExcludedAnimations.AddRange(oldTae.Animations
             .Where(x => x.GetOffset() > 0 && data.ExcludedAnimations.Contains(x.GetNoOffsetId()))
@@ -168,7 +168,7 @@ public class SekiroConverter : Converter
                 data.ExcludedAnimations.Contains(otherHeader.ImportFromAnimID))
             .Select(x => Convert.ToInt32(x.ID)));
 
-        data.ExcludedAnimations.AddRange(oldTae.GetExcludedOffsetAnimations(op));
+        data.ExcludedAnimations.AddRange(oldTae.GetExcludedOffsetAnimations());
 
         newTae.Animations = oldTae.Animations
             .Where(x => !data.ExcludedAnimations.Contains(Convert.ToInt32(x.ID))).ToList();
@@ -190,32 +190,32 @@ public class SekiroConverter : Converter
             if (data.AnimationRemapping.ContainsKey(anim.GetNoOffsetId()))
             {
                 data.AnimationRemapping.TryGetValue(anim.GetNoOffsetId(), out int newAnimId);
-                anim.SetAnimationProperties(newAnimId, anim.GetNoOffsetId(), anim.GetOffset(), op);
+                anim.SetAnimationProperties(newAnimId, anim.GetNoOffsetId(), anim.GetOffset());
             }
             else
             {
-                anim.SetAnimationProperties(anim.GetNoOffsetId(), anim.GetNoOffsetId(), anim.GetOffset(), op);
+                anim.SetAnimationProperties(anim.GetNoOffsetId(), anim.GetNoOffsetId(), anim.GetOffset());
             }
 			
             anim.Events = anim.Events.Where(ev => 
                     (!data.ExcludedEvents.Contains(ev.Type) || ev.IsAllowedSpEffect(newTae.BigEndian, data)) && 
                     !data.ExcludedJumpTables.Contains(ev.GetJumpTableId(newTae.BigEndian)) && 
                     !data.ExcludedRumbleCams.Contains(ev.GetRumbleCamId(newTae.BigEndian)))
-                .Select(ev => EditEvent(ev, newTae.BigEndian, op, data)).ToList();
+                .Select(ev => EditEvent(ev, newTae.BigEndian, data)).ToList();
         }
 		
-        if (op.ExcludedAnimOffsets.Any())
+        if (ConversionContext.ExcludedAnimOffsets.Any())
         {
-            newTae.ShiftAnimationOffsets(op);
+            newTae.ShiftAnimationOffsets();
         }
 
         taeFile = new BinderFile(Binder.FileFlags.Flag1, 3000000,
-            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\tae\\c{op.PortedId}.tae",
+            $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{ConversionContext.PortedId}\\tae\\c{ConversionContext.PortedId}.tae",
             newTae.Write());
 		
-        if (op.PortTaeOnly)
+        if (ConversionContext.PortTaeOnly)
         {
-            File.WriteAllBytes($"{op.Cwd}\\c{op.PortedId}.tae", taeFile.Bytes);
+            File.WriteAllBytes($"{ConversionContext.Cwd}\\c{ConversionContext.PortedId}.tae", taeFile.Bytes);
         }
         else
         {
@@ -225,7 +225,7 @@ public class SekiroConverter : Converter
     /// <summary>
 	/// Edits parameters of a Sekiro event so that it will match with its DS3 event equivalent.
 	/// </summary>
-	protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data)
+	protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, XmlData data)
 	{
 		byte[] paramBytes = ev.GetParameterBytes(bigEndian);
 		
@@ -252,17 +252,17 @@ public class SekiroConverter : Converter
                 break;
             // PlaySound_CenterBody
             case 128:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 break;
             // PlaySound_ByStateInfo
             case 129:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
-                switch (op.SourceBndsType)
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
+                switch (ConversionContext.SourceBndsType)
                 {
-                    case Options.AssetType.Character:
+                    case ConversionContext.AssetType.Character:
                         Array.Clear(paramBytes, 18, 2);
                         break;
-                    case Options.AssetType.Object:
+                    case ConversionContext.AssetType.Object:
                         Array.Clear(paramBytes, 12, 4);
                         Array.Resize(ref paramBytes, 32);
                         break;
@@ -270,13 +270,13 @@ public class SekiroConverter : Converter
                 break;
             // PlaySound_ByDummyPoly_PlayerVoice
             case 130:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 Array.Clear(paramBytes, 16, 2);
                 Array.Resize(ref paramBytes, 32);
                 break;
             // PlaySound_DummyPoly
             case 131:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 break;
             // SetLockCamParam_Boss
             case 151:
@@ -334,7 +334,7 @@ public class SekiroConverter : Converter
                 break;
             // PlaySound_WanderGhost
             case 10130:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 Array.Clear(paramBytes, 12, 4);
                 Array.Resize(ref paramBytes, 16);
                 break;

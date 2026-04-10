@@ -9,7 +9,7 @@ public static class TaeUtils
 	/// Enables HKX importing for anim and sets HKX to import from.
 	/// </summary>
 	public static void SetAnimationProperties(this TAE.Animation anim, int newId, int newImportHkxSourceAnimId,
-		int animOffset, Options op)
+		int animOffset)
 	{
 		newId += animOffset * 1000000;
 		anim.ID = Convert.ToInt64(newId);
@@ -130,10 +130,10 @@ public static class TaeUtils
 	/// <summary>
 	/// Change the first four digits of the Sound ID parameter of this event to match the new character ID
 	/// </summary>
-	public static byte[] ChangeSoundEventId(this TAE.Event ev, bool isBigEndian, Options op)
+	public static byte[] ChangeSoundEventId(this TAE.Event ev, bool isBigEndian)
 	{
 		byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
-		if (op.ChangeSoundIds)
+		if (ConversionContext.ChangeSoundIds)
 		{
 			byte[] soundTypeBytes = new byte[4];
 			byte[] soundIdBytes = new byte[4];
@@ -148,14 +148,14 @@ public static class TaeUtils
 			int soundType = BitConverter.ToInt32(soundTypeBytes, 0);
 			int soundId = BitConverter.ToInt32(soundIdBytes, 0);
 			string soundIdString = Convert.ToString(soundId);
-			bool isValidSoundType = op.SourceBndsType switch
+			bool isValidSoundType = ConversionContext.SourceBndsType switch
 			{
-				Options.AssetType.Character => soundType is 1 or 8,
-				Options.AssetType.Object => soundType is 3 or 14,
+				ConversionContext.AssetType.Character => soundType is 1 or 8,
+				ConversionContext.AssetType.Object => soundType is 3 or 14,
 				_ => false
 			};
 			if (isValidSoundType && soundIdString.Length == 9 && 
-			    !Regex.IsMatch(soundIdString.Substring(0, op.IdLength), $"\\d9{op.IdLength}"))
+			    !Regex.IsMatch(soundIdString.Substring(0, ConversionContext.IdLength), $"\\d9{ConversionContext.IdLength}"))
 			{
 				if (soundType == 14)
 				{
@@ -163,7 +163,7 @@ public static class TaeUtils
 					byte[] newTypeBytes = BitConverter.GetBytes(soundType);
 					Array.Copy(newTypeBytes, 0, paramBytes, 0, 4);
 				}
-				soundIdString = op.SoundId + soundIdString.Substring(op.IdLength);
+				soundIdString = ConversionContext.SoundId + soundIdString.Substring(ConversionContext.IdLength);
 				soundId = Int32.Parse(soundIdString);
 				byte[] newBytes = BitConverter.GetBytes(soundId);
 				Array.Copy(newBytes, 0, paramBytes, 4, 4);
@@ -176,10 +176,10 @@ public static class TaeUtils
 	/// <summary>
 	/// Change the first three digits of the LockOnParamID parameter of this event to match the new character ID
 	/// </summary>
-	public static byte[] ChangeLockOnParamId(this TAE.Event ev, bool isBigEndian, Options op)
+	public static byte[] ChangeLockOnParamId(this TAE.Event ev, bool isBigEndian)
 	{
 		byte[] paramBytes = ev.GetParameterBytes(isBigEndian);
-		if (op.ChangeLockCamParamIds)
+		if (ConversionContext.ChangeLockCamParamIds)
 		{
 			byte[] lockCamParamIdBytes = new byte[4];
 			Array.Copy(paramBytes, lockCamParamIdBytes, 4);
@@ -190,7 +190,7 @@ public static class TaeUtils
 			
 			int lockCamParamId = BitConverter.ToInt32(lockCamParamIdBytes, 0);
 			string lockCamParamIdString = Convert.ToString(lockCamParamId);
-			lockCamParamIdString = op.LockCamParamId[..^1] + lockCamParamIdString.Substring(op.IdLength - 1);
+			lockCamParamIdString = ConversionContext.LockCamParamId[..^1] + lockCamParamIdString.Substring(ConversionContext.IdLength - 1);
 			lockCamParamId = Int32.Parse(lockCamParamIdString);
 			byte[] newBytes = BitConverter.GetBytes(lockCamParamId);
 			Array.Copy(newBytes, 0, paramBytes, 0, 4);
@@ -238,28 +238,28 @@ public static class TaeUtils
 	/// <summary>
 	/// Gets ids of animations that belong to excluded offsets.
 	/// </summary>
-	public static List<int> GetExcludedOffsetAnimations(this TAE sourceTae, Options op)
+	public static List<int> GetExcludedOffsetAnimations(this TAE sourceTae)
 	{
 		List<int> excludedOffsetAnimations = new();
-		if (op.ExcludedAnimOffsets.Any())
+		if (ConversionContext.ExcludedAnimOffsets.Any())
 		{
-			foreach (int offsetId in op.ExcludedAnimOffsets.Where(x => x > 0))
+			foreach (int offsetId in ConversionContext.ExcludedAnimOffsets.Where(x => x > 0))
 			{
-				int idMin = offsetId * op.Game.Offset, idMax = (offsetId + 1) * op.Game.Offset;
+				int idMin = offsetId * ConversionContext.SourceGame.HkxAnimIdOffset, idMax = (offsetId + 1) * ConversionContext.SourceGame.HkxAnimIdOffset;
 				excludedOffsetAnimations.AddRange(sourceTae.Animations.Where(y => 
 					y.ID >= idMin && y.ID < idMax).Select(y => Convert.ToInt32(y.ID)).ToList());
 			}
 
-			if (op.ExcludedAnimOffsets.Contains(0))
+			if (ConversionContext.ExcludedAnimOffsets.Contains(0))
 			{
 				int nextAllowedOffset = 1;
-				while (op.ExcludedAnimOffsets.Contains(nextAllowedOffset))
+				while (ConversionContext.ExcludedAnimOffsets.Contains(nextAllowedOffset))
 				{
 					nextAllowedOffset++;
 				}
 
-				nextAllowedOffset *= op.Game.Offset;
-				foreach (var anim in sourceTae.Animations.Where(x => x.ID < op.Game.Offset))
+				nextAllowedOffset *= ConversionContext.SourceGame.HkxAnimIdOffset;
+				foreach (var anim in sourceTae.Animations.Where(x => x.ID < ConversionContext.SourceGame.HkxAnimIdOffset))
 				{
 					if (sourceTae.Animations.FindIndex(x => 
 						    x.ID == anim.ID + nextAllowedOffset) >= 0 || (anim.ID is >= 3000 and < 4000))
@@ -314,15 +314,15 @@ public static class TaeUtils
 	/// <summary>
 	/// Change the offsets of animations in order to fill gaps when offsets are removed.
 	/// </summary>
-	public static void ShiftAnimationOffsets(this TAE tae, Options op)
+	public static void ShiftAnimationOffsets(this TAE tae)
 	{
 		int oldOffset = 0, newOffset = 0;
 		foreach (var anim in tae.Animations)
 		{
-			if (op.ExcludedAnimOffsets.Contains(0))
+			if (ConversionContext.ExcludedAnimOffsets.Contains(0))
 			{
 				int nextAllowedOffset = 1;
-				while (op.ExcludedAnimOffsets.Contains(nextAllowedOffset))
+				while (ConversionContext.ExcludedAnimOffsets.Contains(nextAllowedOffset))
 				{
 					nextAllowedOffset++;
 				}

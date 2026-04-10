@@ -42,40 +42,40 @@ public class XmlData
 	/// </summary>
 	public Dictionary<int, int> SpEffectRemapping = new();
 
-	public XmlData(Options op)
+	public XmlData()
 	{
-	    string gameName = op.Game.Name;
+	    string gameName = ConversionContext.SourceGame.InternalName;
 	    string? xmlDirectory;
-	    switch (op.SourceBndsType)
+	    switch (ConversionContext.SourceBndsType)
 	    {
-		    case Options.AssetType.Character:
-			    xmlDirectory = $"{op.Cwd}Res\\CharacterXML\\";
+		    case ConversionContext.AssetType.Character:
+			    xmlDirectory = $"{ConversionContext.Cwd}Res\\CharacterXML\\";
 			    AnimationRemapping = GetXmlDictionary(XElement.Load($"{xmlDirectory}AnimationRemapping.xml"), gameName);
 			    ExcludedAnimations = GetXmlSet(XElement.Load($"{xmlDirectory}ExcludedAnimations.xml"), gameName);
 			    AllowedSpEffects = GetXmlSet(XElement.Load($"{xmlDirectory}AllowedSpEffects.xml"), gameName);
 			    SpEffectRemapping = GetXmlDictionary(XElement.Load($"{xmlDirectory}SpEffectRemapping.xml"), gameName);
 			    break;
-		    case Options.AssetType.Object:
-			    xmlDirectory = $"{op.Cwd}Res\\ObjectXML\\";
+		    case ConversionContext.AssetType.Object:
+			    xmlDirectory = $"{ConversionContext.Cwd}Res\\ObjectXML\\";
 			    break;
-		    case Options.AssetType.MapPiece:
-			    xmlDirectory = $"{op.Cwd}Res\\ObjectXML\\";
+		    case ConversionContext.AssetType.MapPiece:
+			    xmlDirectory = $"{ConversionContext.Cwd}Res\\ObjectXML\\";
 			    break;
 		    default:
 			    throw new ArgumentException("Unsupported bnd type.");
 	    }
 	    
-	    MatShaderInfoBankDS3.ReadXml($"{op.Cwd}\\Res\\MatShaderInfoBank_ds3.xml", out MatShaderInfoBankDS3? infoBank);
+	    MatShaderInfoBankDS3.ReadXml($"{ConversionContext.Cwd}\\Res\\MatShaderInfoBank_ds3.xml", out MatShaderInfoBankDS3? infoBank);
 	    if (infoBank != null) MaterialInfoBank = infoBank;
 	    ExcludedEvents = GetXmlSet(XElement.Load($"{xmlDirectory}ExcludedEvents.xml"), gameName);
 	    ExcludedJumpTables = GetXmlSet(XElement.Load($"{xmlDirectory}ExcludedJumpTables.xml"), gameName);
 	    ExcludedRumbleCams = GetXmlSet(XElement.Load($"{xmlDirectory}ExcludedRumbleCams.xml"), gameName);
 
-	    if (op.Game.Type == Game.GameTypes.EldenRing)
+	    if (ConversionContext.SourceGame.InternalName == "er")
 	    {
 		    MatBins = new Dictionary<string, MATBIN>();
 		    
-		    BND4 allMaterialBnd = BND4.Read($"{op.Cwd}\\Res\\MATBIN\\{gameName}\\allmaterial.matbinbnd.dcx");
+		    BND4 allMaterialBnd = BND4.Read($"{ConversionContext.Cwd}\\Res\\MATBIN\\{gameName}\\allmaterial.matbinbnd.dcx");
 		    foreach (BinderFile bf in allMaterialBnd.Files)
 		    {
 			    if (MATBIN.Is(bf.Bytes))
@@ -86,7 +86,7 @@ public class XmlData
 			    }
 		    }
 		    
-		    BND4 allMaterialDLC01Bnd = BND4.Read($"{op.Cwd}\\Res\\MATBIN\\{gameName}\\allmaterial_dlc01.matbinbnd.dcx");
+		    BND4 allMaterialDLC01Bnd = BND4.Read($"{ConversionContext.Cwd}\\Res\\MATBIN\\{gameName}\\allmaterial_dlc01.matbinbnd.dcx");
 		    foreach (BinderFile bf in allMaterialDLC01Bnd.Files)
 		    {
 			    if (MATBIN.Is(bf.Bytes))
@@ -97,7 +97,7 @@ public class XmlData
 			    }
 		    }
 		    
-		    BND4 allMaterialDLC02Bnd = BND4.Read($"{op.Cwd}\\Res\\MATBIN\\{gameName}\\allmaterial_dlc02.matbinbnd.dcx");
+		    BND4 allMaterialDLC02Bnd = BND4.Read($"{ConversionContext.Cwd}\\Res\\MATBIN\\{gameName}\\allmaterial_dlc02.matbinbnd.dcx");
 		    foreach (BinderFile bf in allMaterialDLC02Bnd.Files)
 		    {
 			    if (MATBIN.Is(bf.Bytes))

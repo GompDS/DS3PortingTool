@@ -11,12 +11,12 @@ public static class FlverUtils
     /// <summary>
     /// Takes a non-native DS3 material and returns a new material with as close a mtd type as possible.
     /// </summary>
-    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat, TextureInfo textureInfo, MatShaderInfoBank infoBank, Options op) 
+    public static FLVER2.Material ToDummyDs3Material(this FLVER2.Material oldMat, TextureInfo textureInfo, MatShaderInfoBank infoBank) 
     {
         FLVER2.Material newMat = new()
         {
 			Name = oldMat.Name,
-            MTD = op.SourceBndsType == Options.AssetType.Character ? GetDs3Mtd_cARSN(oldMat.MTD) : GetDs3Mtd_mARSN(oldMat.MTD)
+            MTD = ConversionContext.SourceBndsType == ConversionContext.AssetType.Character ? GetDs3Mtd_cARSN(oldMat.MTD) : GetDs3Mtd_mARSN(oldMat.MTD)
         };
         
         MatShaderInfoBank.MaterialInfo matDef = infoBank.MaterialInformation
@@ -35,17 +35,17 @@ public static class FlverUtils
     /// Takes a non-native DS3 material and turns it into a DS3 material with original textures.
     /// </summary>
     public static FLVER2.Material ToDs3Material(this FLVER2.Material oldMat, TextureInfo texInfo, FLVER2 oldFlver, MatShaderInfoBank infoBank,
-        Dictionary<string,MATBIN> matbins, Options op)
+        Dictionary<string,MATBIN> matbins)
     {
         FLVER2.Material newMat = new()
 	    {
 		    Name = oldMat.Name
 	    };
         
-        string mtdName = GetBestFitMTD(oldMat, oldFlver, infoBank, texInfo, op);
+        string mtdName = GetBestFitMTD(oldMat, oldFlver, infoBank, texInfo);
         if (mtdName.Length > 0)
         {
-            newMat.MTD = op.SourceBndsType == Options.AssetType.Character
+            newMat.MTD = ConversionContext.SourceBndsType == ConversionContext.AssetType.Character
                 ? newMat.MTD = $"N:\\FDP\\data\\Material\\mtd\\character\\{mtdName}"
                 : newMat.MTD = $"N:\\FDP\\data\\Material\\mtd\\map\\{mtdName}";
             
@@ -72,16 +72,16 @@ public static class FlverUtils
                     //{
                     //    texName = Path.GetFileName(texInfo.Material.Samplers.First(x => x.Type == texKvp.Key).Path);
                     //}
-                    switch (op.SourceBndsType)
+                    switch (ConversionContext.SourceBndsType)
                     {
-                        case Options.AssetType.Character:
-                            tex.Path = $"N:\\FDP\\data\\Model\\chr\\c{op.PortedId}\tex\\" + texName;
+                        case ConversionContext.AssetType.Character:
+                            tex.Path = $"N:\\FDP\\data\\Model\\chr\\c{ConversionContext.PortedId}\tex\\" + texName;
                             break;
-                        case Options.AssetType.Object:
-                            tex.Path = $"N:\\FDP\\data\\Model\\obj\\o{op.PortedId[..2]}\\o{op.PortedId}\\tex\\" + texName;
+                        case ConversionContext.AssetType.Object:
+                            tex.Path = $"N:\\FDP\\data\\Model\\obj\\o{ConversionContext.PortedId[..2]}\\o{ConversionContext.PortedId}\\tex\\" + texName;
                             break;
-                        case Options.AssetType.MapPiece:
-                            tex.Path = $"N:\\FDP\\data\\Model\\map\\m{op.PortedId[..2]}\\tex\\" + texName;
+                        case ConversionContext.AssetType.MapPiece:
+                            tex.Path = $"N:\\FDP\\data\\Model\\map\\m{ConversionContext.PortedId[..2]}\\tex\\" + texName;
                             break;
                     }
                     
@@ -94,7 +94,7 @@ public static class FlverUtils
                 //if (matchingTex == null) continue;
                 //Match texContainer = Regex.Match(matchingTex.Path, "c[0-9]{4}", RegexOptions.IgnoreCase);
                 //if (!texContainer.Success) continue;
-                //tex.Path = $"N:\\FDP\\data\\Model\\chr\\c{op.PortedId}\\tex\\{Path.GetFileName(matchingTex.Path)}";
+                //tex.Path = $"N:\\FDP\\data\\Model\\chr\\c{Options.PortedId}\\tex\\{Path.GetFileName(matchingTex.Path)}";
                 newMat.Textures.Add(tex);
             }
         }
@@ -188,7 +188,7 @@ public static class FlverUtils
         return "";
     }
 
-    private static string GetBestFitMTD(FLVER2.Material oldMat, FLVER2 oldFlver, MatShaderInfoBank infoBank, TextureInfo texInfo, Options op)
+    private static string GetBestFitMTD(FLVER2.Material oldMat, FLVER2 oldFlver, MatShaderInfoBank infoBank, TextureInfo texInfo)
     {
         int minTangentCount = 0;
         bool hasBitangent = false;
@@ -240,7 +240,7 @@ public static class FlverUtils
         MatShaderInfoBank.MaterialInfo? bestFitMat = null;
 
         List<MatShaderInfoBank.MaterialInfo> narrowedMatInfos;
-        if (op.SourceBndsType == Options.AssetType.Character)
+        if (ConversionContext.SourceBndsType == ConversionContext.AssetType.Character)
         {
             narrowedMatInfos = infoBank.MaterialInformation.Where(x => x.MatName.StartsWith("c", StringComparison.OrdinalIgnoreCase)).ToList();
         }

@@ -1,0 +1,143 @@
+{
+  "demons_souls__ps3":
+  {
+    "exe_name": "eboot.bin",
+    "platform": "ps3",
+    "display_name": "Demon's Souls (PS3)",
+    "internal_name": "des",
+    "bnd_type": "BND3",
+    "compression": "DCX_EDGE",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "N:\\DemonsSoul\\data\\DVDROOT",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 10000
+  },
+  "dark_souls__windows":
+  {
+    "exe_name": "DARKSOULS.exe",
+    "platform": "win32",
+    "display_name": "Dark Souls (Windows)",
+    "internal_name": "ds1",
+    "bnd_type": "BND3",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "N:\\FRPG\\data\\INTERROOT_win32",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 1000000
+  },
+  "dark_souls_2__windows":
+  {
+    "exe_name": "DarkSoulsII.exe",
+    "platform": "win32",
+    "display_name": "Dark Souls II (Windows)",
+    "internal_name": "ds2",
+    "bnd_type": "BND4",
+    "compression": "DCX_DFLT_10000_24_9",
+    "bnd_version": "01001500",
+    "main_ezstate_machine_id": 10
+  },
+  "dark_souls_2_sotfs__windows":
+  {
+    "exe_name": "DarkSoulsII.exe",
+    "platform": "win64",
+    "display_name": "Dark Souls II: Scholar of the First Sin (Windows)",
+    "internal_name": "ds2s",
+    "bnd_type": "BND4",
+    "compression": "DCX_DFLT_10000_24_9",
+    "bnd_version": "02000200",
+    "main_ezstate_machine_id": 10
+  },
+  "bloodborne__ps4":
+  {
+    "exe_name": "eboot.bin",
+    "platform": "ps4",
+    "display_name": "Bloodborne (PS4)",
+    "internal_name": "bb",
+    "game_data_path": "dvdroot_ps4",
+    "bnd_type": "BND4",
+    "compression": "DCX_DFLT_10000_44_9",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "N:\\SPRJ\\data\\INTERROOT_ps4",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 1000000
+  },
+  "dark_souls_3__windows": {
+    "exe_name": "DarkSoulsIII.exe",
+    "platform": "win64",
+    "display_name": "Dark Souls III (Windows)",
+    "internal_name": "ds3",
+    "bnd_type": "BND4",
+    "compression": "DCX_DFLT_10000_44_9",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "N:\\FDP\\data\\INTERROOT_win64",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 1000000
+  },
+  "dark_souls_remastered__windows": {
+    "exe_name": "DarkSoulsRemastered.exe",
+    "platform": "win64",
+    "display_name": "Dark Souls: Remastered (Windows)",
+    "internal_name": "ds1r",
+    "bnd_type": "BND4",
+    "compression": "DCX_DFLT_10000_24_9",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "N:\\FRPG\\data\\INTERROOT_x64",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 1000000
+  },
+  "sekiro_sdt__windows": {
+    "exe_name": "sekiro.exe",
+    "platform": "win64",
+    "display_name": "Sekiro: Shadows Die Twice (Windows)",
+    "internal_name": "sdt",
+    "bnd_type": "BND4",
+    "compression": "DCX_KRAK_6",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "N:\\NTC\\data\\Target\\INTERROOT_win64",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 100000000,
+    "requires_oodle": true,
+    "oodle_dll_path": "oo2core_6_win64.dll"
+  },
+  "elden_ring__windows": {
+    "exe_name": "eldenring.exe",
+    "platform": "win64",
+    "display_name": "Elden Ring (Windows)",
+    "internal_name": "er",
+    "bnd_type": "BND4",
+    "compression": "DCX_KRAK_6",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "N:\\GR\\data\\INTERROOT_win64",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 1000000,
+    "requires_oodle": true,
+    "oodle_dll_path": "oo2core_6_win64.dll"
+  },
+  "armored_core_6_for__windows": {
+    "exe_name": "armoredcore6.exe",
+    "platform": "win64",
+    "display_name": "Armored Core VI: Fires of Rubicon (Windows)",
+    "internal_name": "ac6",
+    "bnd_type": "BND4",
+    "compression": "DCX_KRAK_9",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "W:\\FNR\\data\\Target\\INTERROOT_win64",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 1000000,
+    "requires_oodle": true,
+    "oodle_dll_path": "oo2core_8_win64.dll"
+  },
+  "elden_ring_nightreign__windows": {
+    "exe_name": "nightreign.exe",
+    "platform": "win64",
+    "display_name": "Elden Ring Nightreign (Windows)",
+    "internal_name": "nr",
+    "bnd_type": "BND4",
+    "compression": "DCX_KRAK_6",
+    "bnd_version": "07D7R6",
+    "binder_file_prefix": "W:\\CL\\data\\Target\\INTERROOT_win64",
+    "main_ezstate_machine_id": 1,
+    "hkx_anim_id_offset": 1000000,
+    "requires_oodle": true,
+    "oodle_dll_path": "oo2core_9_win64.dll"
+  }
+}

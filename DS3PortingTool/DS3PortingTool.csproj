@@ -8,8 +8,8 @@
         <Authors>GompDS</Authors>
         <Version>1.3.4</Version>
         <PackageProjectUrl>https://github.com/GompDS/DS3PortingTool</PackageProjectUrl>
-        <LangVersion>10</LangVersion>
-        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>12</LangVersion>
+        <TargetFramework>net9.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,6 +18,9 @@
       </Reference>
       <Reference Include="SoulsFormats">
         <HintPath>Lib\SoulsFormats.dll</HintPath>
+      </Reference>
+      <Reference Include="SoulsGameSpecs">
+        <HintPath>..\SoulsGameSpecs.dll</HintPath>
       </Reference>
     </ItemGroup>
     
@@ -94,10 +97,15 @@
       <AdditionalFiles Include="texconv.exe">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </AdditionalFiles>
+      <None Remove="ValidGameSpecs.json" />
+      <AdditionalFiles Include="ValidGameSpecs.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AdditionalFiles>
+      <None Remove="Converter\**" />
+      <None Remove="Util\**" />
     </ItemGroup>
     
     <ItemGroup>
-      <ProjectReference Include="..\..\SoulsFormats\SoulsAssetPipeline\SoulsAssetPipeline.csproj" />
       <ProjectReference Include="..\FLVERMaterialHelper\FLVERMaterialHelper\FLVERMaterialHelper.csproj" />
       <ProjectReference Include="..\SoulsFormatsNEXT\SoulsFormats\SoulsFormats.csproj" />
     </ItemGroup>
@@ -109,6 +117,17 @@
     <ItemGroup>
       <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.8.0" />
       <PackageReference Include="Magick.NET.Core" Version="14.8.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Compile Remove="Converter\**" />
+      <Compile Remove="Util\**" />
+      <Compile Remove="XmlData.cs" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <EmbeddedResource Remove="Converter\**" />
+      <EmbeddedResource Remove="Util\**" />
     </ItemGroup>
 
     <Target Name="CopyHavokDowngrade" AfterTargets="AfterBuild">

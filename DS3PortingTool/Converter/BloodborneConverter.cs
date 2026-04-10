@@ -7,78 +7,78 @@ public class BloodborneConverter : Converter
     /// <summary>
     /// Performs the steps necessary to convert a Bloodborne binder into a DS3 compatible binder.
     /// </summary>
-    public override void DoConversion(Options op)
+    public override void DoConversion()
     {
-        BND4 sourceBnd = (BND4)op.CurrentTextureSourceFile;
+        BND4 sourceBnd = (BND4)ConversionContext.CurrentTextureSourceFile;
         
         BND4 newBnd = new();
-        if (op.CurrentTextureSourceFileName.Contains("anibnd"))
+        if (ConversionContext.CurrentTextureSourceFileName.Contains("anibnd"))
         {
-            if (!op.PortTaeOnly)
+            if (!ConversionContext.PortTaeOnly)
             {
-                ConvertCharacterHkx(sourceBnd, newBnd, op);
+                ConvertCharacterHkx(sourceBnd, newBnd);
             }
             
             BinderFile? file = sourceBnd.Files.Find(x => x.Name.Contains(".tae"));
             if (file != null)
             {
-                ConvertCharacterTae(sourceBnd, newBnd, file, op);
+                ConvertCharacterTae(sourceBnd, newBnd, file);
             }
 
-            if (!op.PortTaeOnly)
+            if (!ConversionContext.PortTaeOnly)
             {
                 newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-                newBnd.Write($"{op.Cwd}\\c{op.PortedId}.anibnd.dcx", new DCX.DcxDfltCompressionInfo(DCX.DfltCompressionPreset.DCX_DFLT_10000_44_9));
+                newBnd.Write($"{ConversionContext.Cwd}\\c{ConversionContext.PortedId}.anibnd.dcx", new DCX.DcxDfltCompressionInfo(DCX.DfltCompressionPreset.DCX_DFLT_10000_44_9));
             }
         }
-        else if (op.CurrentTextureSourceFileName.Contains("chrbnd"))
+        else if (ConversionContext.CurrentTextureSourceFileName.Contains("chrbnd"))
         {
-            ConvertCharacterHkx(sourceBnd, newBnd, op);
+            ConvertCharacterHkx(sourceBnd, newBnd);
 
-            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{op.PortedId}.hkx")))
+            if (newBnd.Files.Any(x => x.Name.ToLower().Contains($"c{ConversionContext.PortedId}.hkx")))
             {
-                sourceBnd.TransferBinderFile(newBnd, $"c{op.SourceId}.hkxpwv",  
-                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{op.PortedId}\\c{op.PortedId}.hkxpwv");
+                sourceBnd.TransferBinderFile(newBnd, $"c{ConversionContext.SourceId}.hkxpwv",  
+                    @"N:\FDP\data\INTERROOT_win64\chr\" + $"c{ConversionContext.PortedId}\\c{ConversionContext.PortedId}.hkxpwv");
             }
 
             BinderFile? file = sourceBnd.Files.Find(x => x.Name.Contains(".flver"));
             if (file != null)
             {
-                ConvertFlver(newBnd, file, op);
+                ConvertFlver(newBnd, file);
             }
             
             // Convert tpfs into texbnd
 
             newBnd.Files = newBnd.Files.OrderBy(x => x.ID).ToList();
-            newBnd.Write($"{op.Cwd}\\c{op.PortedId}.chrbnd.dcx", new DCX.DcxDfltCompressionInfo(DCX.DfltCompressionPreset.DCX_DFLT_10000_44_9));
+            newBnd.Write($"{ConversionContext.Cwd}\\c{ConversionContext.PortedId}.chrbnd.dcx", new DCX.DcxDfltCompressionInfo(DCX.DfltCompressionPreset.DCX_DFLT_10000_44_9));
         }
     }
     /// <summary>
     /// Converts a Bloodborne HKX file into a DS3 compatible HKX file.
     /// </summary>
-	protected override void ConvertCharacterHkx(IBinder sourceBnd, BND4 newBnd, Options op)
+	protected override void ConvertCharacterHkx(IBinder sourceBnd, BND4 newBnd)
     {
-        if (op.CurrentTextureSourceFileName.Contains("anibnd"))
+        if (ConversionContext.CurrentTextureSourceFileName.Contains("anibnd"))
         {
             newBnd.Files = sourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx") && x.Name.Contains("chr"))
-                .Where(x => PortHavok(x, $"{op.Cwd}HavokDowngrade\\")).ToList();
+                .Where(x => PortHavok(x, $"{ConversionContext.Cwd}HavokDowngrade\\")).ToList();
         }
-        else if (op.CurrentTextureSourceFileName.Contains("chrbnd"))
+        else if (ConversionContext.CurrentTextureSourceFileName.Contains("chrbnd"))
         {
             newBnd.Files = sourceBnd.Files
                 .Where(x => Path.GetExtension(x.Name).ToLower().Equals(".hkx") && !Path.GetFileName(x.Name).ToLower().Contains("_c"))
-                .Where(x => PortHavokRagdoll(x, $"{op.Cwd}HavokDowngrade\\")).ToList();
+                .Where(x => PortHavokRagdoll(x, $"{ConversionContext.Cwd}HavokDowngrade\\")).ToList();
         }
 
         foreach (BinderFile hkx in newBnd.Files)
         {
-            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{op.PortedId}\\";
+            string path = $"N:\\FDP\\data\\INTERROOT_win64\\chr\\c{ConversionContext.PortedId}\\";
             string name = Path.GetFileName(hkx.Name).ToLower();
 
-            if (name.Contains($"c{op.SourceId}.hkx"))
+            if (name.Contains($"c{ConversionContext.SourceId}.hkx"))
             {
-                hkx.Name = $"{path}{name.Replace(op.SourceId, op.PortedId)}";
+                hkx.Name = $"{path}{name.Replace(ConversionContext.SourceId, ConversionContext.PortedId)}";
             }
             else
             {
@@ -91,7 +91,7 @@ public class BloodborneConverter : Converter
         }
     }
 
-    protected override void ConvertObjectHkx(IBinder sourceBnd, BND4 newBnd, Options op, bool isInnerAnibnd)
+    protected override void ConvertObjectHkx(IBinder sourceBnd, BND4 newBnd, bool isInnerAnibnd)
     {
         throw new NotImplementedException();
     }
@@ -99,7 +99,7 @@ public class BloodborneConverter : Converter
     /// <summary>
     /// Edits parameters of a Bloodborne event so that it will match with its DS3 event equivalent.
     /// </summary>
-    protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, Options op, XmlData data)
+    protected override TAE.Event EditEvent(TAE.Event ev, bool bigEndian, XmlData data)
     {
         byte[] paramBytes = ev.GetParameterBytes(bigEndian);
 
@@ -127,23 +127,23 @@ public class BloodborneConverter : Converter
                 break;
             // PlaySound_CenterBody
             case 128:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 break;
             // PlaySound_StateInfo
             case 129:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 break;
             // PlaySound_ByDummyPoly_PlayerVoice
             case 130:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 break;
             // PlaySound_ByDummyPoly
             case 131:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 break;
             // PlaySound_Weapon
             case 132:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 break;
             // AddSpEffect_DragonForm
             case 302:
@@ -177,7 +177,7 @@ public class BloodborneConverter : Converter
                 break;
             // PlaySound_WanderGhost
             case 10130:
-                paramBytes = ev.ChangeSoundEventId(bigEndian, op);
+                paramBytes = ev.ChangeSoundEventId(bigEndian);
                 break;
         }
         
@@ -187,7 +187,7 @@ public class BloodborneConverter : Converter
     /// <summary>
     /// Creates a new DS3 FLVER using data from a Bloodborne FLVER.
     /// </summary>
-    protected override FLVER2 CreateDs3Flver(FLVER2 sourceFlver, XmlData data, Options op)
+    protected override FLVER2 CreateDs3Flver(FLVER2 sourceFlver, XmlData data)
     {
         FLVER2 newFlver = new FLVER2
         {
@@ -202,7 +202,7 @@ public class BloodborneConverter : Converter
                 Unk68 = sourceFlver.Header.Unk68
             },
             Dummies = sourceFlver.Dummies,
-            //Materials = sourceFlver.Materials.Select(x => x.ToDummyDs3Material(data.MaterialInfoBank, op)).ToList(),
+            //Materials = sourceFlver.Materials.Select(x => x.ToDummyDs3Material(data.MaterialInfoBank)).ToList(),
             Nodes = sourceFlver.Nodes.Select(x =>
             {
                 // Flags should only be 0 or 1 in DS3.
