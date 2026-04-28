@@ -10,7 +10,8 @@
     "bnd_version": "07D7R6",
     "binder_file_prefix": "N:\\DemonsSoul\\data\\DVDROOT",
     "main_ezstate_machine_id": 1,
-    "hkx_anim_id_offset": 10000
+    "hkx_anim_id_offset": 10000,
+    "stable_havok_version": "Havok-5.5.0-r1"
   },
   "dark_souls__windows":
   {
@@ -22,7 +23,8 @@
     "bnd_version": "07D7R6",
     "binder_file_prefix": "N:\\FRPG\\data\\INTERROOT_win32",
     "main_ezstate_machine_id": 1,
-    "hkx_anim_id_offset": 1000000
+    "hkx_anim_id_offset": 1000000,
+    "stable_havok_version": "hk_2010.2.0-r1"
   },
   "dark_souls_2__windows":
   {
@@ -58,7 +60,8 @@
     "bnd_version": "07D7R6",
     "binder_file_prefix": "N:\\SPRJ\\data\\INTERROOT_ps4",
     "main_ezstate_machine_id": 1,
-    "hkx_anim_id_offset": 1000000
+    "hkx_anim_id_offset": 1000000,
+    "stable_havok_version": "hk_2014.1.0-r1"
   },
   "dark_souls_3__windows": {
     "exe_name": "DarkSoulsIII.exe",
@@ -70,7 +73,8 @@
     "bnd_version": "07D7R6",
     "binder_file_prefix": "N:\\FDP\\data\\INTERROOT_win64",
     "main_ezstate_machine_id": 1,
-    "hkx_anim_id_offset": 1000000
+    "hkx_anim_id_offset": 1000000,
+    "stable_havok_version": "hk_2014.1.0-r1"
   },
   "dark_souls_remastered__windows": {
     "exe_name": "DarkSoulsRemastered.exe",
@@ -82,7 +86,8 @@
     "bnd_version": "07D7R6",
     "binder_file_prefix": "N:\\FRPG\\data\\INTERROOT_x64",
     "main_ezstate_machine_id": 1,
-    "hkx_anim_id_offset": 1000000
+    "hkx_anim_id_offset": 1000000,
+    "stable_havok_version": "SDKV20150100"
   },
   "sekiro_sdt__windows": {
     "exe_name": "sekiro.exe",
@@ -96,7 +101,8 @@
     "main_ezstate_machine_id": 1,
     "hkx_anim_id_offset": 100000000,
     "requires_oodle": true,
-    "oodle_dll_path": "oo2core_6_win64.dll"
+    "oodle_dll_path": "oo2core_6_win64.dll",
+    "stable_havok_version": "SDKV20160200"
   },
   "elden_ring__windows": {
     "exe_name": "eldenring.exe",
@@ -110,7 +116,8 @@
     "main_ezstate_machine_id": 1,
     "hkx_anim_id_offset": 1000000,
     "requires_oodle": true,
-    "oodle_dll_path": "oo2core_6_win64.dll"
+    "oodle_dll_path": "oo2core_6_win64.dll",
+    "stable_havok_version": "SDKV20180100"
   },
   "armored_core_6_for__windows": {
     "exe_name": "armoredcore6.exe",
@@ -124,7 +131,8 @@
     "main_ezstate_machine_id": 1,
     "hkx_anim_id_offset": 1000000,
     "requires_oodle": true,
-    "oodle_dll_path": "oo2core_8_win64.dll"
+    "oodle_dll_path": "oo2core_8_win64.dll",
+    "stable_havok_version": "SDKV20190100"
   },
   "elden_ring_nightreign__windows": {
     "exe_name": "nightreign.exe",
@@ -138,6 +146,7 @@
     "main_ezstate_machine_id": 1,
     "hkx_anim_id_offset": 1000000,
     "requires_oodle": true,
-    "oodle_dll_path": "oo2core_9_win64.dll"
+    "oodle_dll_path": "oo2core_9_win64.dll",
+    "stable_havok_version": "SDKV20180100"
   }
 }

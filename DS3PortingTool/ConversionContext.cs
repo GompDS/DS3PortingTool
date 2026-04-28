@@ -12,6 +12,8 @@ public static class ConversionContext
     /// The current-working directory.
     /// </summary>
     public static string Cwd { get; } = AppDomain.CurrentDomain.BaseDirectory;
+
+    public static string ToolsDir { get; } = Cwd + "havok\\";
     /// <summary>
     /// File handlers for the assets supplied from the SourceGame
     /// </summary>

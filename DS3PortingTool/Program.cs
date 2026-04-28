@@ -39,10 +39,7 @@ static class Program
 				foreach (BinderFile file in bnd.Files.Where(x => Path.GetExtension(x.Name).Equals(".hkx", 
 					         StringComparison.OrdinalIgnoreCase)))
 				{
-					if (HavokConverter.TryGetVersion(file, out HavokConverter.HavokVersion? version))
-					{
-						Console.WriteLine($"{Path.GetFileName(file.Name),-20} {version}");
-					}
+					HavokConverter.TryConvert(file, null);
 				}
 				Console.WriteLine();
 			}

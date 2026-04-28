@@ -29,70 +29,10 @@
     </ItemGroup>
     
     <ItemGroup>
-      <None Remove="Res\CharacterXML\AllowedSpEffects.xml" />
-      <AdditionalFiles Include="Res\CharacterXML\AllowedSpEffects.xml">
+      <None Remove="Res\**" />
+      <AdditionalFiles Include="Res\**">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
-      <None Remove="Res\CharacterXML\AnimationRemapping.xml" />
-      <AdditionalFiles Include="Res\CharacterXML\AnimationRemapping.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\CharacterXML\ExcludedAnimations.xml" />
-      <AdditionalFiles Include="Res\CharacterXML\ExcludedAnimations.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\CharacterXML\ExcludedEvents.xml" />
-      <AdditionalFiles Include="Res\CharacterXML\ExcludedEvents.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\CharacterXML\ExcludedJumpTables.xml" />
-      <AdditionalFiles Include="Res\CharacterXML\ExcludedJumpTables.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\CharacterXML\ExcludedRumbleCams.xml" />
-      <AdditionalFiles Include="Res\CharacterXML\ExcludedRumbleCams.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\CharacterXML\SpEffectRemapping.xml" />
-      <AdditionalFiles Include="Res\CharacterXML\SpEffectRemapping.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\ObjectXML\ExcludedEvents.xml" />
-      <AdditionalFiles Include="Res\MATBIN\EldenRing\allmaterial.matbinbnd.dcx">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <AdditionalFiles Include="Res\MATBIN\EldenRing\allmaterial_dlc01.matbinbnd.dcx">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <AdditionalFiles Include="Res\MATBIN\EldenRing\allmaterial_dlc02.matbinbnd.dcx">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <AdditionalFiles Include="Res\MATBIN\EldenRing\speedtree.matbinbnd.dcx">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <AdditionalFiles Include="Res\ObjectXML\ExcludedEvents.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\ObjectXML\ExcludedJumpTables.xml" />
-      <AdditionalFiles Include="Res\ObjectXML\ExcludedJumpTables.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\ObjectXML\ExcludedRumbleCams.xml" />
-      <AdditionalFiles Include="Res\ObjectXML\ExcludedRumbleCams.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\BankDS3.xml" />
-      <AdditionalFiles Include="Res\BankDS3.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\MatShaderInfoBank_ds3.xml" />
-      <AdditionalFiles Include="Res\MatShaderInfoBank_ds3.xml">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="Res\allmaterial.matbinbnd.dcx" />
-      <None Remove="Res\allmaterial_dlc01.matbinbnd.dcx" />
-      <None Remove="Res\allmaterial_dlc02.matbinbnd.dcx" />
-      <None Remove="Res\speedtree.matbinbnd.dcx" />
       <None Remove="texconv.exe" />
       <AdditionalFiles Include="texconv.exe">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -103,6 +43,10 @@
       </AdditionalFiles>
       <None Remove="Converter\**" />
       <None Remove="Util\**" />
+      <None Remove="havok\**" />
+      <AdditionalFiles Include="havok\**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AdditionalFiles>
     </ItemGroup>
     
     <ItemGroup>
@@ -129,9 +73,4 @@
       <EmbeddedResource Remove="Converter\**" />
       <EmbeddedResource Remove="Util\**" />
     </ItemGroup>
-
-    <Target Name="CopyHavokDowngrade" AfterTargets="AfterBuild">
-        <Copy SourceFiles="@(CopyHavokDowngrade)" DestinationFolder="bin\Debug\net6.0\HavokDowngrade\%(RecursiveDir)" />
-    </Target>
-    
 </Project>
