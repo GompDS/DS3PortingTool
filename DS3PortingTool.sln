@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DS3PortingTool", "DS3Portin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoulsFormats", "SoulsFormatsNEXT\SoulsFormats\SoulsFormats.csproj", "{2A7BAE23-D4D5-4EAD-B30A-801B61C16736}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FLVERMaterialHelper", "FLVERMaterialHelper\FLVERMaterialHelper\FLVERMaterialHelper.csproj", "{0C79F2BE-7541-4351-AFB7-00A9D7EC1359}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoulsGameSpecs", "..\SoulsGameSpecs\SoulsGameSpecs\SoulsGameSpecs.csproj", "{6609599D-08C0-4BE1-9B89-C79C33C9EA54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,9 +20,9 @@ Global
 		{2A7BAE23-D4D5-4EAD-B30A-801B61C16736}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A7BAE23-D4D5-4EAD-B30A-801B61C16736}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A7BAE23-D4D5-4EAD-B30A-801B61C16736}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0C79F2BE-7541-4351-AFB7-00A9D7EC1359}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0C79F2BE-7541-4351-AFB7-00A9D7EC1359}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0C79F2BE-7541-4351-AFB7-00A9D7EC1359}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0C79F2BE-7541-4351-AFB7-00A9D7EC1359}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6609599D-08C0-4BE1-9B89-C79C33C9EA54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6609599D-08C0-4BE1-9B89-C79C33C9EA54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6609599D-08C0-4BE1-9B89-C79C33C9EA54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6609599D-08C0-4BE1-9B89-C79C33C9EA54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -34,9 +34,6 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="texconv.exe" />
-      <AdditionalFiles Include="texconv.exe">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
       <None Remove="ValidGameSpecs.json" />
       <AdditionalFiles Include="ValidGameSpecs.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -50,12 +47,9 @@
     </ItemGroup>
     
     <ItemGroup>
+      <ProjectReference Include="..\..\SoulsGameSpecs\SoulsGameSpecs\SoulsGameSpecs.csproj" />
       <ProjectReference Include="..\FLVERMaterialHelper\FLVERMaterialHelper\FLVERMaterialHelper.csproj" />
       <ProjectReference Include="..\SoulsFormatsNEXT\SoulsFormats\SoulsFormats.csproj" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="Res\MATBIN\" />
     </ItemGroup>
     
     <ItemGroup>

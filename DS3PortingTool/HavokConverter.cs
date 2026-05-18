@@ -103,6 +103,8 @@ public static class HavokConverter
         }
         File.Delete($"{ConversionContext.ToolsDir}/{hkxName}");
         
+        //TODO
+        
         return true;
     }
 }
