@@ -81,18 +81,20 @@ public static class ConversionContext
 
     private static readonly Dictionary<string, string[]> SupportedGamesLookup = new Dictionary<string, string[]>
     {
-        ["source_game"] = ["sekiro_sdt__windows", "elden_ring__windows", "elden_ring_nightreign__windows"],
+        ["source_game"] = ["demons_souls__ps3", "sekiro_sdt__windows", "elden_ring__windows", "elden_ring_nightreign__windows"],
         ["target_game"] = ["dark_souls_3__windows"]
     };
     
     private static readonly Dictionary<string, GameAsset.FSAssetType[]> SupportedAssetTypesLookup =
         new Dictionary<string, GameAsset.FSAssetType[]>
     {
+        ["demons_souls__ps3"] = [GameAsset.FSAssetType.OBJBND, GameAsset.FSAssetType.ANIBND],
         ["elden_ring_nightreign__windows"] = [GameAsset.FSAssetType.CHRBND, GameAsset.FSAssetType.ANIBND],
     };
 
     private static readonly Dictionary<string, string[]> SupportedAssetTypesRegexLookup = new Dictionary<string, string[]>
     {
+        ["demons_souls__ps3"] = [@"((\.objbnd$)|\.objbnd\.dcx$)", @"((\.anibnd$)|\.anibnd\.dcx$)"],
         ["elden_ring_nightreign__windows"] = [@"((\.chrbnd$)|\.chrbnd\.dcx$)", @"((\.anibnd$)|\.anibnd\.dcx$)"],
     };
 

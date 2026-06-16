@@ -8,7 +8,8 @@ public class GameAsset(string filePath, GameSpec originGame, GameAsset.FSAssetTy
     public enum FSAssetType
     {
         CHRBND,
-        ANIBND
+        ANIBND,
+        OBJBND
     }
     
     public string FilePath { get; } = filePath;
